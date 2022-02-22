@@ -5,12 +5,19 @@ import { View, Text, TextInput,Button, Alert } from 'react-native';
 
 
 
+
+
+
+
 class ProfileScreen extends Component {
 
     render(){
       return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text>ProfileScreen</Text>
+        <View>
+            <View style="profileHeader">        
+            </View>
+            <View style="profileBody">        
+            </View>
         </View>
       );
     } 

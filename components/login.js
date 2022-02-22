@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput,Button } from 'react-native';
+import { View, Text, TextInput,Button, StyleSheet,TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import TextInjection from 'react-native/Libraries/Text/TextInjection';
 
@@ -24,39 +24,9 @@ class LoginScreen extends Component {
         };
     }
 
-    
-
-        // The login function, which takes the data from the state, and fetches it to the website
-        // login = () => {
-        //     fetch('http://localhost:3333/api/1.0.0/login', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         },
-        //         // this is what we pass to our website
-        //         // email and password, the ones we passed
-        //         body: JSON.stringify({
-        //             email: this.state.email,
-        //             password: this.state.password
-        //         })
-        //     })
-        //     .then((response) => response.json())
-        //     .then((json) => {
-        //         console.log(json);
-        //         storeData(json);
-        //         // TODO
-        //         // NAVIGATE TO FEED IF THE DETAILS ARE CORRECT
-        //         // this.props.navigation.navigate("Feed");
-        //     })
-        //     .catch((error) => {
-        //         console.error(error);
-        //     });
-        // }    
-
         
         login = async () => {
 
-            //Validation here...
     
             return fetch("http://localhost:3333/api/1.0.0/login", {
                 method: 'post',
@@ -77,8 +47,7 @@ class LoginScreen extends Component {
             .then(async (responseJson) => {
                     console.log(responseJson);
                     await AsyncStorage.setItem('@session_token', responseJson.token);
-                    
-                    // this.props.navigation.navigate("Home");
+                    this.props.navigation.navigate("Main");
                     // Navigate home 
 
             })
@@ -94,23 +63,36 @@ class LoginScreen extends Component {
         const navigation = this.props.navigation;
 
         return(
-            <View>
-            <TextInput
+            <View style={style.container}>
+            <TextInput 
+                style={style.input}
                 placeholder="email"
                 onChangeText={(email) => this.setState({email})}
                 value={this.state.email}
             />
             <TextInput
+                style={style.input}
                 placeholder="password"
                 onChangeText={(password) => this.setState({password})}
                 value={this.state.password}
                 secureTextEntry={true}
             />
             <Button
+                style={style.Button}
                 title="LOGIN"
                 onPress={() => this.login()}
             />
-            <Button
+            
+
+            <Button 
+                style={style.Button}
+                title='Sign up page'
+                onPress={() => navigation.navigate('Signup')}
+            />
+
+        {/* Get rid of the main page button  */}
+            <Button 
+                style={style.Button}
                 title='Main page'
                 onPress={() => navigation.navigate('Main')}
             />
@@ -120,3 +102,33 @@ class LoginScreen extends Component {
 }
 
 export default LoginScreen;
+
+
+
+
+// TODO
+// Delete some of this, and add it to css component outside of this
+
+
+const style = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#fff",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: 'column',
+        backgroundColor: 'black'
+      },
+      input: {
+        backgroundColor: "#edf7ff",
+        borderRadius: 10,
+        height: 50,
+        // flex: 1,
+        padding: 10,
+        marginBottom: 20,
+      },
+      Button:{
+          marginBottom:50,
+      }
+
+})

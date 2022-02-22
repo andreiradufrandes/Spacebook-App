@@ -36,6 +36,8 @@ class SignupScreen extends Component {
             })
             .then((response) =>{
                 Alert.alert("User added successfully");
+                // navigate me to main
+                this.props.navigation.navigate('Login');
             })
             .catch((error) =>{
                 console.log(error)
@@ -84,6 +86,7 @@ class SignupScreen extends Component {
           <Button
             title="Signup"
             onPress = {() => this.signup()}
+            // take me to login
           />
 
 
