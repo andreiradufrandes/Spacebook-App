@@ -15,13 +15,13 @@ const Tab = createBottomTabNavigator();
 class MainScreen extends Component {
     render(){
       return (
-        <NavigationContainer>
+        
           <Tab.Navigator>
             <Tab.Screen name="Profile" component={ProfileScreen} />
             <Tab.Screen name="Search" component={SearchScreen} />
             <Tab.Screen name="Notifications" component={NotificationsScreen} />
           </Tab.Navigator>
-        </NavigationContainer>   
+        
 
 
       );

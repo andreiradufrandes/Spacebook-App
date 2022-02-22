@@ -21,8 +21,8 @@ class SignupScreen extends Component {
     signup = () =>{
 
         let user_details = {
-            first_name : this.first_name,
-            last_name : this.last_name,
+            first_name : this.state.first_name,
+            last_name : this.state.last_name,
             email: this.state.email,
             password: this.state.password
         }
@@ -54,6 +54,9 @@ class SignupScreen extends Component {
 
 
     render(){
+
+        // const navigation = this.props.navigation;
+
       return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           

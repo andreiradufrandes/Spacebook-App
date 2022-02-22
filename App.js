@@ -12,12 +12,11 @@ class App extends Component {
     return (
       <NavigationContainer>
           {/* Stack navigator */}
-        <Stack.Navigator>
+        <Stack.Navigator>         
           
-          <Stack.Screen name="Main" component={MainScreen} />
-          
-          <Stack.Screen name="Signup" component={SignupScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+          <Stack.Screen name="Main" component={MainScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     );

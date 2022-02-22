@@ -7,7 +7,14 @@ import { View, Text, TextInput,Button, Alert } from 'react-native';
 
 class SearchScreen extends Component {
 
+    constructor(props){
+        super(props);
+    }
+
     render(){
+
+
+
       return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <Text>SearchScreen</Text>
