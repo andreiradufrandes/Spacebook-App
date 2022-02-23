@@ -19,8 +19,8 @@ class LoginScreen extends Component {
     constructor(props){
         super(props);
         this.state = {
-            email: "defaultemail@gmail.com",
-            password: "defaultPassword"
+            email: "andreifrandes@mmu.ac.uk",
+            password: "andreifrandes"
         };
     }
 
@@ -46,7 +46,9 @@ class LoginScreen extends Component {
             })
             .then(async (responseJson) => {
                     console.log(responseJson);
+                    console.log("token is " + responseJson.token);
                     await AsyncStorage.setItem('@session_token', responseJson.token);
+                    // UNCOMMENT THIS LATER
                     this.props.navigation.navigate("Main");
                     // Navigate home 
 
