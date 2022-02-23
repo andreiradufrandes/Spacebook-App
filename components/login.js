@@ -48,10 +48,9 @@ class LoginScreen extends Component {
                     console.log(responseJson);
                     console.log("token is " + responseJson.token);
                     await AsyncStorage.setItem('@session_token', responseJson.token);
-                    // UNCOMMENT THIS LATER
-                    this.props.navigation.navigate("Main");
-                    // Navigate home 
-
+                    await AsyncStorage.setItem('@id',responseJson.id)
+                    console.log("id: " + AsyncStorage.getItem('@id'));
+                    this.props.navigation.navigate("Practice");  // change this to main
             })
             .catch((error) => {
                 console.log(error);
@@ -98,6 +97,12 @@ class LoginScreen extends Component {
                 title='Main page'
                 onPress={() => navigation.navigate('Main')}
             />
+            
+            <Button 
+                style={style.Button}
+                title='Profile'
+                onPress={() => navigation.navigate('Profile')}
+            />
          </View>    
         )
     }
@@ -119,7 +124,7 @@ const style = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         flexDirection: 'column',
-        backgroundColor: 'black'
+        
       },
       input: {
         backgroundColor: "#edf7ff",
