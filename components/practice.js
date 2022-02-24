@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, TextInput,Button, Alert,StyleSheet } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 class PracticeScreen extends Component {
@@ -13,68 +12,76 @@ class PracticeScreen extends Component {
     
         this.state = {
           isLoading: true,
-        //   LIST DATA CONTAINS  ALL THE USERS IN THE LIST
-          listData: []
+          userInfo: [] // not sure, might be diferent type
 
         }
       }
 
-    componentDidMount() {
-        this.unsubscribe = this.props.navigation.addListener('focus', () => {
-          this.checkLoggedIn();
-        })
-        this.getData();
-      }
-    
-      componentWillUnmount() {
-        this.unsubscribe();
-      } 
+    // i believe this is to call it 
+    // call the get user data (which we need here)
+  componentDidMount() {
+    this.getUserInfo();
+  } 
 
+//  not sure if it needs async
+    getUserInfo = async () =>{
+        // Store user id
+        // IMPORTANT, await waits to get the item first 
+        const userId = await AsyncStorage.getItem('@id');
+        const value = await AsyncStorage.getItem('@session_token');
+        console.log(userId);
+        console.log(value);
 
-  getData = async () => {
-    const value = await AsyncStorage.getItem('@session_token');
-    const id = await AsyncStorage.getItem('@id'); // store the id 
-    return fetch("http://localhost:3333/api/1.0.0/search", {
-          'headers': {
-            'X-Authorization':  value
-          }
+        return fetch("http://localhost:3333/api/1.0.0/user/" + userId,{
+            'headers': {
+                'X-Authorization':  value
+              }
         })
         .then((response) => {
             if(response.status === 200){
                 return response.json()
-            }else if(response.status === 401){
-              this.props.navigation.navigate("Login");
             }else{
                 throw 'Something went wrong';
             }
         })
         .then((responseJson) => {
+            // save the users info inside the state
           this.setState({
-            isLoading: false,
-            listData: responseJson,
-          });
-          console.log(this.state.listData);
-          console.log("id: " + id);
-          console.log("token:"  + value);
+            isLoading: false, // meaning it finished and now you can display it 
+            userInfo: responseJson
+          }),
+          console.log(this.state.userInfo);
+          
         })
         .catch((error) => {
             console.log(error);
         })
-  }
 
-
-
-  checkLoggedIn = async () => {
-    const value = await AsyncStorage.getItem('@session_token');
-    if (value == null) {
-        this.props.navigation.navigate('Login');
     }
-  };
+    
+
+
+//  insert is loading and the rest 
+
 
 
 
 
     render(){
+
+        if (this.state.isLoading){
+            return (
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text>Loading..</Text>
+              </View>
+            );
+          }else{
       return (
         //   main view 
         <View >
@@ -83,13 +90,12 @@ class PracticeScreen extends Component {
                 <Text> Placeholder for image</Text> 
                 <Button
                     title='Update details'
-                />
-                <Text> First name Last Name</Text>
-                
-                <Text> Friends(REPLACE) : 
+                    // Take me to the 
                     
-                </Text> 
-
+                />
+                <Text>{this.state.userInfo.first_name + " " + this.state.userInfo.last_name}</Text>
+                <Text> {this.state.userInfo.friend_count + " friends" }</Text> 
+                    
                 <Button
                     title='Notificatins'
                     // TODO
@@ -98,6 +104,10 @@ class PracticeScreen extends Component {
                 />
                 <Button
                     title='Add post'
+                />
+                <Button
+                    title='Display data in console to test it(DELETE LATER) '
+                    onPress={() => this.getUserInfo()}
                 />
                 
 
@@ -118,9 +128,65 @@ class PracticeScreen extends Component {
                 />
 
             </View>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </View>
       );
-    } 
+    }
+} 
 }
 
 

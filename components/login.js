@@ -49,12 +49,12 @@ class LoginScreen extends Component {
                     console.log("token is " + responseJson.token);
                     await AsyncStorage.setItem('@session_token', responseJson.token);
                     await AsyncStorage.setItem('@id',responseJson.id)
-                    console.log("id: " + AsyncStorage.getItem('@id'));
                     this.props.navigation.navigate("Practice");  // change this to main
             })
             .catch((error) => {
                 console.log(error);
             })
+            
         }
     
 
