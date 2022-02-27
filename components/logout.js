@@ -65,10 +65,10 @@ class LogoutScreen extends Component{
                     title="Logout"
                     onPress={() => this.logout()}
                 />
-                <Button
+                {/* <Button
                     title="Main page"
                     onPress={() => navigation.navigate('Main')}
-                />
+                /> */}
             </View>
         )
     }

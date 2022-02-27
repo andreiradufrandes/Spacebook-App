@@ -9,6 +9,7 @@ import ProfileScreen from './profile';
 import SearchScreen from './search';
 import NotificationsScreen from './notifications';
 import LogoutScreen from './logout';
+import ProfileComponentScreen from './profileComponent';
 
 const Tab = createBottomTabNavigator();
 
@@ -92,8 +93,13 @@ class MainScreen extends Component {
         }else{
       return (
         
-          <Tab.Navigator>
-            <Tab.Screen name="Profile" component={ProfileScreen} />
+          <Tab.Navigator
+            screenOptions={{headerShown: false}}
+          >
+            {/* <Tab.Screen name="Profile" component={ProfileScreen} /> */}
+            {/* add the profile stack */}
+                
+            <Tab.Screen name="ProfileComponent" component={ProfileComponentScreen} />
             <Tab.Screen name="Search" component={SearchScreen} />
             <Tab.Screen name="Notifications" component={NotificationsScreen} />
             <Tab.Screen name="Logout" component={LogoutScreen} />

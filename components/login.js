@@ -49,7 +49,8 @@ class LoginScreen extends Component {
                     console.log("token is " + responseJson.token);
                     await AsyncStorage.setItem('@session_token', responseJson.token);
                     await AsyncStorage.setItem('@id',responseJson.id)
-                    this.props.navigation.navigate("Practice");  // change this to main
+                    // this.props.navigation.navigate("Practice");  // change this to main
+                    this.props.navigation.navigate("Main");  // change this to main
             })
             .catch((error) => {
                 console.log(error);
@@ -92,7 +93,7 @@ class LoginScreen extends Component {
             />
 
         {/* Get rid of the main page button  */}
-            <Button 
+            {/* <Button 
                 style={style.Button}
                 title='Main page'
                 onPress={() => navigation.navigate('Main')}
@@ -102,7 +103,7 @@ class LoginScreen extends Component {
                 style={style.Button}
                 title='Profile'
                 onPress={() => navigation.navigate('Profile')}
-            />
+            /> */}
          </View>    
         )
     }

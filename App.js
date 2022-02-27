@@ -14,8 +14,8 @@ class App extends Component {
   render(){
     return (
       <NavigationContainer>
-          {/* Stack navigator */}
-        <Stack.Navigator>  
+          
+        <Stack.Navigator screenOptions={{headerShown: false}} >  
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Practice" component={PracticeScreen} />  
           <Stack.Screen name="Signup" component={SignupScreen} />      
