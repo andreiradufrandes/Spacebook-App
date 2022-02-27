@@ -7,11 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // todo 
 // change friends so that it applies only to accepted ones 
-
-// a6c34fc5a08d92378ff060477ac2d6fa  DELETE THIS 
-
-
-
+// can't like posts
+// only delete your posts
+// present the button ONLY if its your own post
 
 
 
@@ -106,9 +104,78 @@ class ProfileScreen extends Component {
         })
     }
 
+    likePost = async (post_id,user_id) =>{
+        const value = await AsyncStorage.getItem('@session_token');
+        console.log(post_id,user_id);
 
+        return fetch("http://localhost:3333/api/1.0.0/user/" + user_id + "/post/" + post_id + "/like" ,{
+            method: 'post',
+            'headers': {
+                'X-Authorization':  value
+              }
+          })
+          .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else{
+                throw 'Something went wrong';
+            }
+        })
+          .catch((error) => {
+            console.log(error);
+          })
+    }
+    
+    deletePost = async (post_id,user_id) =>{
+        const value = await AsyncStorage.getItem('@session_token');
+        console.log(post_id,user_id);
 
+        return fetch("http://localhost:3333/api/1.0.0/user/" + user_id + "/post/" + post_id + "/like" ,{
+            method: 'delete',
+            'headers': {
+                'X-Authorization':  value
+              }
+          })
+          .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else{
+                throw 'Something went wrong';
+            }
+        })
+          .catch((error) => {
+            console.log(error);
+          })
+    }
 
+     
+    // addNewPost = async () =>{
+    //     const value = await AsyncStorage.getItem('@session_token');
+
+    //     // CHANGE FOR OTHER USERS 
+    //     const id = await AsyncStorage.getItem('@id');
+    //     return fetch("http://localhost:3333/api/1.0.0/user/" + id + "/post",{
+    //         method: 'post',
+    //         'headers': {
+    //             'X-Authorization':  value
+    //           }
+    //     })
+    //     .then((response) => {
+    //         if(response.status === 200){
+    //             return response.json()
+    //         }else{
+    //             throw 'Something went wrong';
+    //         }
+    //     })
+    //     // .then((responseJson) => {
+    //     //     // TODO 
+    //     //     // you might need something here
+    //     //     console.log("friend added");
+    //     // })
+    //     .catch((error) => {
+    //         console.log(error);
+    //     })
+    // }
 
     render(){
 
@@ -139,16 +206,11 @@ class ProfileScreen extends Component {
                 />
                 <Text>{this.state.userInfo.first_name + " " + this.state.userInfo.last_name}</Text>
                 <Text> {this.state.userInfo.friend_count + " friends" }</Text> 
-                    
                 <Button
-                    title='Notificatins'
-                    // TODO
-                    // TAKE USER TO NOTIFICATION SCREEN
-                    // HAVE FRIEND REQUESTS THERE
-                    onPress={() => this.props.navigation.navigate('Notifications')}
-                />
-                <Button
-                    title='Add post'
+                //  TODO 
+                //  This changes if it's on someone else's profile
+                    title='Add post(not coded) ADD INPUT AND MAKE IT ONE ELEMENT TO BE ABLE TO GET THE CONTENT'
+                    onPress={() => this.addNewPost()}
                 />
                 {/* <Button
                     title='Display data in console to test it(DELETE LATER) '
@@ -185,6 +247,18 @@ class ProfileScreen extends Component {
                             <Text> {item.text} </Text>
                             <Text> From: {item.author.first_name} {item.author.last_name}  </Text>
                             <Text> Posted at {item.timestamp} </Text>
+                            <Text> Likes: {item.numLikes}</Text>
+                            <Button
+                                title='Like post(not sure if the right one is liked)'
+                                onPress={() => this.likePost(item.post_id,item.author.user_id)}
+                            />
+                            <Button 
+                                title='Delete post(complete)'
+                                onPress={() => this.deletePost(item.post_id,item.author.user_id)}
+                            />
+                            <Button 
+                                title='Update post(complete)'
+                            />
                         </View>
                         
                     } 
