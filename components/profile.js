@@ -9,6 +9,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // can't like posts
 // only delete your posts
 // present the button ONLY if its your own post
+// CHECK THAT THE USER ID IS CORRECT
+// this.props.route.params
 
 class ProfileScreen extends Component {
   constructor(props) {
@@ -18,18 +20,41 @@ class ProfileScreen extends Component {
       isLoading: true,
       userInfo: [],
       userPosts: [], // not sure, might be diferent type
+      loggedUserId: "", // WARNING - THIS IS THE ASYNC ONLY
     };
   }
 
+  checkUserProfile = async () => {
+    //   My id
+    const loggedUserId = await AsyncStorage.getItem("@id");
+    this.state.loggedUserId = loggedUserId;
+
+    // if userId null means the user logged in went there
+    console.log("logged in userid: " + loggedUserId);
+    console.log("user id from other user profile: " + userId);
+  };
+
   //  Add a component listener to check if you went back to this page
-  componentDidMount() {
+  componentDidMount = async () => {
+    this.checkUserProfile();
+    const userId = await AsyncStorage.getItem("@id");
+    this.state.asyncUserId = userId;
     this.unsubscribe = this.props.navigation.addListener("focus", () => {
+      // ID FROM props. COuld be mine or somone elses
+      console.log("ID from props: " + this.props.route.params);
       this.getUserInfo();
       this.getUserPosts(); // Only 1 function sets loading to false (the last one)
+
+      if (userId == this.props.route.params.userId) {
+        console.log("This is my profile");
+      } else {
+        console.log("This is NOT my profile");
+      }
     });
+
     this.getUserInfo();
     this.getUserPosts();
-  }
+  };
   componentWillUnmount() {
     this.unsubscribe();
   }
@@ -40,8 +65,6 @@ class ProfileScreen extends Component {
     // IMPORTANT, await waits to get the item first
     const userId = await AsyncStorage.getItem("@id");
     const value = await AsyncStorage.getItem("@session_token");
-    console.log(userId);
-    console.log(value);
 
     return fetch("http://localhost:3333/api/1.0.0/user/" + userId, {
       headers: {
@@ -56,14 +79,10 @@ class ProfileScreen extends Component {
         }
       })
       .then((responseJson) => {
-        // save the users info inside the state
         this.setState({
-          //   TODO
-          // uncomment this IF THERE IS A NEED FOR IT
-          // isLoading: false, // meaning it finished and now you can display it  t
           userInfo: responseJson,
         }),
-          console.log(this.state.userInfo);
+          console.log(this.state.userInfo); // delete
       })
       .catch((error) => {
         console.log(error);
@@ -123,7 +142,8 @@ class ProfileScreen extends Component {
       .then((response) => {
         if (response.status === 200) {
           this.getUserPosts();
-          return response.json();
+          //   return response.json(); // not sure of this
+          console.log("Post liked:");
         } else {
           throw "Something went wrong";
         }
@@ -133,7 +153,6 @@ class ProfileScreen extends Component {
       });
   };
 
-  //   rewrite it
   deletePost = async (post_id, user_id) => {
     const value = await AsyncStorage.getItem("@session_token");
     console.log(post_id, user_id);
@@ -151,7 +170,7 @@ class ProfileScreen extends Component {
         if (response.status === 200) {
           console.log("post deleted"); // delete this
           this.getUserPosts();
-          return response.json();
+          //   return response.json();
         } else {
           throw "Something went wrong";
         }
@@ -161,35 +180,53 @@ class ProfileScreen extends Component {
       });
   };
 
-  // addNewPost = async () =>{
-  //     const value = await AsyncStorage.getItem('@session_token');
+  //   addNewPost = async () =>{
+  //       const value = await AsyncStorage.getItem('@session_token');
 
-  //     // CHANGE FOR OTHER USERS
-  //     const id = await AsyncStorage.getItem('@id');
-  //     return fetch("http://localhost:3333/api/1.0.0/user/" + id + "/post",{
-  //         method: 'post',
-  //         'headers': {
-  //             'X-Authorization':  value
+  //       // CHANGE FOR OTHER USERS
+  //       const id = await AsyncStorage.getItem('@id');
+  //       return fetch("http://localhost:3333/api/1.0.0/user/" + id + "/post",{
+  //           method: 'post',
+  //           'headers': {
+  //               'X-Authorization':  value
+  //             }
+  //       })
+  //       .then((response) => {
+  //           if(response.status === 200){
+  //               return response.json()
+  //           }else{
+  //               throw 'Something went wrong';
   //           }
-  //     })
-  //     .then((response) => {
-  //         if(response.status === 200){
-  //             return response.json()
-  //         }else{
-  //             throw 'Something went wrong';
-  //         }
-  //     })
-  //     // .then((responseJson) => {
-  //     //     // TODO
-  //     //     // you might need something here
-  //     //     console.log("friend added");
-  //     // })
-  //     .catch((error) => {
-  //         console.log(error);
-  //     })
-  // }
+  //       })
+  //       // .then((responseJson) => {
+  //       //     // TODO
+  //       //     // you might need something here
+  //       //     console.log("friend added");
+  //       // })
+  //       .catch((error) => {
+  //           console.log(error);
+  //       })
+  //   }
 
   render() {
+    // check the id's are the same
+    // const userId = await AsyncStorage.getItem("@id");
+
+    // const renderUpdateButton = () => {
+    // if(this.props.route.params.userId == null)
+    // {
+
+    // }
+    // else(this.state.asyncUserId == this.props.route.params.userId) {
+    //         return (
+    //           <Button
+    //             title="Update details"
+    //             onPress={() => this.props.navigation.navigate("Update")}
+    //           />
+    //         );
+    //       }
+    //     };
+
     if (this.state.isLoading) {
       return (
         <View
@@ -210,11 +247,17 @@ class ProfileScreen extends Component {
           {/* header */}
           <View>
             <Text> Placeholder for image</Text>
+            <Text> Displaying async id test: {this.userId} </Text>
+
+            {/* only display IF my profile */}
+
+            {/* {renderUpdateButton()} */}
             <Button
               title="Update details"
               onPress={() => this.props.navigation.navigate("Update")}
               // Take me to the
             />
+
             <Text>
               {this.state.userInfo.first_name +
                 " " +
@@ -223,30 +266,18 @@ class ProfileScreen extends Component {
             <Text> {"Email:" + this.state.userInfo.email}</Text>
             <Text> {this.state.userInfo.friend_count + " friends"}</Text>
             <Button
+              title="See list of friends"
+              onPress={() => this.props.navigation.navigate("Friends")}
+            ></Button>
+            <Button
               //  TODO
               //  This changes if it's on someone else's profile
               title="Add post(not coded) ADD INPUT AND MAKE IT ONE ELEMENT TO BE ABLE TO GET THE CONTENT"
               onPress={() => this.addNewPost()}
             />
-            {/* <Button
-                    title='Display data in console to test it(DELETE LATER) '
-                    onPress={() => this.getUserInfo()}
-                />
-                 */}
           </View>
           {/* body/ wall */}
           <View style={Styles.wall}>
-            {/* wrapped in a flatlist */}
-
-            {/* <View>
-                    <Text>
-                    {"Post: " + this.state.userPosts.at(0).text }
-                    </Text>
-                    <Text>
-                    {"From: " + this.state.userPosts.at(0).author.first_name  + " " + this.state.userPosts.at(0).author.last_name}
-                    </Text>
-                </View> */}
-
             <FlatList
               // ADD THE POSTS
               // POPULATE WITH POST CUSTOME COMPONENT
@@ -267,6 +298,7 @@ class ProfileScreen extends Component {
                       this.likePost(item.post_id, item.author.user_id)
                     }
                   />
+
                   <Button
                     title="Delete post(complete)"
                     onPress={() =>

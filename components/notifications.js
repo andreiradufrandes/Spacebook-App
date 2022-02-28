@@ -3,6 +3,15 @@ import { View, Text, TextInput, Button, Alert } from "react-native";
 import { FlatList } from "react-native-web";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+/*
+To implement 
+- button for accepting request IF they're not my friend
+
+
+
+
+*/
+
 class NotificationsScreen extends Component {
   constructor(props) {
     super(props);
@@ -11,11 +20,13 @@ class NotificationsScreen extends Component {
       isLoading: true,
       friendsRequests: [],
       likes: [],
+      friendsList: [],
     };
   }
 
   componentDidMount() {
     this.getFriendRequests();
+    this.getListOfFriends();
   }
 
   getFriendRequests = async () => {
@@ -50,29 +61,23 @@ class NotificationsScreen extends Component {
     // how to get the exact id i need
     console.log(id);
     const value = await AsyncStorage.getItem("@session_token");
-    return (
-      fetch("http://localhost:3333/api/1.0.0/friendrequests/" + id, {
-        method: "post",
-        headers: {
-          "X-Authorization": value,
-        },
+    return fetch("http://localhost:3333/api/1.0.0/friendrequests/" + id, {
+      method: "post",
+      headers: {
+        "X-Authorization": value,
+      },
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          // return response.json();
+          this.getFriendRequests();
+        } else {
+          throw "Something went wrong";
+        }
       })
-        .then((response) => {
-          if (response.status === 200) {
-            return response.json();
-          } else {
-            throw "Something went wrong";
-          }
-        })
-        // .then((responseJson) => {
-        //     // TODO
-        //     // you might need something here
-        //     console.log("friend added");
-        // })
-        .catch((error) => {
-          console.log(error);
-        })
-    );
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   declineFriendRequest = async (id) => {
@@ -88,7 +93,8 @@ class NotificationsScreen extends Component {
       .then((response) => {
         if (response.status === 200) {
           console.log("friend request deleted");
-          return response.json();
+          this.getFriendRequests();
+          //   return response.json();
         } else {
           throw "Something went wrong";
         }
@@ -121,13 +127,14 @@ class NotificationsScreen extends Component {
             renderItem={({ item }) => (
               <View>
                 <Text>
-                  {" "}
                   Friend request from {item.first_name} {item.last_name}
                 </Text>
                 <Button
-                  title="Visit user's profile(not coded)"
-                  // TODO
-                  // Take user there
+                  title="Visit user's profile"
+                  onPress={() =>
+                    this.props.navigation.navigate("Profile", item.user_id)
+                  }
+                  //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
                 />
 
                 <Button

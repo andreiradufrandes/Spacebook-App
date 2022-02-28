@@ -18,15 +18,12 @@ class UpdateScreen extends Component {
       origin_first_name: "",
       origin_last_name: "",
       origin_email: "",
-      //   id : '',
       first_name: "",
       last_name: "",
       email: "",
     };
   }
 
-  // i believe this is to call it
-  // call the get user data (which we need here)
   componentDidMount() {
     this.getUserInfo();
   }
@@ -68,9 +65,6 @@ class UpdateScreen extends Component {
       });
   };
 
-  //   Updating the user
-  //      TODO
-  //      ADD error handling here
   updateDetails = async () => {
     const userId = await AsyncStorage.getItem("@id");
     const value = await AsyncStorage.getItem("@session_token");
@@ -90,12 +84,8 @@ class UpdateScreen extends Component {
     ) {
       to_send["last_name"] = this.state.last_name;
     }
-    // TODO
-    // UPDATE THE EMAIL TO BE LIKE FIRST NAME AND LAST NAME IF WE NEED THAT
-    if (
-      this.state.email != this.state.origin_email &&
-      this.state.last_name != ""
-    ) {
+
+    if (this.state.email != this.state.origin_email && this.state.email != "") {
       to_send["email"] = this.state.email;
     }
 
@@ -112,15 +102,7 @@ class UpdateScreen extends Component {
     })
       .then((response) => {
         console.log("User details updated");
-        //   ADD ALERT HERE
-        // TAKE USER TO PROFILE PAGE
-        Alert.alert("Update", "User details have been updated correctly", [
-          {
-            text: "Ok",
-            onPress: () => console.log("alert has been closed"),
-          },
-        ]);
-        this.props.navigation.navigate("Profile");
+        this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
       })
       .catch((error) => {
         console.log(error);
@@ -159,6 +141,7 @@ class UpdateScreen extends Component {
             onChangeText={(email) => this.setState({ email })}
             value={this.state.email}
           />
+
           <Button title="Update details" onPress={() => this.updateDetails()} />
         </View>
       );

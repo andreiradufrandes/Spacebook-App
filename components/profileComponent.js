@@ -7,6 +7,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import ProfileScreen from "./profile";
 import UpdateScreen from "./update";
 import NotificationsScreen from "./notifications";
+import FriendsScreen from "./friends";
 
 // const Stack = createStackNavigator();
 const ProfileStack = createStackNavigator();
@@ -21,6 +22,7 @@ class ProfileComponentScreen extends Component {
           name="Notifications"
           component={NotificationsScreen}
         />
+        <ProfileStack.Screen name="Friends" component={FriendsScreen} />
       </ProfileStack.Navigator>
     );
   }
