@@ -1,77 +1,73 @@
-import React, { Component } from 'react';
-import { Text, ScrollView, Button, View} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { Component } from "react";
+import { Text, ScrollView, Button, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-class LogoutScreen extends Component{
-    constructor(props){
-        super(props);
+class LogoutScreen extends Component {
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            token: ''
+    this.state = {
+      token: "",
+    };
+  }
+
+  componentDidMount() {
+    this._unsubscribe = this.props.navigation.addListener("focus", () => {
+      this.checkLoggedIn();
+    });
+  }
+
+  componentWillUnmount() {
+    this._unsubscribe();
+  }
+
+  checkLoggedIn = async () => {
+    const value = await AsyncStorage.getItem("@session_token");
+    if (value !== null) {
+      this.setState({ token: value });
+    } else {
+      this.props.navigation.navigate("Login");
+    }
+  };
+
+  logout = async () => {
+    let token = await AsyncStorage.getItem("@session_token");
+    await AsyncStorage.removeItem("@session_token");
+    return fetch("http://localhost:3333/api/1.0.0/logout", {
+      method: "post",
+      headers: {
+        "X-Authorization": token,
+      },
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          this.props.navigation.navigate("Login");
+        } else if (response.status === 401) {
+          this.props.navigation.navigate("Login");
+        } else {
+          throw "Something went wrong";
         }
-    }
+      })
+      .catch((error) => {
+        console.log(error);
+        // ToastAndroid.show(error, ToastAndroid.SHORT);
+      });
+  };
 
-    componentDidMount(){
-        this._unsubscribe = this.props.navigation.addListener('focus', () => {
-            this.checkLoggedIn();
-        });        
-    }
+  render() {
+    // not sure about this one
+    const navigation = this.props.navigation;
 
-    componentWillUnmount(){
-        this._unsubscribe();
-    }
-
-    checkLoggedIn = async () => {
-        const value = await AsyncStorage.getItem('@session_token');
-        if(value !== null) {
-          this.setState({token:value});
-        }else{
-            this.props.navigation.navigate("Login");
-        }
-    }
-
-    logout = async () => {
-        let token = await AsyncStorage.getItem('@session_token');
-        await AsyncStorage.removeItem('@session_token');
-        return fetch("http://localhost:3333/api/1.0.0/logout", {
-            method: 'post',
-            headers: {
-                "X-Authorization": token
-            }
-        })
-        .then((response) => {
-            if(response.status === 200){
-                this.props.navigation.navigate("Login");
-            }else if(response.status === 401){
-                this.props.navigation.navigate("Login");
-            }else{
-                throw 'Something went wrong';
-            }
-        })
-        .catch((error) => {
-            console.log(error);
-            // ToastAndroid.show(error, ToastAndroid.SHORT);
-        })
-    }
-
-    render(){
-
-        // not sure about this one 
-        const navigation = this.props.navigation;
-
-        return (
-            <View>
-                <Button
-                    title="Logout"
-                    onPress={() => this.logout()}
-                />
-                {/* <Button
+    return (
+      <View>
+        <Button title="Logout" onPress={() => this.logout()} />
+        {/* <Button
                     title="Main page"
                     onPress={() => navigation.navigate('Main')}
                 /> */}
-            </View>
-        )
-    }
+      </View>
+    );
+  }
 }
 
 export default LogoutScreen;
