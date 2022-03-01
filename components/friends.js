@@ -18,6 +18,7 @@ class FriendsScreen extends Component {
   }
   // get friends list
   componentDidMount() {
+    console.log("Friends page");
     this.getListOfFriends();
   }
 
@@ -102,6 +103,7 @@ class FriendsScreen extends Component {
       return (
         //   maybe delete the style AND the container
         <View>
+          <Text>List of friends</Text>
           <FlatList
             // ADD THE POSTS
             // POPULATE WITH POST CUSTOME COMPONENT
@@ -111,9 +113,15 @@ class FriendsScreen extends Component {
               <View>
                 {/* <Text> {item.text} </Text> */}
                 <Text>
-                  {" "}
-                  {item.first_name} {item.last_name}
+                  {item.user_givenname} {item.user_familyname}
                 </Text>
+                <Button
+                  title="Visit user's profile"
+                  onPress={() =>
+                    this.props.navigation.navigate("Profile", item.user_id)
+                  }
+                  //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
+                />
               </View>
             )}
           />

@@ -29,6 +29,7 @@ class LoginScreen extends Component {
   }
 
   login = async () => {
+    console.log(JSON.stringify(this.state)); // delete later
     return fetch("http://localhost:3333/api/1.0.0/login", {
       method: "post",
       headers: {
@@ -88,7 +89,7 @@ class LoginScreen extends Component {
           onPress={() => navigation.navigate("Signup")}
         />
 
-        {/* Get rid of the main page button  */}
+        {/* Get rid of thee main page button  */}
         {/* <Button 
                 style={style.Button}
                 title='Main page'

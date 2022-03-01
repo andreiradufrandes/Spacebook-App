@@ -61,6 +61,7 @@ class SearchScreen extends Component {
   };
 
   render() {
+    //
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <Text> Search for people or friends</Text>
@@ -71,6 +72,8 @@ class SearchScreen extends Component {
           value={this.state.searchTerm}
         />
         <Button title="search" onPress={() => this.searchName()} />
+
+        {true ? <Button title="Hi" /> : <Button title="Bye" />}
 
         <FlatList
           data={this.state.searchResults}

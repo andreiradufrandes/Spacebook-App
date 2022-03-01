@@ -25,8 +25,8 @@ class NotificationsScreen extends Component {
   }
 
   componentDidMount() {
+    console.log("Notifications page");
     this.getFriendRequests();
-    this.getListOfFriends();
   }
 
   getFriendRequests = async () => {
@@ -139,7 +139,10 @@ class NotificationsScreen extends Component {
 
                 <Button
                   title="Accept"
-                  onPress={() => this.acceptFriendRequest(item.user_id)}
+                  onPress={() => {
+                    this.acceptFriendRequest(item.user_id);
+                    this.props.navigation.navigate("Profile", item.user_id);
+                  }}
                 />
                 <Button
                   title="Decline"
