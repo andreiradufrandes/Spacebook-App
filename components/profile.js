@@ -16,6 +16,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // make sure it works with 0 friends( the looping through) when it comes to checking if someone is a friend
 // move small stuff outside the component did mount into individual functions(like check friend for instance)
 // error for haing multiple users with same name
+// make sure the loading is right
+
+// Button affected
+// Add post (only mine and friends)
+// update details
+// see friends
 
 class ProfileScreen extends Component {
   constructor(props) {
@@ -31,7 +37,6 @@ class ProfileScreen extends Component {
       isLoggedInUsersProfile: true,
       profileVisitorId: "",
       isFriend: false,
-      // change to false when you have to
       friendsList: [],
     };
   }
@@ -106,21 +111,72 @@ class ProfileScreen extends Component {
       }
       console.log("My profile: " + this.state.isLoggedInUsersProfile); // delete
 
-      // Determine if the user is friend or not
+      //    Determine if the user is friend or not
       if (!this.state.isLoggedInUsersProfile) {
         await this.checkUserIsFriend();
       }
 
-      // At this point botg isLoggedInUsersProfile and iffriend should be determined
-      console.log(
-        "inside componenet did mount AFTER calling the checkuserisfriend: " +
-          this.state.isLoggedInUsersProfile +
-          ", isFriend: " +
-          this.state.isFriend
-      );
+      //   All of the states have the user's details
+
+      //   1. User logged in
+      this.getUserInfo();
+      if (this.state.isLoggedInUsersProfile) {
+        console.log("------This is my profile");
+        // ------My profile-------
+        // display:
+        // - details - DONE
+        // - posts - DONE
+        this.getUserPosts();
+        // - update
+        // - DONT DISPLAY: add friend
+        // -----------------------
+      } else {
+        // 2. This is NOT my profile, isLoggedInUsersProfile == false
+        if (this.state.isFriend) {
+          console.log("-------This is a friend's profile");
+          // ------Friend's profile-------
+          // display:
+          // - details - DONE
+          // - posts - DONE
+          this.getUserPosts();
+          // - DONT DISPLAY: update button, add friend
+          // -----------------------
+        } else {
+          console.log("-------This is NOT a friend's profile");
+          // ------Stranger's profile-------
+          // display
+          // - details
+          // - add friend
+          // - DONT DISPLAY: update button, posts list
+
+          // -----------------------
+        }
+        // 2.2 NOT friend
+      }
+
+      //   isLoggedInUsersProfile: true,
+      //   profileVisitorId: "",
+      //   isFriend: false,
+
+      //   1. If it's ME
+      //  isLoggedInUsersProfile = true
+      //  other dont matter
+
+      //  2. if it's FRIEND
+      // isLoggedInUsersProfile: false first
+      // then check if friend
+      // when you come from friend page SET IS MY PROFILE to false
+      // when i click profile SET PROFILE TO FALSE
+      // isFriend = true
+      // isLoggedInUsersProfile = false ( i think )
+      // isLoggedInUsersProfile = false -> SET it to false
+
+      //  2. is NOT friend
+      // isFriend = false
+      // isLoggedInUsersProfile = false ( i think )
 
       this.getUserInfo();
-      this.getUserPosts();
+      //   this.getUserPosts();
       // Get the list of friends for the user that is logged in
       // maybe delete later
     });
@@ -344,8 +400,11 @@ class ProfileScreen extends Component {
             <Button
               title="Update details"
               onPress={() => this.props.navigation.navigate("Update")}
-              // Take me to the
             />
+            {/* trial button */}
+            {this.state.isLoggedInUsersProfile ? (
+              <Button title="UpdateTest" />
+            ) : null}
 
             <Text>
               {this.state.userInfo.first_name +
