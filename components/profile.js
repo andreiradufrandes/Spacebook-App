@@ -29,6 +29,10 @@ title="Remove like(NOT CODED)"
 // update post no working
 // add post on the RIGHT person's profile
 // send friend requests
+// Make it so that you can go from list of friends > individual friend -> to profile. Atm if you are there and click tab navigator to go to profile component it doesnt go
+// remove likes
+// change timestamp!! <Text> Posted at {item.timestamp} </Text>
+// Add conditional to like post to display something if it's your own post
 
 class ProfileScreen extends Component {
   constructor(props) {
@@ -38,21 +42,114 @@ class ProfileScreen extends Component {
       isLoading: true,
       userInfo: [],
       userPosts: [], // not sure, might be diferent type
-      loggedUserId: "", // WARNING - THIS IS THE ASYNC ONLY - MAYBE DELETE
+      loggedUserId: "", // WARNING - delete it think
       newPostText: "",
       postaddedWindow: "",
       isLoggedInUsersProfile: true,
-      profileVisitorId: "",
+      userProfileID: "",
       isFriend: false,
       friendsList: [],
     };
   }
 
+  componentDidMount = async () => {
+    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+    console.log("async id in getuserinfo" + loggeduserIDCheck);
+    this.unsubscribe = this.props.navigation.addListener("focus", async () => {
+      this.state.userPosts = []; // refresh it // redo this cleare or in a function
+      let userCheck = this.props.route.params; // rename this
+
+      // 1: Determine if it's my profile or someone's else
+      if (typeof userCheck === "undefined") {
+        this.state.isLoggedInUsersProfile = true;
+        // Set he user id to the one of the person who logged in to be used for the networking requests
+        this.state.userProfileID = await AsyncStorage.getItem("@id");
+      } else {
+        this.state.isLoggedInUsersProfile = false;
+        this.state.userProfileID = this.props.route.params;
+      }
+      console.log("My profile: " + this.state.isLoggedInUsersProfile); // delete
+      console.log(
+        "Id of the user's who's profile this is : " + this.state.userProfileID
+      );
+      //  Determine if the user is friend and specify in set the state to reflect if the person is a friend or not
+      if (!this.state.isLoggedInUsersProfile) {
+        await this.checkUserIsFriend();
+      }
+
+      //   All of the states have the user's details
+
+      //   1. User logged in
+      this.getUserInfo();
+      if (this.state.isLoggedInUsersProfile) {
+        // not sure if useful
+        console.log("------This is my profile");
+        this.getUserPosts();
+      } else {
+        // 2. This is NOT my profile, isLoggedInUsersProfile == false
+        if (this.state.isFriend) {
+          console.log("-------This is a friend's profile");
+          this.getUserPosts();
+        } else {
+          console.log("-------This is NOT a friend's profile");
+        }
+      }
+
+      //   isLoggedInUsersProfile: true,
+      //   userProfileID: "",
+      //   isFriend: false,
+
+      //   1. If it's ME
+      //  isLoggedInUsersProfile = true
+      //  other dont matter
+
+      //  2. if it's FRIEND
+      // isLoggedInUsersProfile: false first
+      // then check if friend
+      // when you come from friend page SET IS MY PROFILE to false
+      // when i click profile SET PROFILE TO FALSE
+      // isFriend = true
+      // isLoggedInUsersProfile = false ( i think )
+      // isLoggedInUsersProfile = false -> SET it to false
+
+      //  2. is NOT friend
+      // isFriend = false
+      // isLoggedInUsersProfile = false ( i think )
+
+      this.getUserInfo();
+
+      const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+      console.log("async id in getuserinfo" + loggeduserIDCheck);
+      //   this.getUserPosts();
+      // Get the list of friends for the user that is logged in
+      // maybe delete later
+    });
+
+    this.getUserInfo();
+    console.log(
+      "OUTSIDE event listener, isLoggedInUsersProfile: " +
+        this.state.isLoggedInUsersProfile
+    );
+
+    if (this.state.isLoggedInUsersProfile) {
+      this.getUserPosts();
+    }
+
+    // this.state.isLoading = false; // not sure if its correct like this
+  };
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
   //   Careful it uses async ( so it will get my id not someone elses)
   getListOfFriends = async () => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+    console.log("async id in getuserinfo" + loggeduserIDCheck);
     const userId = await AsyncStorage.getItem("@id");
-    console.log(value);
+    // const userId = this.state.userProfileID;
+    const value = await AsyncStorage.getItem("@session_token");
+    console.log(value); // delete
 
     return fetch(
       "http://localhost:3333/api/1.0.0/user/" + userId + "/friends",
@@ -85,6 +182,8 @@ class ProfileScreen extends Component {
   // write a function that sets isFriend to no if it's not a friend
   // ONLY call this function IF isMyProfile == false
   checkUserIsFriend = async () => {
+    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+    console.log("async id in getuserinfo" + loggeduserIDCheck);
     await this.getListOfFriends();
 
     this.state.friendsList.forEach((element) => {
@@ -103,107 +202,6 @@ class ProfileScreen extends Component {
         this.state.isFriend
     );
   };
-
-  componentDidMount = async () => {
-    this.unsubscribe = this.props.navigation.addListener("focus", async () => {
-      this.state.userPosts = []; // refresh it
-      let userCheck = this.props.route.params;
-
-      // 1: Determine if it's my profile or someone's else
-      if (typeof userCheck === "undefined") {
-        this.state.isLoggedInUsersProfile = true;
-      } else {
-        this.state.isLoggedInUsersProfile = false;
-        this.state.profileVisitorId = this.props.route.params;
-      }
-      console.log("My profile: " + this.state.isLoggedInUsersProfile); // delete
-
-      //    Determine if the user is friend or not
-      if (!this.state.isLoggedInUsersProfile) {
-        await this.checkUserIsFriend();
-      }
-
-      //   All of the states have the user's details
-
-      //   1. User logged in
-      this.getUserInfo();
-      if (this.state.isLoggedInUsersProfile) {
-        console.log("------This is my profile");
-        // ------My profile-------
-        // display:
-        // - details - DONE
-        // - posts - DONE
-        this.getUserPosts();
-        // - update
-        // - DONT DISPLAY: add friend
-        // -----------------------
-      } else {
-        // 2. This is NOT my profile, isLoggedInUsersProfile == false
-        if (this.state.isFriend) {
-          console.log("-------This is a friend's profile");
-          // ------Friend's profile-------
-          // display:
-          // - details - DONE
-          // - posts - DONE
-          this.getUserPosts();
-          // - DONT DISPLAY: update button, add friend
-          // -----------------------
-        } else {
-          console.log("-------This is NOT a friend's profile");
-          // ------Stranger's profile-------
-          // display
-          // - details
-          // - add friend
-          // - DONT DISPLAY: update button, posts list
-
-          // -----------------------
-        }
-        // 2.2 NOT friend
-      }
-
-      //   isLoggedInUsersProfile: true,
-      //   profileVisitorId: "",
-      //   isFriend: false,
-
-      //   1. If it's ME
-      //  isLoggedInUsersProfile = true
-      //  other dont matter
-
-      //  2. if it's FRIEND
-      // isLoggedInUsersProfile: false first
-      // then check if friend
-      // when you come from friend page SET IS MY PROFILE to false
-      // when i click profile SET PROFILE TO FALSE
-      // isFriend = true
-      // isLoggedInUsersProfile = false ( i think )
-      // isLoggedInUsersProfile = false -> SET it to false
-
-      //  2. is NOT friend
-      // isFriend = false
-      // isLoggedInUsersProfile = false ( i think )
-
-      this.getUserInfo();
-      //   this.getUserPosts();
-      // Get the list of friends for the user that is logged in
-      // maybe delete later
-    });
-
-    this.getUserInfo();
-    console.log(
-      "OUTSIDE event listener, isLoggedInUsersProfile: " +
-        this.state.isLoggedInUsersProfile
-    );
-
-    if (this.state.isLoggedInUsersProfile) {
-      this.getUserPosts();
-    }
-
-    // this.state.isLoading = false; // not sure if its correct like this
-  };
-
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
 
   //   send friend request
   sendFriendRequest() {
@@ -232,19 +230,11 @@ class ProfileScreen extends Component {
   }
 
   getUserInfo = async () => {
-    // Store user id
-    // IMPORTANT, await waits to get the item first
-    // const userId = "";
-    // if (this.state.isLoggedInUsersProfile) {
-    //   userId = await AsyncStorage.getItem("@id");
-    //   console.log("myid: " + userId);
-    // } else {
-    //   userId = this.props.route.params;
-    //   console.log("friend OR stranger id: " + userId);
-    // }
-
-    const userId = await AsyncStorage.getItem("@id"); // TODO change
+    const userId = this.state.userProfileID;
     const value = await AsyncStorage.getItem("@session_token");
+    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+    console.log("------------getuserinfo: my id: " + loggeduserIDCheck);
+    console.log("------------getuserinfo: friend i'm adding: " + userId);
 
     return fetch("http://localhost:3333/api/1.0.0/user/" + userId, {
       headers: {
@@ -269,12 +259,11 @@ class ProfileScreen extends Component {
       });
   };
 
+  //   I think this already happend in the render, so no need here
   getUserPosts = async () => {
-    console.log("get users posts has been called!");
-    if (this.state.isLoggedInUsersProfile) {
-      // delete
-
-      const userId = await AsyncStorage.getItem("@id");
+    // Display the posts for the user only if it is the logged in user's profile or a friend
+    if (this.state.isLoggedInUsersProfile || this.state.isFriend) {
+      const userId = this.state.userProfileID;
       const value = await AsyncStorage.getItem("@session_token");
       console.log(userId);
       console.log(value);
@@ -303,37 +292,6 @@ class ProfileScreen extends Component {
           console.log(error);
         });
     }
-  };
-
-  likePost = async (post_id, user_id) => {
-    const value = await AsyncStorage.getItem("@session_token");
-    console.log(post_id, user_id);
-
-    return fetch(
-      "http://localhost:3333/api/1.0.0/user/" +
-        user_id +
-        "/post/" +
-        post_id +
-        "/like",
-      {
-        method: "post",
-        headers: {
-          "X-Authorization": value,
-        },
-      }
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          this.getUserPosts();
-          //   return response.json(); // not sure of this
-          console.log("Post liked:");
-        } else {
-          throw "Something went wrong";
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
   };
 
   deletePost = async (post_id, user_id) => {
@@ -372,8 +330,9 @@ class ProfileScreen extends Component {
 
     console.log("post format: " + JSON.stringify(post_to_send));
     // CHANGE FOR OTHER USERS
-    const id = await AsyncStorage.getItem("@id");
-    return fetch("http://localhost:3333/api/1.0.0/user/" + id + "/post", {
+    // const id = await AsyncStorage.getItem("@id");
+    const userId = this.state.userProfileID;
+    return fetch("http://localhost:3333/api/1.0.0/user/" + userId + "/post", {
       method: "post",
       headers: {
         "content-type": "application/json",
@@ -394,26 +353,74 @@ class ProfileScreen extends Component {
         console.log(error);
       });
   };
+  likePost = async (post_id, user_id) => {
+    const value = await AsyncStorage.getItem("@session_token");
+
+    return fetch(
+      "http://localhost:3333/api/1.0.0/user/" +
+        user_id +
+        "/post/" +
+        post_id +
+        "/like",
+      {
+        method: "post",
+        headers: {
+          "X-Authorization": value,
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          this.getUserPosts();
+          console.log("Post liked:");
+        } else {
+          throw "Something went wrong";
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  //   i already created this function somewhere else, just import it
+  addFriend = async () => {
+    const value = await AsyncStorage.getItem("@session_token");
+    const myID = await AsyncStorage.getItem("@id"); // delete later
+    const userId = this.state.userProfileID;
+    this.state.userProfileID = myID; // bit hacky, delete later
+
+    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+    console.log("------------getuserinfo: my id: " + loggeduserIDCheck);
+    console.log("------------getuserinfo: friend i'm adding: " + userId);
+
+    // the
+    return fetch(
+      "http://localhost:3333/api/1.0.0/user/" + userId + "/friends",
+      {
+        method: "post",
+        headers: {
+          "content-type": "application/json",
+          "X-Authorization": value,
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("Friend added successfully");
+          //   TODO, REFRESH PAGE SO THAT IT DISPLAYS EVERYTHING
+          // change ifFriend to true
+          this.state.isFriend = true;
+        } else {
+          throw "Something went wrong.Friend couldn't be added ";
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   render() {
-    // check the id's are the same
-    // const userId = await AsyncStorage.getItem("@id");
-
-    // const renderUpdateButton = () => {
-    // if(this.props.route.params.userId == null)
-    // {
-
-    // }
-    // else(this.state.asyncUserId == this.props.route.params.userId) {
-    //         return (
-    //           <Button
-    //             title="Update details"
-    //             onPress={() => this.props.navigation.navigate("Update")}
-    //           />
-    //         );
-    //       }
-    //     };
-
+    // Display a buffer text if the data required to be displayed in not loaded yet
     if (this.state.isLoading) {
       return (
         <View
@@ -429,19 +436,11 @@ class ProfileScreen extends Component {
       );
     } else {
       return (
-        //   main view
         <View>
-          {/* header */}
-
           <View>
             <Text> Placeholder for image</Text>
-            {/* <Text> Displaying async id test: {this.userId} </Text> */}
 
-            {/* only display IF my profile */}
-
-            {/* {renderUpdateButton()} */}
-
-            {/* Disaply the update button only when it is my profile*/}
+            {/* Display the update button only for the user's who are logged in*/}
             {this.state.isLoggedInUsersProfile ? (
               <Button
                 title="Update details"
@@ -449,6 +448,7 @@ class ProfileScreen extends Component {
               />
             ) : null}
 
+            {/* Display the details of the user's who's profile we are on */}
             <Text>
               {this.state.userInfo.first_name +
                 " " +
@@ -457,7 +457,7 @@ class ProfileScreen extends Component {
             <Text>{this.state.userInfo.email}</Text>
             <Text> {this.state.userInfo.friend_count + " friends"}</Text>
 
-            {/* display the list of friends only it's my profile*/}
+            {/* Display the list of friends for the user who is logged in only*/}
             {this.state.isLoggedInUsersProfile ? (
               <Button
                 title="See list of friends"
@@ -465,8 +465,7 @@ class ProfileScreen extends Component {
               ></Button>
             ) : null}
 
-            {/* </View> */}
-            {/* Add friend button which displays only when the profile is not a friend */}
+            {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
             {!this.state.isLoggedInUsersProfile && !this.state.isFriend ? (
               <Button
                 title="Add friend(NOT CODED)"
@@ -477,7 +476,7 @@ class ProfileScreen extends Component {
 
           {/* ---------------------BODY---------------------*/}
 
-          {/* display the lists of posts and add post only if it's my profile or a friend's profile */}
+          {/* Display someone's posts, as well as the option to add a post only for the logged in user's profile and for their friends */}
           {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
             <View>
               {/* Add a post only if it is my profile or a friend's profile */}
@@ -496,6 +495,8 @@ class ProfileScreen extends Component {
                 />
               </View>
 
+              {/*   Display user's posts as a flatlist, with the option to like, remove like, delete, update posts,
+                 and visit person's profile, depending on the posts are from */}
               <FlatList
                 data={this.state.userPosts}
                 keyExtractor={(item) => item.post_id}
@@ -503,11 +504,10 @@ class ProfileScreen extends Component {
                   <View>
                     <Text> {item.text} </Text>
                     <Text>
-                      {" "}
                       From: {item.author.first_name} {item.author.last_name}{" "}
                     </Text>
                     <Text> Posted at {item.timestamp} </Text>
-                    <Text> Likes: {item.numLikes}</Text>
+                    <Text> {item.numLikes} likes</Text>
 
                     {/* Display only if it's NOT my page */}
                     <Button
@@ -517,11 +517,8 @@ class ProfileScreen extends Component {
                     ></Button>
 
                     {this.state.isFriend ? (
-                      <Button title="Visit use'rs page NOT CODED" />
+                      <Button title="Visit user's page(NOT CODED)" />
                     ) : null}
-
-                    {/* only like if it's NOT you profile */}
-                    {/* {!this.state.isLoggedInUsersProfile ? ( */}
 
                     <Button
                       title="Like post(not sure if the right one is liked)"
@@ -529,9 +526,8 @@ class ProfileScreen extends Component {
                         this.likePost(item.post_id, item.author.user_id)
                       }
                     />
-                    {/* ) : null} */}
 
-                    {/* Delete post ONLY if it's your profile */}
+                    {/* Allow the user to delete a post if it's on their own profile */}
                     {this.state.isLoggedInUsersProfile ? (
                       <Button
                         title="Delete post(complete)"
@@ -540,8 +536,8 @@ class ProfileScreen extends Component {
                         }
                       />
                     ) : null}
-                    {/* update post ONLY if it's your  profile */}
 
+                    {/* Add functionality for updating a post if it's on the user's profile */}
                     {this.state.isLoggedInUsersProfile ? (
                       <Button title="Update post(NOT CODED)" />
                     ) : null}

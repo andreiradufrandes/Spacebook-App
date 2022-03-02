@@ -10,6 +10,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // import TextInjection from 'react-native/Libraries/Text/TextInjection';
 
+// Delete this
 const storeData = async (value) => {
   try {
     const jsonValue = JSON.stringify(value);
@@ -23,8 +24,8 @@ class LoginScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: "andreifrandes@mmu.ac.uk",
-      password: "andreifrandes",
+      email: "andreifrandes@mmu.ac.uk", // change
+      password: "andreifrandes", // change
     };
   }
 
@@ -60,7 +61,7 @@ class LoginScreen extends Component {
   };
 
   render() {
-    const navigation = this.props.navigation;
+    const navigation = this.props.navigation; // change
 
     return (
       <View style={style.container}>
