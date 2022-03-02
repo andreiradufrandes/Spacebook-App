@@ -8,6 +8,7 @@ import ProfileScreen from "./profile";
 import UpdateScreen from "./update";
 import NotificationsScreen from "./notifications";
 import FriendsScreen from "./friends";
+import PostScreen from "./post";
 
 // const Stack = createStackNavigator();
 const ProfileStack = createStackNavigator();
@@ -22,6 +23,7 @@ class ProfileComponentScreen extends Component {
           name="Notifications"
           component={NotificationsScreen}
         />
+        <ProfileStack.Screen name="Post" component={PostScreen} />
         <ProfileStack.Screen name="Friends" component={FriendsScreen} />
       </ProfileStack.Navigator>
     );

@@ -4,6 +4,7 @@ import { FlatList } from "react-native-web";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+// fix it when you go to YOUR PROFILE fro notifications or somewhere else
 // todo
 // change friends so that it applies only to accepted ones
 // can't like posts
@@ -17,11 +18,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // move small stuff outside the component did mount into individual functions(like check friend for instance)
 // error for haing multiple users with same name
 // make sure the loading is right
-
-// Button affected
-// Add post (only mine and friends)
-// update details
-// see friends
+// display the right details on the user profile(if its me or someone else)
+// Display stuff when the user runs into errors
+// only allow for your posts to be liked by other people(and viceversa)
+// make sure you get the right posts(for example if youre on someone else's page)
+/* <Button
+title="Remove like(NOT CODED)"
+/> */
+// change getUserPosts to not have the conditional statement inside of it
+// update post no working
+// add post on the RIGHT person's profile
+// send friend requests
 
 class ProfileScreen extends Component {
   constructor(props) {
@@ -198,10 +205,45 @@ class ProfileScreen extends Component {
     this.unsubscribe();
   }
 
+  //   send friend request
+  sendFriendRequest() {
+    // Set the RIGHT user id
+
+    return fetch(
+      "http://localhost:3333/api/1.0.0/user/" + user_id + "/friends",
+      {
+        method: "post",
+        headers: {
+          "X-Authorization": value,
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          // TODO, refresh the user page
+          console.log("Friend added:");
+        } else {
+          throw "Something went wrong";
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
   getUserInfo = async () => {
     // Store user id
     // IMPORTANT, await waits to get the item first
-    const userId = await AsyncStorage.getItem("@id");
+    // const userId = "";
+    // if (this.state.isLoggedInUsersProfile) {
+    //   userId = await AsyncStorage.getItem("@id");
+    //   console.log("myid: " + userId);
+    // } else {
+    //   userId = this.props.route.params;
+    //   console.log("friend OR stranger id: " + userId);
+    // }
+
+    const userId = await AsyncStorage.getItem("@id"); // TODO change
     const value = await AsyncStorage.getItem("@session_token");
 
     return fetch("http://localhost:3333/api/1.0.0/user/" + userId, {
@@ -390,20 +432,21 @@ class ProfileScreen extends Component {
         //   main view
         <View>
           {/* header */}
+
           <View>
             <Text> Placeholder for image</Text>
-            <Text> Displaying async id test: {this.userId} </Text>
+            {/* <Text> Displaying async id test: {this.userId} </Text> */}
 
             {/* only display IF my profile */}
 
             {/* {renderUpdateButton()} */}
-            <Button
-              title="Update details"
-              onPress={() => this.props.navigation.navigate("Update")}
-            />
-            {/* trial button */}
+
+            {/* Disaply the update button only when it is my profile*/}
             {this.state.isLoggedInUsersProfile ? (
-              <Button title="UpdateTest" />
+              <Button
+                title="Update details"
+                onPress={() => this.props.navigation.navigate("Update")}
+              />
             ) : null}
 
             <Text>
@@ -413,61 +456,100 @@ class ProfileScreen extends Component {
             </Text>
             <Text>{this.state.userInfo.email}</Text>
             <Text> {this.state.userInfo.friend_count + " friends"}</Text>
-            <Button
-              title="See list of friends"
-              onPress={() => this.props.navigation.navigate("Friends")}
-            ></Button>
-            {/* add post view  */}
-            <View>
-              <TextInput
-                placeholder="Add post.."
-                onChangeText={(newPostText) => this.setState({ newPostText })}
-                value={this.state.newPostText}
-              />
+
+            {/* display the list of friends only it's my profile*/}
+            {this.state.isLoggedInUsersProfile ? (
               <Button
-                //  TODO
-                //  This changes if it's on someone else's profile
-                title="Add post(not coded) ADD INPUT AND MAKE IT ONE ELEMENT TO BE ABLE TO GET THE CONTENT"
-                onPress={() => this.addNewPost()}
+                title="See list of friends"
+                onPress={() => this.props.navigation.navigate("Friends")}
+              ></Button>
+            ) : null}
+
+            {/* </View> */}
+            {/* Add friend button which displays only when the profile is not a friend */}
+            {!this.state.isLoggedInUsersProfile && !this.state.isFriend ? (
+              <Button
+                title="Add friend(NOT CODED)"
+                onPress={() => this.addFriend()} // code it
+              ></Button>
+            ) : null}
+          </View>
+
+          {/* ---------------------BODY---------------------*/}
+
+          {/* display the lists of posts and add post only if it's my profile or a friend's profile */}
+          {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
+            <View>
+              {/* Add a post only if it is my profile or a friend's profile */}
+
+              <View>
+                <TextInput
+                  placeholder="Add post.."
+                  onChangeText={(newPostText) => this.setState({ newPostText })}
+                  value={this.state.newPostText}
+                />
+                <Button
+                  //  TODO
+                  //  This changes if it's on someone else's profile
+                  title="Add post(not coded) ADD INPUT AND MAKE IT ONE ELEMENT TO BE ABLE TO GET THE CONTENT"
+                  onPress={() => this.addNewPost()}
+                />
+              </View>
+
+              <FlatList
+                data={this.state.userPosts}
+                keyExtractor={(item) => item.post_id}
+                renderItem={({ item }) => (
+                  <View>
+                    <Text> {item.text} </Text>
+                    <Text>
+                      {" "}
+                      From: {item.author.first_name} {item.author.last_name}{" "}
+                    </Text>
+                    <Text> Posted at {item.timestamp} </Text>
+                    <Text> Likes: {item.numLikes}</Text>
+
+                    {/* Display only if it's NOT my page */}
+                    <Button
+                      onPress={() => {
+                        this.props.navigation.navigate("Post", item.post_id);
+                      }}
+                    ></Button>
+
+                    {this.state.isFriend ? (
+                      <Button title="Visit use'rs page NOT CODED" />
+                    ) : null}
+
+                    {/* only like if it's NOT you profile */}
+                    {/* {!this.state.isLoggedInUsersProfile ? ( */}
+
+                    <Button
+                      title="Like post(not sure if the right one is liked)"
+                      onPress={() =>
+                        this.likePost(item.post_id, item.author.user_id)
+                      }
+                    />
+                    {/* ) : null} */}
+
+                    {/* Delete post ONLY if it's your profile */}
+                    {this.state.isLoggedInUsersProfile ? (
+                      <Button
+                        title="Delete post(complete)"
+                        onPress={() =>
+                          this.deletePost(item.post_id, item.author.user_id)
+                        }
+                      />
+                    ) : null}
+                    {/* update post ONLY if it's your  profile */}
+
+                    {this.state.isLoggedInUsersProfile ? (
+                      <Button title="Update post(NOT CODED)" />
+                    ) : null}
+                  </View>
+                )}
               />
             </View>
-          </View>
-          {/* body/ wall */}
-          <View style={Styles.wall}>
-            <FlatList
-              // ADD THE POSTS
-              // POPULATE WITH POST CUSTOME COMPONENT
-              data={this.state.userPosts}
-              keyExtractor={(item) => item.post_id}
-              renderItem={({ item }) => (
-                <View>
-                  <Text> {item.text} </Text>
-                  <Text>
-                    {" "}
-                    From: {item.author.first_name} {item.author.last_name}{" "}
-                  </Text>
-                  <Text> Posted at {item.timestamp} </Text>
-                  <Text> Likes: {item.numLikes}</Text>
-                  <Button title="Visit use'rs page NOT CODED" />
-                  <Button
-                    title="Like post(not sure if the right one is liked)"
-                    onPress={() =>
-                      this.likePost(item.post_id, item.author.user_id)
-                    }
-                  />
-
-                  <Button
-                    title="Delete post(complete)"
-                    onPress={() =>
-                      this.deletePost(item.post_id, item.author.user_id)
-                    }
-                  />
-                  <Button title="Update post(complete)" />
-                </View>
-              )}
-              // keyExtractor = {item=>item.id}
-            />
-          </View>
+          ) : null}
         </View>
       );
     }
