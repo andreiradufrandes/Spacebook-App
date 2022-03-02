@@ -64,6 +64,11 @@ class SearchScreen extends Component {
     //
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        {/* 37 friend now but ill remove him */}
+        <Button
+          title="take me to someone's profile(write id by hand)"
+          onPress={() => this.props.navigation.navigate("Profile", 37)}
+        />
         <Text> Search for people or friends</Text>
         <TextInput
           style={styles.input}
@@ -73,7 +78,7 @@ class SearchScreen extends Component {
         />
         <Button title="search" onPress={() => this.searchName()} />
 
-        {true ? <Button title="Hi" /> : <Button title="Bye" />}
+        {/* {true ? <Button title="Hi" /> : <Button title="Bye" />} */}
 
         <FlatList
           data={this.state.searchResults}
