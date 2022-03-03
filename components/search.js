@@ -69,6 +69,10 @@ class SearchScreen extends Component {
           title="take me to someone's profile(write id by hand)"
           onPress={() => this.props.navigation.navigate("Profile", 37)}
         />
+        <Button
+          title="take me to Andrei's profile"
+          onPress={() => this.props.navigation.navigate("Profile", 17)}
+        />
         <Text> Search for people or friends</Text>
         <TextInput
           style={styles.input}

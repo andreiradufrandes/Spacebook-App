@@ -56,10 +56,12 @@ class ProfileScreen extends Component {
   }
 
   componentDidMount = async () => {
-    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
-
+    // const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+    // Initial set for the user profile to display posts when we log in
+    this.state.userProfileID = await AsyncStorage.getItem("@id");
     // console.log("async id in getuserinfo" + loggeduserIDCheck);
     this.unsubscribe = this.props.navigation.addListener("focus", async () => {
+      console.log("Focus listener activated");
       this.state.userPosts = []; // refresh it // redo this cleare or in a function
       this.state.isFriend = false; // maybe delete
 
@@ -70,35 +72,40 @@ class ProfileScreen extends Component {
         this.state.isLoggedInUsersProfile = true;
         this.state.userProfileID = await AsyncStorage.getItem("@id");
       } else {
-        this.state.isLoggedInUsersProfile = false;
+        //   check if the profile is mine
         this.state.userProfileID = this.props.route.params;
+        let AsyncStorageID = await AsyncStorage.getItem("@id");
+        if (this.state.userProfileID == AsyncStorageID) {
+          this.state.isLoggedInUsersProfile = true;
+          this.state.userProfileID = await AsyncStorage.getItem("@id");
+        } else {
+          this.state.isLoggedInUsersProfile = false;
+        }
       }
-      console.log(
-        "-_-_-is it my profile?: " + this.state.isLoggedInUsersProfile
-      ); // delete
-      console.log(
-        "Id of the user's who's profile this is : " + this.state.userProfileID
-      );
 
       //  Determine if the user is friend and specify in set the state to reflect if the person is a friend or not
       if (!this.state.isLoggedInUsersProfile) {
         await this.checkUserIsFriend();
       }
+      console.log(
+        "\n -isLoggedInUsersProfile(is this my prfile): " +
+          this.state.isLoggedInUsersProfile +
+          "\n ,-userProfileID(user's whos prile this is): " +
+          this.state.userProfileID +
+          "\n ,-isFriend: " +
+          this.state.isFriend
+      ); // delete
 
       //   All of the states have the user's details
 
       //   1. User logged in
       this.getUserInfo();
       if (this.state.isLoggedInUsersProfile) {
-        console.log("------This is my profile");
         this.getUserPosts();
       } else {
-        // 2. This is NOT my profile, isLoggedInUsersProfile == false
+        // 2. This is NOT my profile, isLoggedInUsersProfile == false, but a frien'ds
         if (this.state.isFriend) {
-          console.log("-------This is a friend's profile");
           this.getUserPosts();
-        } else {
-          console.log("-------This is NOT a friend's profile");
         }
       }
     });
@@ -109,6 +116,7 @@ class ProfileScreen extends Component {
       this.getUserPosts();
     }
 
+    console.log("-- code not in the event listener-- ");
     // this.state.isLoading = false; // not sure if its correct like this
   };
 
@@ -143,9 +151,7 @@ class ProfileScreen extends Component {
         this.setState({
           isLoading: false,
           friendsList: responseJson,
-        }),
-          console.log("List of friend from getListOfFriend: ");
-        console.log(this.state.friendsList);
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -163,11 +169,8 @@ class ProfileScreen extends Component {
     await this.getListOfFriends();
 
     this.state.friendsList.forEach((element) => {
-      console.log(element.user_id + " " + this.props.route.params);
-
       if (element.user_id == this.props.route.params) {
         this.state.isFriend = true;
-        console.log("yes the person is your friend!");
       }
     });
     console.log("inside checkuserisfriend");
@@ -229,7 +232,9 @@ class ProfileScreen extends Component {
         this.setState({
           userInfo: responseJson,
         }),
-          console.log(this.state.userInfo); // delete
+          console.log("userInfo when getUserInfo is called:");
+        console.log(this.state.userInfo); // delete
+        console.log("Async id:" + loggeduserIDCheck);
       })
       .catch((error) => {
         console.log(error);
@@ -262,8 +267,7 @@ class ProfileScreen extends Component {
             //   NOT sure if we need this here
             isLoading: false, // meaning it finished and now you can display it
             userPosts: responseJson,
-          }),
-            console.log(this.state.userPosts);
+          });
         })
         .catch((error) => {
           console.log(error);
@@ -305,7 +309,6 @@ class ProfileScreen extends Component {
     let post_to_send = {};
     post_to_send["text"] = this.state.newPostText;
 
-    console.log("post format: " + JSON.stringify(post_to_send));
     // CHANGE FOR OTHER USERS
     // const id = await AsyncStorage.getItem("@id");
     const userId = this.state.userProfileID;
@@ -330,9 +333,11 @@ class ProfileScreen extends Component {
         console.log(error);
       });
   };
-  likePost = async (post_id, user_id) => {
+  likePost = async (post_id) => {
     const value = await AsyncStorage.getItem("@session_token");
-
+    // TODO
+    // user_id was initially in the request but it didnt' work
+    const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
     return fetch(
       "http://localhost:3333/api/1.0.0/user/" +
         user_id +
@@ -349,7 +354,40 @@ class ProfileScreen extends Component {
       .then((response) => {
         if (response.status === 200) {
           this.getUserPosts();
-          console.log("Post liked:");
+          console.log("Post liked!");
+        } else {
+          throw "Something went wrong";
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  //   Finish
+  //   1. Add condition so you can ONLY unlike the post IF you liked it already
+  removeLike = async (post_id) => {
+    const value = await AsyncStorage.getItem("@session_token");
+    // TODO
+    // user_id was initially in the request but it didnt' work
+    const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
+    return fetch(
+      "http://localhost:3333/api/1.0.0/user/" +
+        user_id +
+        "/post/" +
+        post_id +
+        "/like",
+      {
+        method: "delete",
+        headers: {
+          "X-Authorization": value,
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          this.getUserPosts();
+          console.log("Like removed");
         } else {
           throw "Something went wrong";
         }
@@ -502,9 +540,12 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
 
                     <Button
                       title="Like post(not sure if the right one is liked)"
-                      onPress={() =>
-                        this.likePost(item.post_id, item.author.user_id)
-                      }
+                      onPress={() => this.likePost(item.post_id)}
+                    />
+
+                    <Button
+                      title="Remove like (not finished)"
+                      onPress={() => this.removeLike(item.post_id)}
                     />
 
                     {/* Allow the user to delete a post if it's on their own profile */}
