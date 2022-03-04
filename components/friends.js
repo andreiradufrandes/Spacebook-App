@@ -118,7 +118,9 @@ class FriendsScreen extends Component {
                 <Button
                   title="Visit user's profile"
                   onPress={() =>
-                    this.props.navigation.navigate("Profile", item.user_id)
+                    this.props.navigation.navigate("Profile", {
+                      user_id: item.user_id,
+                    })
                   }
                   //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
                 />

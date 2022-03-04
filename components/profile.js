@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // todo
 // change friends so that it applies only to accepted ones
 // can't like posts
+// only update your posts
 // only delete your posts
 // present the button ONLY if its your own post
 // CHECK THAT THE USER ID IS CORRECT
@@ -37,6 +38,26 @@ title="Remove like(NOT CODED)"
 // go to random person's account
 // add them as a friend
 
+// The props can be changed
+// maybe use state display message. Then on click you set that to false and not display anymore
+// on click set button to false and refresh page or something
+const UserMessage = (props) => {
+  return (
+    <View>
+      {/* <Text>Hello, I am {props.name}!</Text> */}
+      <Text>{props.message}</Text>
+      <Button
+        title="Ok"
+        onPress={() => {
+          props.displayMessage = false;
+        }}
+        Fix
+        this
+      />
+    </View>
+  );
+};
+
 class ProfileScreen extends Component {
   constructor(props) {
     super(props);
@@ -51,83 +72,80 @@ class ProfileScreen extends Component {
       isLoggedInUsersProfile: true,
       userProfileID: "",
       isFriend: false,
+      displayMessage: false, // maybe delete later
       friendsList: [],
     };
   }
 
-  componentDidMount = async () => {
-    // const loggeduserIDCheck = await AsyncStorage.getItem("@id");
-    // Initial set for the user profile to display posts when we log in
-    this.state.userProfileID = await AsyncStorage.getItem("@id");
-    // console.log("async id in getuserinfo" + loggeduserIDCheck);
-    this.unsubscribe = this.props.navigation.addListener("focus", async () => {
-      console.log("Focus listener activated");
-      this.state.userPosts = []; // refresh it // redo this cleare or in a function
-      this.state.isFriend = false; // maybe delete
+  startFunction = async () => {
+    let userCheck = this.props.route.params; // i think
 
-      let userCheck = this.props.route.params; // rename this
-
-      // 1: Determine if its my profile or someone's else
-      if (typeof userCheck === "undefined") {
+    if (typeof userCheck === "undefined") {
+      this.state.isLoggedInUsersProfile = true;
+      this.state.userProfileID = await AsyncStorage.getItem("@id");
+    } else {
+      //   check if the profile is mine
+      this.state.userProfileID = this.props.route.params.user_id; // this
+      let AsyncStorageID = await AsyncStorage.getItem("@id");
+      if (this.state.userProfileID == AsyncStorageID) {
         this.state.isLoggedInUsersProfile = true;
         this.state.userProfileID = await AsyncStorage.getItem("@id");
       } else {
-        //   check if the profile is mine
-        this.state.userProfileID = this.props.route.params;
-        let AsyncStorageID = await AsyncStorage.getItem("@id");
-        if (this.state.userProfileID == AsyncStorageID) {
-          this.state.isLoggedInUsersProfile = true;
-          this.state.userProfileID = await AsyncStorage.getItem("@id");
-        } else {
-          this.state.isLoggedInUsersProfile = false;
-        }
+        this.state.isLoggedInUsersProfile = false;
       }
+    }
 
-      //  Determine if the user is friend and specify in set the state to reflect if the person is a friend or not
-      if (!this.state.isLoggedInUsersProfile) {
-        await this.checkUserIsFriend();
-      }
-      console.log(
-        "\n -isLoggedInUsersProfile(is this my prfile): " +
-          this.state.isLoggedInUsersProfile +
-          "\n ,-userProfileID(user's whos prile this is): " +
-          this.state.userProfileID +
-          "\n ,-isFriend: " +
-          this.state.isFriend
-      ); // delete
+    //  Determine if the user is friend and specify in set the state to reflect if the person is a friend or not
+    if (!this.state.isLoggedInUsersProfile) {
+      await this.checkUserIsFriend();
+    }
 
-      //   All of the states have the user's details
+    this.state.isFriend = false; // maybe delete
 
-      //   1. User logged in
-      this.getUserInfo();
-      if (this.state.isLoggedInUsersProfile) {
-        this.getUserPosts();
-      } else {
-        // 2. This is NOT my profile, isLoggedInUsersProfile == false, but a frien'ds
-        if (this.state.isFriend) {
-          this.getUserPosts();
-        }
-      }
-    });
+    console.log(
+      "\n -isLoggedInUsersProfile(is this my prfile): " +
+        this.state.isLoggedInUsersProfile +
+        "\n ,-userProfileID(user's whos prile this is): " +
+        this.state.userProfileID +
+        "\n ,-isFriend: " +
+        this.state.isFriend
+    ); // delete
+
+    this.state.userPosts = []; // refresh it // redo this cleare or in a function
 
     this.getUserInfo();
+    //   1. User logged in
 
     if (this.state.isLoggedInUsersProfile) {
       this.getUserPosts();
+    } else {
+      // 2. This is NOT my profile, isLoggedInUsersProfile == false, but a frien'ds
+      if (this.state.isFriend) {
+        this.getUserPosts();
+      }
     }
+  };
 
-    console.log("-- code not in the event listener-- ");
-    // this.state.isLoading = false; // not sure if its correct like this
+  componentDidMount = async () => {
+    // Display the logged in user's information and posts once they log in
+    this.state.userProfileID = await AsyncStorage.getItem("@id");
+    this.getUserInfo();
+    this.getUserPosts();
+
+    this.unsubscribe = this.props.navigation.addListener("focus", async () => {
+      console.log("Focus listener activated");
+      console.log("object passed with user id and params;");
+      console.log("params : " + this.props.route.params);
+      //   console.log("params user_id: " + this.props.route.params.user_id);
+
+      this.startFunction();
+    });
   };
 
   componentWillUnmount() {
     this.unsubscribe();
   }
 
-  //   Careful it uses async ( so it will get my id not someone elses)
-  //
-
-  //   works fine
   getListOfFriends = async () => {
     const userId = await AsyncStorage.getItem("@id");
     const value = await AsyncStorage.getItem("@session_token");
@@ -161,7 +179,7 @@ class ProfileScreen extends Component {
   // write a function that sets isFriend to no if it's not a friend
   // ONLY call this function IF isMyProfile == false
 
-  //   Could be replaced with an error
+  //   Could be replaced with an error( like 203 not friend from some request do do something )
   checkUserIsFriend = async () => {
     const loggeduserIDCheck = await AsyncStorage.getItem("@id");
 
@@ -169,7 +187,7 @@ class ProfileScreen extends Component {
     await this.getListOfFriends();
 
     this.state.friendsList.forEach((element) => {
-      if (element.user_id == this.props.route.params) {
+      if (element.user_id == this.props.route.params.user_id) {
         this.state.isFriend = true;
       }
     });
@@ -291,7 +309,9 @@ class ProfileScreen extends Component {
       .then((response) => {
         if (response.status === 200) {
           console.log("post deleted"); // delete this
+          this.state.displayMessage = true; // maybe delete later
           this.getUserPosts();
+
           //   return response.json();
         } else {
           throw "Something went wrong";
@@ -354,6 +374,7 @@ class ProfileScreen extends Component {
       .then((response) => {
         if (response.status === 200) {
           this.getUserPosts();
+
           console.log("Post liked!");
         } else {
           throw "Something went wrong";
@@ -515,6 +536,16 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
 
               {/*   Display user's posts as a flatlist, with the option to like, remove like, delete, update posts,
                  and visit person's profile, depending on the posts are from */}
+              {/* display only when display user message true  */}
+
+              {/* display aler ONLY when it's true */}
+              {this.state.displayMessage ? (
+                <UserMessage
+                  message="Delete post"
+                  displayMessage="false"
+                ></UserMessage>
+              ) : null}
+
               <FlatList
                 data={this.state.userPosts}
                 keyExtractor={(item) => item.post_id}
@@ -529,6 +560,7 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
 
                     {/* Display only if it's NOT my page */}
                     <Button
+                      title="View post"
                       onPress={() => {
                         this.props.navigation.navigate("Post", item.post_id);
                       }}

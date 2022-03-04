@@ -93,9 +93,11 @@ class SearchScreen extends Component {
                 {item.user_givenname} {item.user_familyname}
               </Text>
               <Button
-                title="Visit Profile"
+                title="Visit Profile WITH OBJECT PASSED "
                 onPress={() =>
-                  this.props.navigation.navigate("Profile", item.user_id)
+                  this.props.navigation.navigate("Profile", {
+                    user_id: item.user_id,
+                  })
                 }
                 //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
               />

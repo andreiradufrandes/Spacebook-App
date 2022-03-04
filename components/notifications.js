@@ -132,7 +132,9 @@ class NotificationsScreen extends Component {
                 <Button
                   title="Visit user's profile"
                   onPress={() =>
-                    this.props.navigation.navigate("Profile", item.user_id)
+                    this.props.navigation.navigate("Profile", {
+                      user_id: item.user_id,
+                    })
                   }
                   //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
                 />
@@ -141,11 +143,13 @@ class NotificationsScreen extends Component {
                   title="Accept"
                   onPress={() => {
                     this.acceptFriendRequest(item.user_id);
-                    this.props.navigation.navigate("Profile", item.user_id);
+                    this.props.navigation.navigate("Profile", {
+                      user_id: item.user_id,
+                    });
                   }}
                 />
                 <Button
-                  title="Decline"
+                  title="Decline TAKE ME SOMEWHERE"
                   onPress={() => this.declineFriendRequest(item.user_id)}
                 />
               </View>

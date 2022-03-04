@@ -102,7 +102,9 @@ class UpdateScreen extends Component {
     })
       .then((response) => {
         console.log("User details updated");
-        this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
+        this.props.navigation.navigate("Profile", {
+          user_id: user_id,
+        }); // can probably get tid of this later
       })
       .catch((error) => {
         console.log(error);
