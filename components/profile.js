@@ -1,9 +1,19 @@
-import React, { Component } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
-import { FlatList } from "react-native-web";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { Component } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import { FlatList } from 'react-native-web';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Camera } from 'expo-camera';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+// repalce touchable opacity in camera
 // fix it when you go to YOUR PROFILE fro notifications or somewhere else
 // todo
 // change friends so that it applies only to accepted ones
@@ -66,30 +76,37 @@ class ProfileScreen extends Component {
       isLoading: true,
       userInfo: [],
       userPosts: [], // not sure, might be diferent type
-      loggedUserId: "", // WARNING - delete it think
-      newPostText: "",
-      postaddedWindow: "",
+      loggedUserId: '', // WARNING - delete it think
+      newPostText: '',
+      postaddedWindow: '',
       isLoggedInUsersProfile: true,
-      userProfileID: "",
+      userProfileID: '',
       isFriend: false,
       displayMessage: false, // maybe delete later
       friendsList: [],
+      //   camera
+      hasPermission: null,
+      type: Camera.Constants.Type.back,
+      photo: null,
+      hasProfilePicture: false,
     };
   }
 
   startFunction = async () => {
+    console.log('#function called: startFunction');
     let userCheck = this.props.route.params; // i think
+    this.state.isFriend = false; // maybe delete
 
-    if (typeof userCheck === "undefined") {
+    if (typeof userCheck === 'undefined') {
       this.state.isLoggedInUsersProfile = true;
-      this.state.userProfileID = await AsyncStorage.getItem("@id");
+      this.state.userProfileID = await AsyncStorage.getItem('@id');
     } else {
       //   check if the profile is mine
       this.state.userProfileID = this.props.route.params.user_id; // this
-      let AsyncStorageID = await AsyncStorage.getItem("@id");
+      let AsyncStorageID = await AsyncStorage.getItem('@id');
       if (this.state.userProfileID == AsyncStorageID) {
         this.state.isLoggedInUsersProfile = true;
-        this.state.userProfileID = await AsyncStorage.getItem("@id");
+        this.state.userProfileID = await AsyncStorage.getItem('@id');
       } else {
         this.state.isLoggedInUsersProfile = false;
       }
@@ -100,14 +117,12 @@ class ProfileScreen extends Component {
       await this.checkUserIsFriend();
     }
 
-    this.state.isFriend = false; // maybe delete
-
     console.log(
-      "\n -isLoggedInUsersProfile(is this my prfile): " +
+      '\n -isLoggedInUsersProfile(is this my prfile): ' +
         this.state.isLoggedInUsersProfile +
         "\n ,-userProfileID(user's whos prile this is): " +
         this.state.userProfileID +
-        "\n ,-isFriend: " +
+        '\n ,-isFriend: ' +
         this.state.isFriend
     ); // delete
 
@@ -127,16 +142,23 @@ class ProfileScreen extends Component {
   };
 
   componentDidMount = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    this.setState({ hasPermission: status === 'granted' });
+
     // Display the logged in user's information and posts once they log in
-    this.state.userProfileID = await AsyncStorage.getItem("@id");
+    this.state.userProfileID = await AsyncStorage.getItem('@id');
     this.getUserInfo();
     this.getUserPosts();
 
-    this.unsubscribe = this.props.navigation.addListener("focus", async () => {
-      console.log("Focus listener activated");
-      console.log("object passed with user id and params;");
-      console.log("params : " + this.props.route.params);
-      //   console.log("params user_id: " + this.props.route.params.user_id);
+    // camera stuff
+
+    this.unsubscribe = this.props.navigation.addListener('focus', async () => {
+      console.log(
+        '#Function called: Event listener insided component did mount'
+      );
+      console.log('object passed with user id and params;');
+      console.log('params : ' + this.props.route.params);
+      console.log('params user_id: ' + this.props.route.params.user_id);
 
       this.startFunction();
     });
@@ -147,14 +169,14 @@ class ProfileScreen extends Component {
   }
 
   getListOfFriends = async () => {
-    const userId = await AsyncStorage.getItem("@id");
-    const value = await AsyncStorage.getItem("@session_token");
+    const userId = await AsyncStorage.getItem('@id');
+    const value = await AsyncStorage.getItem('@session_token');
 
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" + userId + "/friends",
+      'http://localhost:3333/api/1.0.0/user/' + userId + '/friends',
       {
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
@@ -162,7 +184,7 @@ class ProfileScreen extends Component {
         if (response.status === 200) {
           return response.json();
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .then((responseJson) => {
@@ -181,9 +203,10 @@ class ProfileScreen extends Component {
 
   //   Could be replaced with an error( like 203 not friend from some request do do something )
   checkUserIsFriend = async () => {
-    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+    console.log('#function called: checkUserIsFriend');
+    const loggeduserIDCheck = await AsyncStorage.getItem('@id');
 
-    console.log("async id in getuserinfo" + loggeduserIDCheck);
+    console.log('async id in getuserinfo' + loggeduserIDCheck);
     await this.getListOfFriends();
 
     this.state.friendsList.forEach((element) => {
@@ -191,11 +214,11 @@ class ProfileScreen extends Component {
         this.state.isFriend = true;
       }
     });
-    console.log("inside checkuserisfriend");
+    console.log('inside checkuserisfriend');
     console.log(
-      "isLoggedInUsersProfile: " +
+      'isLoggedInUsersProfile: ' +
         this.state.isLoggedInUsersProfile +
-        ", isFriend: " +
+        ', isFriend: ' +
         this.state.isFriend
     );
   };
@@ -205,20 +228,20 @@ class ProfileScreen extends Component {
     // Set the RIGHT user id
 
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" + user_id + "/friends",
+      'http://localhost:3333/api/1.0.0/user/' + user_id + '/friends',
       {
-        method: "post",
+        method: 'post',
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
       .then((response) => {
         if (response.status === 200) {
           // TODO, refresh the user page
-          console.log("Friend added:");
+          console.log('Friend added:');
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {
@@ -227,32 +250,33 @@ class ProfileScreen extends Component {
   }
 
   getUserInfo = async () => {
+    console.log('#function called: getUserInfo');
     const userId = this.state.userProfileID;
-    const value = await AsyncStorage.getItem("@session_token");
-    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
+    const value = await AsyncStorage.getItem('@session_token');
+    const loggeduserIDCheck = await AsyncStorage.getItem('@id');
 
-    console.log("------------getuserinfo: my id: " + loggeduserIDCheck);
+    console.log('------------getuserinfo: my id: ' + loggeduserIDCheck);
     console.log("------------getuserinfo: friend i'm adding: " + userId);
 
-    return fetch("http://localhost:3333/api/1.0.0/user/" + userId, {
+    return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
       headers: {
-        "X-Authorization": value,
+        'X-Authorization': value,
       },
     })
       .then((response) => {
         if (response.status === 200) {
           return response.json();
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .then((responseJson) => {
         this.setState({
           userInfo: responseJson,
         }),
-          console.log("userInfo when getUserInfo is called:");
+          console.log('userInfo when getUserInfo is called:');
         console.log(this.state.userInfo); // delete
-        console.log("Async id:" + loggeduserIDCheck);
+        console.log('Async id:' + loggeduserIDCheck);
       })
       .catch((error) => {
         console.log(error);
@@ -262,22 +286,23 @@ class ProfileScreen extends Component {
   //   I think this already happend in the render, so no need here
   getUserPosts = async () => {
     // Display the posts for the user only if it is the logged in user's profile or a friend
+    console.log('#Function called: getUserPosts');
     if (this.state.isLoggedInUsersProfile || this.state.isFriend) {
       const userId = this.state.userProfileID;
-      const value = await AsyncStorage.getItem("@session_token");
+      const value = await AsyncStorage.getItem('@session_token');
       console.log(userId);
       console.log(value);
 
-      return fetch("http://localhost:3333/api/1.0.0/user/" + userId + "/post", {
+      return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       })
         .then((response) => {
           if (response.status === 200) {
             return response.json();
           } else {
-            throw "Something went wrong";
+            throw 'Something went wrong';
           }
         })
         .then((responseJson) => {
@@ -294,59 +319,58 @@ class ProfileScreen extends Component {
   };
 
   deletePost = async (post_id, user_id) => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const value = await AsyncStorage.getItem('@session_token');
     console.log(post_id, user_id);
 
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" + user_id + "/post/" + post_id,
+      'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
       {
-        method: "delete",
+        method: 'delete',
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
       .then((response) => {
         if (response.status === 200) {
-          console.log("post deleted"); // delete this
+          console.log('post deleted'); // delete this
           this.state.displayMessage = true; // maybe delete later
           this.getUserPosts();
 
           //   return response.json();
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {
         console.log(error);
       });
   };
-
   //   TODO
   // CHANGE SO THAT IT POSTS ON THE RIGHT PERSONS PROFILE
   addNewPost = async () => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const value = await AsyncStorage.getItem('@session_token');
     let post_to_send = {};
-    post_to_send["text"] = this.state.newPostText;
+    post_to_send['text'] = this.state.newPostText;
 
     // CHANGE FOR OTHER USERS
     // const id = await AsyncStorage.getItem("@id");
     const userId = this.state.userProfileID;
-    return fetch("http://localhost:3333/api/1.0.0/user/" + userId + "/post", {
-      method: "post",
+    return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
+      method: 'post',
       headers: {
-        "content-type": "application/json",
-        "X-Authorization": value,
+        'content-type': 'application/json',
+        'X-Authorization': value,
       },
       body: JSON.stringify(post_to_send),
     })
       .then((response) => {
         if (response.status === 201) {
-          console.log("Post created");
+          console.log('Post created');
           this.getUserPosts();
-          this.state.newPostText = "";
+          this.state.newPostText = '';
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {
@@ -354,20 +378,20 @@ class ProfileScreen extends Component {
       });
   };
   likePost = async (post_id) => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const value = await AsyncStorage.getItem('@session_token');
     // TODO
     // user_id was initially in the request but it didnt' work
     const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" +
+      'http://localhost:3333/api/1.0.0/user/' +
         user_id +
-        "/post/" +
+        '/post/' +
         post_id +
-        "/like",
+        '/like',
       {
-        method: "post",
+        method: 'post',
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
@@ -375,42 +399,40 @@ class ProfileScreen extends Component {
         if (response.status === 200) {
           this.getUserPosts();
 
-          console.log("Post liked!");
+          console.log('Post liked!');
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {
         console.log(error);
       });
   };
-
-  //   Finish
   //   1. Add condition so you can ONLY unlike the post IF you liked it already
   removeLike = async (post_id) => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const value = await AsyncStorage.getItem('@session_token');
     // TODO
     // user_id was initially in the request but it didnt' work
     const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" +
+      'http://localhost:3333/api/1.0.0/user/' +
         user_id +
-        "/post/" +
+        '/post/' +
         post_id +
-        "/like",
+        '/like',
       {
-        method: "delete",
+        method: 'delete',
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
       .then((response) => {
         if (response.status === 200) {
           this.getUserPosts();
-          console.log("Like removed");
+          console.log('Like removed');
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {
@@ -420,29 +442,29 @@ class ProfileScreen extends Component {
 
   //   i already created this function somewhere else, just import it
   addFriend = async () => {
-    const value = await AsyncStorage.getItem("@session_token");
-    const myID = await AsyncStorage.getItem("@id"); // delete later
+    const value = await AsyncStorage.getItem('@session_token');
+    const myID = await AsyncStorage.getItem('@id'); // delete later
     const userId = this.state.userProfileID;
     this.state.userProfileID = myID; // bit hacky, delete later
 
-    const loggeduserIDCheck = await AsyncStorage.getItem("@id");
-    console.log("------------getuserinfo: my id: " + loggeduserIDCheck);
+    const loggeduserIDCheck = await AsyncStorage.getItem('@id');
+    console.log('------------getuserinfo: my id: ' + loggeduserIDCheck);
     console.log("------------getuserinfo: friend i'm adding: " + userId);
 
     // the
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" + userId + "/friends",
+      'http://localhost:3333/api/1.0.0/user/' + userId + '/friends',
       {
-        method: "post",
+        method: 'post',
         headers: {
-          "content-type": "application/json",
-          "X-Authorization": value,
+          'content-type': 'application/json',
+          'X-Authorization': value,
         },
       }
     )
       .then((response) => {
         if (response.status === 200) {
-          console.log("Friend added successfully");
+          console.log('Friend added successfully');
           //   TODO, REFRESH PAGE SO THAT IT DISPLAYS EVERYTHING
           // change ifFriend to true
           this.state.isFriend = true;
@@ -455,6 +477,75 @@ class ProfileScreen extends Component {
       });
   };
 
+  //   Camera functions
+  takePicture = async () => {
+    if (this.camera) {
+      const options = {
+        quality: 0.5,
+        base64: true,
+        onPictureSaved: (data) => this.sendToServer(data),
+      };
+      await this.camera.takePictureAsync(options);
+    }
+  };
+
+  //   Send image to servet
+  sendToServer = async (data) => {
+    // Get these from AsyncStorage
+    const userId = this.state.userProfileID;
+    const value = await AsyncStorage.getItem('@session_token');
+
+    let res = await fetch(data.base64);
+    let blob = await res.blob();
+
+    return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/photo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'image/png',
+        'X-Authorization': value,
+      },
+      body: blob,
+    })
+      .then((response) => {
+        console.log('Picture added', response);
+        console.log(
+          ' inside sendToServer: get_profile_image called to get the image and store it!'
+        );
+        this.state.hasProfilePicture = true;
+        this.get_profile_image();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  //   Replace to get the users page we are on NOT ours
+  get_profile_image = async () => {
+    const userId = this.state.userProfileID;
+    const value = await AsyncStorage.getItem('@session_token');
+
+    fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/photo', {
+      method: 'GET',
+      headers: {
+        'X-Authorization': value,
+      },
+    })
+      .then((res) => {
+        return res.blob();
+      })
+      .then((resBlob) => {
+        let data = URL.createObjectURL(resBlob);
+        console.log('inside get_profile_image: image retrived correctly');
+        this.setState({
+          photo: data,
+        });
+        // Call getUserInfo so it displays the image now
+      })
+      .catch((err) => {
+        console.log('error', err);
+      });
+  };
+
   render() {
     // Display a buffer text if the data required to be displayed in not loaded yet
     if (this.state.isLoading) {
@@ -462,19 +553,22 @@ class ProfileScreen extends Component {
         <View
           style={{
             flex: 1,
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Text>Loading..</Text>
         </View>
       );
-    } else {
+    }
+    // Display if the the page is ready
+    else {
       return (
         <View>
+          {/* header */}
           <View>
-            <Text> Placeholder for image</Text>
+            <Text> is there an image? {this.state.hasProfilePicture}</Text>
 
             {/* 38
 profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
@@ -483,24 +577,24 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
             {this.state.isLoggedInUsersProfile ? (
               <Button
                 title="Update details"
-                onPress={() => this.props.navigation.navigate("Update")}
+                onPress={() => this.props.navigation.navigate('Update')}
               />
             ) : null}
 
             {/* Display the details of the user's who's profile we are on */}
             <Text>
               {this.state.userInfo.first_name +
-                " " +
+                ' ' +
                 this.state.userInfo.last_name}
             </Text>
             <Text>{this.state.userInfo.email}</Text>
-            <Text> {this.state.userInfo.friend_count + " friends"}</Text>
+            <Text> {this.state.userInfo.friend_count + ' friends'}</Text>
 
             {/* Display the list of friends for the user who is logged in only*/}
             {this.state.isLoggedInUsersProfile ? (
               <Button
                 title="See list of friends"
-                onPress={() => this.props.navigation.navigate("Friends")}
+                onPress={() => this.props.navigation.navigate('Friends')}
               ></Button>
             ) : null}
 
@@ -513,7 +607,33 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
             ) : null}
           </View>
 
-          {/* ---------------------BODY---------------------*/}
+          {/*------------------------------ Camera ------------------------------    */}
+
+          {/* If the app has permission to the camera, display it. Otherwise display a text letting the user know what the issue is  */}
+          {this.state.hasPermission ? (
+            <View style={styles.container}>
+              <Camera
+                style={styles.camera}
+                type={this.state.type}
+                ref={(ref) => (this.camera = ref)}
+              >
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => {
+                      this.takePicture();
+                    }}
+                  >
+                    <Text style={styles.text}> Take Photo </Text>
+                  </TouchableOpacity>
+                </View>
+              </Camera>
+            </View>
+          ) : (
+            <Text>No access to camera</Text>
+          )}
+
+          {/* ------------------------------ BODY ------------------------------ 
 
           {/* Display someone's posts, as well as the option to add a post only for the logged in user's profile and for their friends */}
           {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
@@ -553,7 +673,7 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
                   <View>
                     <Text> {item.text} </Text>
                     <Text>
-                      From: {item.author.first_name} {item.author.last_name}{" "}
+                      From: {item.author.first_name} {item.author.last_name}{' '}
                     </Text>
                     <Text> Posted at {item.timestamp} </Text>
                     <Text> {item.numLikes} likes</Text>
@@ -562,7 +682,7 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
                     <Button
                       title="View post"
                       onPress={() => {
-                        this.props.navigation.navigate("Post", item.post_id);
+                        this.props.navigation.navigate('Post', item.post_id);
                       }}
                     ></Button>
 
@@ -607,8 +727,26 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
 
 export default ProfileScreen;
 
-const Styles = StyleSheet.create({
-  wall: {
-    backgroundColor: "233232",
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    margin: 20,
+  },
+  button: {
+    flex: 0.1,
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 18,
+    color: 'white',
   },
 });
