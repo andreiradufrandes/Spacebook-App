@@ -40,6 +40,7 @@ class ProfilePhotoScreen extends Component {
     }
   };
 
+  // Add the errros here
   sendToServer = async (data) => {
     // Get these from AsyncStorage
     const userId = this.state.userProfileID;

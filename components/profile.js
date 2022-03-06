@@ -449,9 +449,8 @@ class ProfileScreen extends Component {
     const value = await AsyncStorage.getItem('@session_token');
     const myID = await AsyncStorage.getItem('@id'); // delete later
     const userId = this.state.userProfileID;
-    this.state.userProfileID = myID; // bit hacky, delete later
+    const loggeduserIDCheck = await AsyncStorage.getItem('@id'); // delete later
 
-    const loggeduserIDCheck = await AsyncStorage.getItem('@id');
     console.log('------------getuserinfo: my id: ' + loggeduserIDCheck);
     console.log("------------getuserinfo: friend i'm adding: " + userId);
 
@@ -467,6 +466,7 @@ class ProfileScreen extends Component {
       }
     )
       .then((response) => {
+        console.log('response status: ' + response.status);
         if (response.status === 200) {
           console.log('Friend added successfully');
           //   TODO, REFRESH PAGE SO THAT IT DISPLAYS EVERYTHING
@@ -550,11 +550,13 @@ class ProfileScreen extends Component {
               </View>
             ) : null}
             {/* Make it so it only appears for my profile */}
-            <Button
-              title="Update profile picture"
-              onPress={() => this.props.navigation.navigate('ProfilePhoto')}
-            />
 
+            {this.state.isLoggedInUsersProfile ? (
+              <Button
+                title="Update profile picture"
+                onPress={() => this.props.navigation.navigate('ProfilePhoto')}
+              />
+            ) : null}
             {/* Display the update button only for the user's who are logged in*/}
             {this.state.isLoggedInUsersProfile ? (
               <Button
@@ -570,7 +572,8 @@ class ProfileScreen extends Component {
                 this.state.userInfo.last_name}
             </Text>
             <Text>{this.state.userInfo.email}</Text>
-            <Text> {this.state.userInfo.friend_count + ' friends'}</Text>
+            {/* Replace where ti */}
+            {/* <Text> {this.state.userInfo.friend_count + ' friends'}</Text>  */}
 
             {/* Display the list of friends for the user who is logged in only*/}
             {this.state.isLoggedInUsersProfile ? (

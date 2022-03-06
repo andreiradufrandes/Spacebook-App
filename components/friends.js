@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import { View, Text, TextInput, Button, Alert } from "react-native";
-import { FlatList } from "react-native-web";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { Component } from 'react';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { FlatList } from 'react-native-web';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Todo
 // Flatlist of friends
@@ -18,7 +18,7 @@ class FriendsScreen extends Component {
   }
   // get friends list
   componentDidMount() {
-    console.log("Friends page");
+    console.log('Friends page');
     this.getListOfFriends();
   }
 
@@ -54,15 +54,15 @@ class FriendsScreen extends Component {
   //       });
   //   };
   getListOfFriends = async () => {
-    const value = await AsyncStorage.getItem("@session_token");
-    const userId = await AsyncStorage.getItem("@id");
+    const value = await AsyncStorage.getItem('@session_token');
+    const userId = await AsyncStorage.getItem('@id');
     console.log(value);
 
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" + userId + "/friends",
+      'http://localhost:3333/api/1.0.0/user/' + userId + '/friends',
       {
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
@@ -70,7 +70,7 @@ class FriendsScreen extends Component {
         if (response.status === 200) {
           return response.json();
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .then((responseJson) => {
@@ -91,9 +91,9 @@ class FriendsScreen extends Component {
         <View
           style={{
             flex: 1,
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Text>Loading..</Text>
@@ -103,7 +103,6 @@ class FriendsScreen extends Component {
       return (
         //   maybe delete the style AND the container
         <View>
-          <Text>List of friends</Text>
           <FlatList
             // ADD THE POSTS
             // POPULATE WITH POST CUSTOME COMPONENT
@@ -118,7 +117,7 @@ class FriendsScreen extends Component {
                 <Button
                   title="Visit user's profile"
                   onPress={() =>
-                    this.props.navigation.navigate("Profile", {
+                    this.props.navigation.navigate('Profile', {
                       user_id: item.user_id,
                     })
                   }

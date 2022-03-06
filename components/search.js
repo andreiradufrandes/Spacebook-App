@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,8 @@ import {
   Alert,
   StyleSheet,
   FlatList,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /*
 TODO 
@@ -22,21 +22,21 @@ class SearchScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchTerm: "",
+      searchTerm: '',
       searchResults: [],
     };
   }
 
   //   ADD LIMIT TO THE FETCH RESULT, AND MAKE IT LOOK LIKE THE REAL ONE
   searchName = async () => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const value = await AsyncStorage.getItem('@session_token');
     console.log(value);
 
     return fetch(
-      "http://localhost:3333/api/1.0.0/search?q=" + this.state.searchTerm,
+      'http://localhost:3333/api/1.0.0/search?q=' + this.state.searchTerm,
       {
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
@@ -44,7 +44,7 @@ class SearchScreen extends Component {
         if (response.status === 200) {
           return response.json();
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .then((responseJson) => {
@@ -63,15 +63,19 @@ class SearchScreen extends Component {
   render() {
     //
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         {/* 37 friend now but ill remove him */}
         <Button
           title="take me to someone's profile(write id by hand)"
-          onPress={() => this.props.navigation.navigate("Profile", 37)}
+          onPress={() =>
+            this.props.navigation.navigate('Profile', {
+              user_id: 37,
+            })
+          }
         />
         <Button
           title="take me to Andrei's profile"
-          onPress={() => this.props.navigation.navigate("Profile", 17)}
+          onPress={() => this.props.navigation.navigate('Profile', 17)}
         />
         <Text> Search for people or friends</Text>
         <TextInput
@@ -95,7 +99,7 @@ class SearchScreen extends Component {
               <Button
                 title="Visit Profile WITH OBJECT PASSED "
                 onPress={() =>
-                  this.props.navigation.navigate("Profile", {
+                  this.props.navigation.navigate('Profile', {
                     user_id: item.user_id,
                   })
                 }
@@ -114,13 +118,13 @@ export default SearchScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
   },
   input: {
-    backgroundColor: "#edf7ff",
+    backgroundColor: '#edf7ff',
     borderRadius: 10,
     height: 50,
     // flex: 1,
