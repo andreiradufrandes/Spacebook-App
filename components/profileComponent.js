@@ -1,15 +1,15 @@
-import React, { Component } from "react";
-import { View, Text, TextInput, Button, Alert } from "react-native";
-import "react-native-gesture-handler";
+import React, { Component } from 'react';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
+import 'react-native-gesture-handler';
 
-import { createStackNavigator } from "@react-navigation/stack";
+import { createStackNavigator } from '@react-navigation/stack';
 
-import ProfileScreen from "./profile";
-import UpdateScreen from "./update";
-import NotificationsScreen from "./notifications";
-import FriendsScreen from "./friends";
-import PostScreen from "./post";
-
+import ProfileScreen from './profile';
+import UpdateScreen from './update';
+import NotificationsScreen from './notifications';
+import FriendsScreen from './friends';
+import PostScreen from './post';
+import ProfilePhotoScreen from './profilePhoto';
 // const Stack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 
@@ -23,7 +23,12 @@ class ProfileComponentScreen extends Component {
           name="Notifications"
           component={NotificationsScreen}
         />
+        <ProfileStack.Screen
+          name="ProfilePhoto"
+          component={ProfilePhotoScreen}
+        />
         <ProfileStack.Screen name="Post" component={PostScreen} />
+
         <ProfileStack.Screen name="Friends" component={FriendsScreen} />
       </ProfileStack.Navigator>
     );

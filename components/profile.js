@@ -7,6 +7,7 @@ import {
   Alert,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -118,7 +119,8 @@ class ProfileScreen extends Component {
     }
 
     console.log(
-      '\n -isLoggedInUsersProfile(is this my prfile): ' +
+      'start function details: \n' +
+        '\n -isLoggedInUsersProfile(is this my prfile): ' +
         this.state.isLoggedInUsersProfile +
         "\n ,-userProfileID(user's whos prile this is): " +
         this.state.userProfileID +
@@ -147,6 +149,7 @@ class ProfileScreen extends Component {
 
     // Display the logged in user's information and posts once they log in
     this.state.userProfileID = await AsyncStorage.getItem('@id');
+    this.get_profile_image(); // not sure if it should be here
     this.getUserInfo();
     this.getUserPosts();
 
@@ -158,9 +161,10 @@ class ProfileScreen extends Component {
       );
       console.log('object passed with user id and params;');
       console.log('params : ' + this.props.route.params);
-      console.log('params user_id: ' + this.props.route.params.user_id);
+      // console.log('params user_id: ' + this.props.route.params.user_id);
 
       this.startFunction();
+      this.get_profile_image(); // not sure if it should be here
     });
   };
 
@@ -477,48 +481,6 @@ class ProfileScreen extends Component {
       });
   };
 
-  //   Camera functions
-  takePicture = async () => {
-    if (this.camera) {
-      const options = {
-        quality: 0.5,
-        base64: true,
-        onPictureSaved: (data) => this.sendToServer(data),
-      };
-      await this.camera.takePictureAsync(options);
-    }
-  };
-
-  //   Send image to servet
-  sendToServer = async (data) => {
-    // Get these from AsyncStorage
-    const userId = this.state.userProfileID;
-    const value = await AsyncStorage.getItem('@session_token');
-
-    let res = await fetch(data.base64);
-    let blob = await res.blob();
-
-    return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/photo', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'image/png',
-        'X-Authorization': value,
-      },
-      body: blob,
-    })
-      .then((response) => {
-        console.log('Picture added', response);
-        console.log(
-          ' inside sendToServer: get_profile_image called to get the image and store it!'
-        );
-        this.state.hasProfilePicture = true;
-        this.get_profile_image();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
   //   Replace to get the users page we are on NOT ours
   get_profile_image = async () => {
     const userId = this.state.userProfileID;
@@ -535,13 +497,17 @@ class ProfileScreen extends Component {
       })
       .then((resBlob) => {
         let data = URL.createObjectURL(resBlob);
-        console.log('inside get_profile_image: image retrived correctly');
+
         this.setState({
           photo: data,
+          hasProfilePicture: true,
         });
         // Call getUserInfo so it displays the image now
       })
       .catch((err) => {
+        this.setState({
+          hasProfilePicture: false,
+        });
         console.log('error', err);
       });
   };
@@ -568,10 +534,26 @@ class ProfileScreen extends Component {
         <View>
           {/* header */}
           <View>
-            <Text> is there an image? {this.state.hasProfilePicture}</Text>
-
-            {/* 38
-profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
+            {/* Change the sizes */}
+            {this.state.hasProfilePicture ? (
+              <View style={styles.container}>
+                <Image
+                  source={{
+                    uri: this.state.photo,
+                  }}
+                  style={{
+                    width: 400,
+                    height: 400,
+                    borderWidth: 5,
+                  }}
+                />
+              </View>
+            ) : null}
+            {/* Make it so it only appears for my profile */}
+            <Button
+              title="Update profile picture"
+              onPress={() => this.props.navigation.navigate('ProfilePhoto')}
+            />
 
             {/* Display the update button only for the user's who are logged in*/}
             {this.state.isLoggedInUsersProfile ? (
@@ -606,32 +588,6 @@ profile.js:272 eefaa0d6dce8bf82f5936c070cfe7037 */}
               ></Button>
             ) : null}
           </View>
-
-          {/*------------------------------ Camera ------------------------------    */}
-
-          {/* If the app has permission to the camera, display it. Otherwise display a text letting the user know what the issue is  */}
-          {this.state.hasPermission ? (
-            <View style={styles.container}>
-              <Camera
-                style={styles.camera}
-                type={this.state.type}
-                ref={(ref) => (this.camera = ref)}
-              >
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                      this.takePicture();
-                    }}
-                  >
-                    <Text style={styles.text}> Take Photo </Text>
-                  </TouchableOpacity>
-                </View>
-              </Camera>
-            </View>
-          ) : (
-            <Text>No access to camera</Text>
-          )}
 
           {/* ------------------------------ BODY ------------------------------ 
 
