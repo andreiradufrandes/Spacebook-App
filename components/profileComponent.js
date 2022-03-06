@@ -23,13 +23,12 @@ class ProfileComponentScreen extends Component {
           name="Notifications"
           component={NotificationsScreen}
         />
+        <ProfileStack.Screen name="Post" component={PostScreen} />
+        <ProfileStack.Screen name="Friends" component={FriendsScreen} />
         <ProfileStack.Screen
           name="ProfilePhoto"
           component={ProfilePhotoScreen}
         />
-        <ProfileStack.Screen name="Post" component={PostScreen} />
-
-        <ProfileStack.Screen name="Friends" component={FriendsScreen} />
       </ProfileStack.Navigator>
     );
   }

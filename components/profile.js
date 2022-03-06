@@ -119,8 +119,7 @@ class ProfileScreen extends Component {
     }
 
     console.log(
-      'start function details: \n' +
-        '\n -isLoggedInUsersProfile(is this my prfile): ' +
+      '\n -isLoggedInUsersProfile(is this my prfile): ' +
         this.state.isLoggedInUsersProfile +
         "\n ,-userProfileID(user's whos prile this is): " +
         this.state.userProfileID +
@@ -149,7 +148,7 @@ class ProfileScreen extends Component {
 
     // Display the logged in user's information and posts once they log in
     this.state.userProfileID = await AsyncStorage.getItem('@id');
-    this.get_profile_image(); // not sure if it should be here
+    this.get_profile_image();
     this.getUserInfo();
     this.getUserPosts();
 
@@ -481,6 +480,49 @@ class ProfileScreen extends Component {
       });
   };
 
+  //   Camera functions
+  takePicture = async () => {
+    if (this.camera) {
+      const options = {
+        quality: 0.5,
+        base64: true,
+        onPictureSaved: (data) => this.sendToServer(data),
+      };
+      await this.camera.takePictureAsync(options);
+    }
+  };
+
+  //   Send image to servet
+  sendToServer = async (data) => {
+    // Get these from AsyncStorage
+    const userId = this.state.userProfileID;
+    const value = await AsyncStorage.getItem('@session_token');
+
+    let res = await fetch(data.base64);
+    let blob = await res.blob();
+
+    return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/photo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'image/png',
+        'X-Authorization': value,
+      },
+      body: blob,
+    })
+      .then((response) => {
+        console.log('Picture added', response);
+        console.log(
+          ' inside sendToServer: get_profile_image called to get the image and store it!'
+        );
+        this.state.hasProfilePicture = true;
+        this.get_profile_image();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  //   Replace to get the users page we are on NOT ours
   //   Replace to get the users page we are on NOT ours
   get_profile_image = async () => {
     const userId = this.state.userProfileID;
@@ -550,6 +592,7 @@ class ProfileScreen extends Component {
               </View>
             ) : null}
             {/* Make it so it only appears for my profile */}
+            <Text> is there an image? {this.state.hasProfilePicture}</Text>
 
             {this.state.isLoggedInUsersProfile ? (
               <Button
@@ -557,6 +600,7 @@ class ProfileScreen extends Component {
                 onPress={() => this.props.navigation.navigate('ProfilePhoto')}
               />
             ) : null}
+
             {/* Display the update button only for the user's who are logged in*/}
             {this.state.isLoggedInUsersProfile ? (
               <Button
@@ -591,6 +635,8 @@ class ProfileScreen extends Component {
               ></Button>
             ) : null}
           </View>
+
+          {/*------------------------------ Camera ------------------------------    */}
 
           {/* ------------------------------ BODY ------------------------------ 
 
