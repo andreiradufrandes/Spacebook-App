@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  ScrollView,
 } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +20,7 @@ import { Camera } from 'expo-camera';
 // todo
 // change friends so that it applies only to accepted ones
 // can't like posts
+// view post doesnt work on THEIR profile
 // only update your posts
 // only delete your posts
 // present the button ONLY if its your own post
@@ -52,6 +54,11 @@ title="Remove like(NOT CODED)"
 // The props can be changed
 // maybe use state display message. Then on click you set that to false and not display anymore
 // on click set button to false and refresh page or something
+
+// undefined does NOT work
+
+// maybe user trow, and inside the trow set the variables to something
+
 const UserMessage = (props) => {
   return (
     <View>
@@ -152,15 +159,34 @@ class ProfileScreen extends Component {
     this.getUserInfo();
     this.getUserPosts();
 
-    // camera stuff
+    let userCheck = this.props.route.params; // i think
+    if (typeof userCheck === 'undefined') {
+      console.log(
+        "When user loggs in , (typeof userCheck === 'undefined'): " + true
+      );
+    } else {
+      console.log(
+        "When user loggs in , (typeof userCheck === 'undefined'): " + false
+      );
+    }
+    console.log(
+      'type of params when logged in = ' + typeof this.props.route.params
+    );
 
+    // camera stuff
+    let paramsCheck = this.props.route.params;
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
       console.log(
         '#Function called: Event listener insided component did mount'
       );
+      console.log(
+        'type of params when navigating from other page(friend or random) = ' +
+          (paramsCheck === undefined)
+      );
       console.log('object passed with user id and params;');
       console.log('params : ' + this.props.route.params);
-      // console.log('params user_id: ' + this.props.route.params.user_id);
+      console.log(typeof this.props.route.param == 'undefined');
+      console.log('params user_id: ' + this.props.route.params.user_id);
 
       this.startFunction();
       this.get_profile_image(); // not sure if it should be here
@@ -459,15 +485,16 @@ class ProfileScreen extends Component {
       {
         method: 'post',
         headers: {
-          'content-type': 'application/json',
+          // 'content-type': 'application/json',
           'X-Authorization': value,
         },
       }
     )
       .then((response) => {
-        console.log('response status: ' + response.status);
-        if (response.status === 200) {
-          console.log('Friend added successfully');
+        console.log('response status inside addFriend: ' + response.status);
+        if (response.status === 201) {
+          // maybe be 200 NOT sure
+          console.log('Friend request sent successfully');
           //   TODO, REFRESH PAGE SO THAT IT DISPLAYS EVERYTHING
           // change ifFriend to true
           this.state.isFriend = true;
@@ -574,156 +601,160 @@ class ProfileScreen extends Component {
     else {
       return (
         <View>
-          {/* header */}
-          <View>
-            {/* Change the sizes */}
-            {this.state.hasProfilePicture ? (
-              <View style={styles.container}>
-                <Image
-                  source={{
-                    uri: this.state.photo,
-                  }}
-                  style={{
-                    width: 400,
-                    height: 400,
-                    borderWidth: 5,
-                  }}
-                />
-              </View>
-            ) : null}
-            {/* Make it so it only appears for my profile */}
-            <Text> is there an image? {this.state.hasProfilePicture}</Text>
-
-            {this.state.isLoggedInUsersProfile ? (
-              <Button
-                title="Update profile picture"
-                onPress={() => this.props.navigation.navigate('ProfilePhoto')}
-              />
-            ) : null}
-
-            {/* Display the update button only for the user's who are logged in*/}
-            {this.state.isLoggedInUsersProfile ? (
-              <Button
-                title="Update details"
-                onPress={() => this.props.navigation.navigate('Update')}
-              />
-            ) : null}
-
-            {/* Display the details of the user's who's profile we are on */}
-            <Text>
-              {this.state.userInfo.first_name +
-                ' ' +
-                this.state.userInfo.last_name}
-            </Text>
-            <Text>{this.state.userInfo.email}</Text>
-            {/* Replace where ti */}
-            {/* <Text> {this.state.userInfo.friend_count + ' friends'}</Text>  */}
-
-            {/* Display the list of friends for the user who is logged in only*/}
-            {this.state.isLoggedInUsersProfile ? (
-              <Button
-                title="See list of friends"
-                onPress={() => this.props.navigation.navigate('Friends')}
-              ></Button>
-            ) : null}
-
-            {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
-            {!this.state.isLoggedInUsersProfile && !this.state.isFriend ? (
-              <Button
-                title="Add friend(NOT CODED)"
-                onPress={() => this.addFriend()} // code it
-              ></Button>
-            ) : null}
-          </View>
-
-          {/*------------------------------ Camera ------------------------------    */}
-
-          {/* ------------------------------ BODY ------------------------------ 
-
-          {/* Display someone's posts, as well as the option to add a post only for the logged in user's profile and for their friends */}
-          {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
+          <ScrollView>
+            {/* header */}
             <View>
-              {/* Add a post only if it is my profile or a friend's profile */}
+              {/* Change the sizes */}
+              {this.state.hasProfilePicture ? (
+                <View style={styles.container}>
+                  <Image
+                    source={{
+                      uri: this.state.photo,
+                    }}
+                    style={{
+                      width: 400,
+                      height: 400,
+                      borderWidth: 5,
+                    }}
+                  />
+                </View>
+              ) : null}
+              {/* Make it so it only appears for my profile */}
+              <Text> is there an image? {this.state.hasProfilePicture}</Text>
 
-              <View>
-                <TextInput
-                  placeholder="Add post.."
-                  onChangeText={(newPostText) => this.setState({ newPostText })}
-                  value={this.state.newPostText}
-                />
+              {this.state.isLoggedInUsersProfile ? (
                 <Button
-                  //  TODO
-                  //  This changes if it's on someone else's profile
-                  title="Add post(not coded) ADD INPUT AND MAKE IT ONE ELEMENT TO BE ABLE TO GET THE CONTENT"
-                  onPress={() => this.addNewPost()}
+                  title="Update profile picture"
+                  onPress={() => this.props.navigation.navigate('ProfilePhoto')}
                 />
-              </View>
-
-              {/*   Display user's posts as a flatlist, with the option to like, remove like, delete, update posts,
-                 and visit person's profile, depending on the posts are from */}
-              {/* display only when display user message true  */}
-
-              {/* display aler ONLY when it's true */}
-              {this.state.displayMessage ? (
-                <UserMessage
-                  message="Delete post"
-                  displayMessage="false"
-                ></UserMessage>
               ) : null}
 
-              <FlatList
-                data={this.state.userPosts}
-                keyExtractor={(item) => item.post_id}
-                renderItem={({ item }) => (
-                  <View>
-                    <Text> {item.text} </Text>
-                    <Text>
-                      From: {item.author.first_name} {item.author.last_name}{' '}
-                    </Text>
-                    <Text> Posted at {item.timestamp} </Text>
-                    <Text> {item.numLikes} likes</Text>
+              {/* Display the update button only for the user's who are logged in*/}
+              {this.state.isLoggedInUsersProfile ? (
+                <Button
+                  title="Update details"
+                  onPress={() => this.props.navigation.navigate('Update')}
+                />
+              ) : null}
 
-                    {/* Display only if it's NOT my page */}
-                    <Button
-                      title="View post"
-                      onPress={() => {
-                        this.props.navigation.navigate('Post', item.post_id);
-                      }}
-                    ></Button>
+              {/* Display the details of the user's who's profile we are on */}
+              <Text>
+                {this.state.userInfo.first_name +
+                  ' ' +
+                  this.state.userInfo.last_name}
+              </Text>
+              <Text>{this.state.userInfo.email}</Text>
+              {/* Replace where ti */}
+              {/* <Text> {this.state.userInfo.friend_count + ' friends'}</Text>  */}
 
-                    {this.state.isFriend ? (
-                      <Button title="Visit user's page(NOT CODED)" />
-                    ) : null}
+              {/* Display the list of friends for the user who is logged in only*/}
+              {this.state.isLoggedInUsersProfile ? (
+                <Button
+                  title="See list of friends"
+                  onPress={() => this.props.navigation.navigate('Friends')}
+                ></Button>
+              ) : null}
 
-                    <Button
-                      title="Like post(not sure if the right one is liked)"
-                      onPress={() => this.likePost(item.post_id)}
-                    />
-
-                    <Button
-                      title="Remove like (not finished)"
-                      onPress={() => this.removeLike(item.post_id)}
-                    />
-
-                    {/* Allow the user to delete a post if it's on their own profile */}
-                    {this.state.isLoggedInUsersProfile ? (
-                      <Button
-                        title="Delete post(complete)"
-                        onPress={() =>
-                          this.deletePost(item.post_id, item.author.user_id)
-                        }
-                      />
-                    ) : null}
-
-                    {/* Add functionality for updating a post if it's on the user's profile */}
-                    {this.state.isLoggedInUsersProfile ? (
-                      <Button title="Update post(NOT CODED)" />
-                    ) : null}
-                  </View>
-                )}
-              />
+              {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
+              {!this.state.isLoggedInUsersProfile && !this.state.isFriend ? (
+                <Button
+                  title="Add friend(NOT CODED)"
+                  onPress={() => this.addFriend()} // code it
+                ></Button>
+              ) : null}
             </View>
-          ) : null}
+
+            {/*------------------------------ Camera ------------------------------    */}
+
+            {/* ------------------------------ BODY ------------------------------ 
+
+          {/* Display someone's posts, as well as the option to add a post only for the logged in user's profile and for their friends */}
+            {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
+              <View>
+                {/* Add a post only if it is my profile or a friend's profile */}
+
+                <View>
+                  <TextInput
+                    placeholder="Add post.."
+                    onChangeText={(newPostText) =>
+                      this.setState({ newPostText })
+                    }
+                    value={this.state.newPostText}
+                  />
+                  <Button
+                    //  TODO
+                    //  This changes if it's on someone else's profile
+                    title="Add post(not coded) ADD INPUT AND MAKE IT ONE ELEMENT TO BE ABLE TO GET THE CONTENT"
+                    onPress={() => this.addNewPost()}
+                  />
+                </View>
+
+                {/*   Display user's posts as a flatlist, with the option to like, remove like, delete, update posts,
+                 and visit person's profile, depending on the posts are from */}
+                {/* display only when display user message true  */}
+
+                {/* display aler ONLY when it's true */}
+                {this.state.displayMessage ? (
+                  <UserMessage
+                    message="Delete post"
+                    displayMessage="false"
+                  ></UserMessage>
+                ) : null}
+
+                <FlatList
+                  data={this.state.userPosts}
+                  keyExtractor={(item) => item.post_id}
+                  renderItem={({ item }) => (
+                    <View>
+                      <Text> {item.text} </Text>
+                      <Text>
+                        From: {item.author.first_name} {item.author.last_name}{' '}
+                      </Text>
+                      <Text> Posted at {item.timestamp} </Text>
+                      <Text> {item.numLikes} likes</Text>
+
+                      {/* Display only if it's NOT my page */}
+                      <Button
+                        title="View post"
+                        onPress={() => {
+                          this.props.navigation.navigate('Post', item.post_id);
+                        }}
+                      ></Button>
+
+                      {this.state.isFriend ? (
+                        <Button title="Visit user's page(NOT CODED)" />
+                      ) : null}
+
+                      <Button
+                        title="Like post(not sure if the right one is liked)"
+                        onPress={() => this.likePost(item.post_id)}
+                      />
+
+                      <Button
+                        title="Remove like (not finished)"
+                        onPress={() => this.removeLike(item.post_id)}
+                      />
+
+                      {/* Allow the user to delete a post if it's on their own profile */}
+                      {this.state.isLoggedInUsersProfile ? (
+                        <Button
+                          title="Delete post(complete)"
+                          onPress={() =>
+                            this.deletePost(item.post_id, item.author.user_id)
+                          }
+                        />
+                      ) : null}
+
+                      {/* Add functionality for updating a post if it's on the user's profile */}
+                      {this.state.isLoggedInUsersProfile ? (
+                        <Button title="Update post(NOT CODED)" />
+                      ) : null}
+                    </View>
+                  )}
+                />
+              </View>
+            ) : null}
+          </ScrollView>
         </View>
       );
     }
