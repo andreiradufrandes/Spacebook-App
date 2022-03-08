@@ -1,3 +1,6 @@
+// undefined does NOT work
+// maybe user trow, and inside the trow set the variables to something
+
 import React, { Component } from 'react';
 import {
   View,
@@ -14,6 +17,8 @@ import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// fix userInfo to store the RIGHT details of the userProfileId NOT async or something else.
 
 // repalce touchable opacity in camera
 // fix it when you go to YOUR PROFILE fro notifications or somewhere else
@@ -54,10 +59,7 @@ title="Remove like(NOT CODED)"
 // The props can be changed
 // maybe use state display message. Then on click you set that to false and not display anymore
 // on click set button to false and refresh page or something
-
-// undefined does NOT work
-
-// maybe user trow, and inside the trow set the variables to something
+// move is loading to the end of component did mount event listener and otside event listener instead of individual functions
 
 const UserMessage = (props) => {
   return (
@@ -81,18 +83,17 @@ class ProfileScreen extends Component {
     super(props);
 
     this.state = {
+      loggedUserId: '', // WARNING - delete it think
+      userProfileID: '',
+      isLoggedInUsersProfile: true,
+      isFriend: false,
       isLoading: true,
       userInfo: [],
       userPosts: [], // not sure, might be diferent type
-      loggedUserId: '', // WARNING - delete it think
       newPostText: '',
       postaddedWindow: '',
-      isLoggedInUsersProfile: true,
-      userProfileID: '',
-      isFriend: false,
       displayMessage: false, // maybe delete later
       friendsList: [],
-      //   camera
       hasPermission: null,
       type: Camera.Constants.Type.back,
       photo: null,
@@ -100,27 +101,76 @@ class ProfileScreen extends Component {
     };
   }
 
+  componentDidMount = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    this.setState({ hasPermission: status === 'granted' });
+    this.state.isLoggedInUsersProfile = true;
+    this.state.loggedUserId = await AsyncStorage.getItem('@id');
+
+    // Display the logged in user's information and posts once they log in
+    this.state.userProfileID = this.state.loggedUserId;
+    this.get_profile_image();
+    this.getUserInfo();
+    this.getUserPosts();
+
+    let userCheck = typeof this.props.route.params;
+    console.log('user check WHEN logging it event listener');
+    console.log('userCheck: ' + userCheck);
+    console.log('userCheck === undefined: ' + (userCheck === 'undefined'));
+
+    // camera stuff
+    // let paramsCheck = this.props.route.params;
+    this.unsubscribe = this.props.navigation.addListener('focus', async () => {
+      console.log(
+        '#Function called: Event listener insided component did mount'
+      );
+
+      let userCheck = typeof this.props.route.params;
+      console.log('user check INSIDE event listener');
+      console.log('userCheck: ' + userCheck);
+      console.log('userCheck === undefined: ' + (userCheck === 'undefined'));
+      console.log('params : ' + this.props.route.params);
+
+      this.startFunction();
+      this.get_profile_image(); // not sure if it should be here
+      this.getUserInfo(); // make sure they use the right ids
+      this.getUserPosts();
+
+      console.log('state: ', this.state); // delete
+    });
+
+    console.log('state: ', this.state); // delete
+  };
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
   startFunction = async () => {
     console.log('#function called: startFunction');
-    let userCheck = this.props.route.params; // i think
-    this.state.isFriend = false; // maybe delete
+    // Resetting parameter
 
-    if (typeof userCheck === 'undefined') {
+    let AsyncStorageID = await AsyncStorage.getItem('@id'); // maye delete
+    this.state.userProfileID = AsyncStorageID; /// set it to MY id for now
+    let userCheck = typeof this.props.route.params;
+
+    // Check if the profile is mine, and set userProfilId to my id
+    if (userCheck === 'undefined') {
       this.state.isLoggedInUsersProfile = true;
-      this.state.userProfileID = await AsyncStorage.getItem('@id');
+      this.state.userProfileID = AsyncStorageID;
+      // If it is NOT my profile
     } else {
-      //   check if the profile is mine
       this.state.userProfileID = this.props.route.params.user_id; // this
-      let AsyncStorageID = await AsyncStorage.getItem('@id');
+      // If I am navigating back to a profile, check if it is mine or not
       if (this.state.userProfileID == AsyncStorageID) {
         this.state.isLoggedInUsersProfile = true;
-        this.state.userProfileID = await AsyncStorage.getItem('@id');
+        this.state.userProfileID = AsyncStorageID;
       } else {
         this.state.isLoggedInUsersProfile = false;
       }
     }
 
-    //  Determine if the user is friend and specify in set the state to reflect if the person is a friend or not
+    // If it is not my profile, check if the user is a friend or not
     if (!this.state.isLoggedInUsersProfile) {
       await this.checkUserIsFriend();
     }
@@ -148,54 +198,6 @@ class ProfileScreen extends Component {
       }
     }
   };
-
-  componentDidMount = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    this.setState({ hasPermission: status === 'granted' });
-
-    // Display the logged in user's information and posts once they log in
-    this.state.userProfileID = await AsyncStorage.getItem('@id');
-    this.get_profile_image();
-    this.getUserInfo();
-    this.getUserPosts();
-
-    let userCheck = this.props.route.params; // i think
-    if (typeof userCheck === 'undefined') {
-      console.log(
-        "When user loggs in , (typeof userCheck === 'undefined'): " + true
-      );
-    } else {
-      console.log(
-        "When user loggs in , (typeof userCheck === 'undefined'): " + false
-      );
-    }
-    console.log(
-      'type of params when logged in = ' + typeof this.props.route.params
-    );
-
-    // camera stuff
-    let paramsCheck = this.props.route.params;
-    this.unsubscribe = this.props.navigation.addListener('focus', async () => {
-      console.log(
-        '#Function called: Event listener insided component did mount'
-      );
-      console.log(
-        'type of params when navigating from other page(friend or random) = ' +
-          (paramsCheck === undefined)
-      );
-      console.log('object passed with user id and params;');
-      console.log('params : ' + this.props.route.params);
-      console.log(typeof this.props.route.param == 'undefined');
-      console.log('params user_id: ' + this.props.route.params.user_id);
-
-      this.startFunction();
-      this.get_profile_image(); // not sure if it should be here
-    });
-  };
-
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
 
   getListOfFriends = async () => {
     const userId = await AsyncStorage.getItem('@id');
@@ -232,6 +234,8 @@ class ProfileScreen extends Component {
 
   //   Could be replaced with an error( like 203 not friend from some request do do something )
   checkUserIsFriend = async () => {
+    // Set the initial value
+    this.state.isFriend = false;
     console.log('#function called: checkUserIsFriend');
     const loggeduserIDCheck = await AsyncStorage.getItem('@id');
 

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
 import 'react-native-gesture-handler';
 
 import { createStackNavigator } from '@react-navigation/stack';
@@ -13,6 +12,7 @@ import ProfilePhotoScreen from './profilePhoto';
 // const Stack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 
+// eslint-disable-next-line react/prefer-stateless-function
 class ProfileComponentScreen extends Component {
   render() {
     return (
