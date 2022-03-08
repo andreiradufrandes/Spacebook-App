@@ -66,13 +66,23 @@ class SearchScreen extends Component {
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         {/* 37 friend now but ill remove him */}
         <Button
-          title="take me to someone's profile(write id by hand)"
+          title="take me to a friend(Leonard) profile"
           onPress={() =>
             this.props.navigation.navigate('Profile', {
-              user_id: 37,
+              user_id: 40,
             })
           }
         />
+
+        <Button
+          title="take me to a stranger's(carold) profile ( change id )"
+          onPress={() =>
+            this.props.navigation.navigate('Profile', {
+              user_id: 41,
+            })
+          }
+        />
+
         <Button
           title="take me to Andrei's profile"
           onPress={() => this.props.navigation.navigate('Profile', 17)}

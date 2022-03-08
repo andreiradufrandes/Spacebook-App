@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import { View, Text, TextInput, Button, Alert } from "react-native";
-import { FlatList } from "react-native-web";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { Component } from 'react';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { FlatList } from 'react-native-web';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Todo
 // only SHOW the update posts if they are yours
@@ -25,19 +25,19 @@ class PostScreen extends Component {
       isLoading: true,
       post: [], // maybe change this
       updatePost: false,
-      postMessage: "",
-      newPostMeesage: "",
+      postMessage: '',
+      newPostMeesage: '',
     };
   }
 
   //   PATCH
   // /user/{user_id}/post/{post_id}
   updatePost = async () => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const value = await AsyncStorage.getItem('@session_token');
     // Set the text for the new post
     let newPost = this.state.post;
     newPost.text = this.state.newPostMeesage;
-    console.log("newPost(shhould have new text: ");
+    console.log('newPost(shhould have new text: ');
 
     console.log(newPost);
     let post_id = this.state.post.post_id;
@@ -51,11 +51,11 @@ class PostScreen extends Component {
     // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
 
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" + user_id + "/post/" + post_id,
+      'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
       {
-        method: "patch",
+        method: 'patch',
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
         body: JSON.stringify(newPost),
       }
@@ -64,9 +64,9 @@ class PostScreen extends Component {
         if (response.status === 200) {
           this.state.updatePost = false;
           this.getSinglePost();
-          console.log("Post updates refresh page(Take user back to page)");
+          console.log('Post updates refresh page(Take user back to page)');
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {
@@ -85,25 +85,25 @@ class PostScreen extends Component {
   }
 
   deletePost = async (post_id, user_id) => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const value = await AsyncStorage.getItem('@session_token');
     console.log(post_id, user_id);
 
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" + user_id + "/post/" + post_id,
+      'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
       {
-        method: "delete",
+        method: 'delete',
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
       .then((response) => {
         if (response.status === 200) {
-          console.log("post deleted");
+          console.log('post deleted');
           //   Navigate user somewhere
-          this.props.navigation.navigate("Profile"); // maybe add something to it
+          this.props.navigation.navigate('Profile'); // maybe add something to it
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .catch((error) => {
@@ -112,20 +112,23 @@ class PostScreen extends Component {
   };
 
   getSinglePost = async () => {
-    const userId = await AsyncStorage.getItem("@id");
-    const value = await AsyncStorage.getItem("@session_token");
-    let post_id = this.props.route.params;
-    console.log("Post page: ");
-    console.log("userId:" + userId);
-    console.log("post_id: " + post_id);
+    // const userId = await AsyncStorage.getItem('@id');
+
+    const value = await AsyncStorage.getItem('@session_token');
+
+    const userId = this.props.route.params.user_id;
+    const post_id = this.props.route.params.post_id;
+    console.log('Post page: ');
+    console.log('userId:' + userId);
+    console.log('post_id: ' + post_id);
 
     // GET POST ID FROM NAVIGATE. WHATEVER
 
     return fetch(
-      "http://localhost:3333/api/1.0.0/user/" + userId + "/post/" + post_id,
+      'http://localhost:3333/api/1.0.0/user/' + userId + '/post/' + post_id,
       {
         headers: {
-          "X-Authorization": value,
+          'X-Authorization': value,
         },
       }
     )
@@ -133,7 +136,7 @@ class PostScreen extends Component {
         if (response.status === 200) {
           return response.json();
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .then((responseJson) => {
@@ -141,7 +144,7 @@ class PostScreen extends Component {
           isLoading: false,
           post: responseJson,
         }),
-          console.log("original post:");
+          console.log('original post:');
         console.log(this.state.post);
       })
       .catch((error) => {
@@ -155,9 +158,9 @@ class PostScreen extends Component {
         <View
           style={{
             flex: 1,
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Text>Loading..</Text>
@@ -167,7 +170,7 @@ class PostScreen extends Component {
       return (
         <View>
           <Text>
-            From {this.state.post.author.first_name}{" "}
+            From {this.state.post.author.first_name}{' '}
             {this.state.post.author.last_name}
           </Text>
           <Text> {this.state.post.text}</Text>
