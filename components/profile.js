@@ -22,6 +22,7 @@ import { Camera } from 'expo-camera';
 // view post on a friends' profile
 // fix single post
 // delete post on individual page
+// remove friend MAYBE
 // see LIST of of friend for other user
 // repalce touchable opacity in camera
 // friends list on friends pages
@@ -105,6 +106,7 @@ class ProfileScreen extends Component {
       type: Camera.Constants.Type.back,
       photo: null,
       hasProfilePicture: false,
+      friendsRequestsList: [],
     };
   }
 
@@ -128,7 +130,9 @@ class ProfileScreen extends Component {
 
     // camera stuff
     // let paramsCheck = this.props.route.params;
+    // Event listener
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
+      this.state.loggedUserId = await AsyncStorage.getItem('@id');
       console.log(
         '\n\n\n\n\n\n\n\n\n#Function called: Event listener insided component did mount'
       );
@@ -143,6 +147,7 @@ class ProfileScreen extends Component {
       this.getProfileImage(); // not sure if it should be here
       // this.getUserInfo(); // make sure they use the right ids
       this.getUserPosts();
+      await this.getFriendRequests(); // To get lst of friends requests AND check if someone friend
 
       console.log('state: ', this.state); // delete
       console.log('isFriend: ' + this.state.isFriend);
@@ -366,6 +371,8 @@ class ProfileScreen extends Component {
   deletePost = async (post_id, user_id) => {
     const value = await AsyncStorage.getItem('@session_token');
     console.log(post_id, user_id);
+    //
+    user_id = await AsyncStorage.getItem('@id');
 
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
@@ -426,7 +433,9 @@ class ProfileScreen extends Component {
     const value = await AsyncStorage.getItem('@session_token');
     // TODO
     // user_id was initially in the request but it didnt' work
+
     const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
+    // const user_id = 41; // change the name of the var and in the fetch as well
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' +
         user_id +
@@ -597,6 +606,40 @@ class ProfileScreen extends Component {
       });
   };
 
+  // 1. Getlistoffrinedrequests
+
+  // Checking IF the user added me already
+  getFriendRequests = async () => {
+    const value = await AsyncStorage.getItem('@session_token');
+    console.log(value);
+
+    return fetch('http://localhost:3333/api/1.0.0/friendrequests', {
+      headers: {
+        'X-Authorization': value,
+      },
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          throw 'Something went wrong';
+        }
+      })
+      .then((responseJson) => {
+        this.setState({
+          isLoading: false,
+          friendsRequestsList: responseJson,
+        }),
+          console.log(
+            'FRIENDS REQUESTS IN getFriendsRequests: ',
+            this.state.friendsRequestsList
+          );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   render() {
     // Display a buffer text if the data required to be displayed in not loaded yet
     if (this.state.isLoading) {
@@ -635,8 +678,6 @@ class ProfileScreen extends Component {
                   />
                 </View>
               ) : null}
-              {/* Make it so it only appears for my profile */}
-              <Text> is there an image? {this.state.hasProfilePicture}</Text>
 
               {this.state.isLoggedInUsersProfile ? (
                 <Button
@@ -667,14 +708,18 @@ class ProfileScreen extends Component {
               {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
                 <Button
                   title="See list of friends"
-                  onPress={() => this.props.navigation.navigate('Friends')}
+                  onPress={() =>
+                    this.props.navigation.navigate('Friends', {
+                      user_id: this.state.userProfileID,
+                    })
+                  }
                 ></Button>
               ) : null}
 
               {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
               {!this.state.isLoggedInUsersProfile && !this.state.isFriend ? (
                 <Button
-                  title="Add friend(NOT CODED)"
+                  title="Add friend"
                   onPress={() => this.addFriend()} // code it
                 ></Button>
               ) : null}
@@ -700,7 +745,7 @@ class ProfileScreen extends Component {
                   <Button
                     //  TODO
                     //  This changes if it's on someone else's profile
-                    title="Add post(not coded) ADD INPUT AND MAKE IT ONE ELEMENT TO BE ABLE TO GET THE CONTENT"
+                    title="Add post"
                     onPress={() => this.addNewPost()}
                   />
                 </View>

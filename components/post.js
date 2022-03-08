@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import delete post instead of rewriting it
 // tod
 // individual posts not working correctly
-
+// fix update post
 class PostScreen extends Component {
   constructor(props) {
     super(props);

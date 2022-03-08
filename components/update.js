@@ -1,12 +1,14 @@
-import React, { Component } from "react";
-import { View, Text, TextInput, Button, Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { Component } from 'react';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /*
 
 Left TODO:
    - update so that it check the names are correct and NOT numbers, code, etc
-
+   - display the right message 
+   - check the details are correct
+   - if the email exists in the database it will give you an error
 */
 
 class UpdateScreen extends Component {
@@ -15,12 +17,12 @@ class UpdateScreen extends Component {
 
     this.state = {
       isLoading: true,
-      origin_first_name: "",
-      origin_last_name: "",
-      origin_email: "",
-      first_name: "",
-      last_name: "",
-      email: "",
+      origin_first_name: '',
+      origin_last_name: '',
+      origin_email: '',
+      first_name: '',
+      last_name: '',
+      email: '',
     };
   }
 
@@ -29,21 +31,21 @@ class UpdateScreen extends Component {
   }
 
   getUserInfo = async () => {
-    const userId = await AsyncStorage.getItem("@id");
-    const value = await AsyncStorage.getItem("@session_token");
+    const userId = await AsyncStorage.getItem('@id');
+    const value = await AsyncStorage.getItem('@session_token');
     console.log(userId); // delete
     console.log(value); // delete
 
-    return fetch("http://localhost:3333/api/1.0.0/user/" + userId, {
+    return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
       headers: {
-        "X-Authorization": value,
+        'X-Authorization': value,
       },
     })
       .then((response) => {
         if (response.status === 200) {
           return response.json();
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .then((responseJson) => {
@@ -56,7 +58,7 @@ class UpdateScreen extends Component {
           origin_email: responseJson.email,
         }),
           console.log(this.state.userInfo);
-        console.log("Details after the getUserInfo");
+        console.log('Details after the getUserInfo');
         console.log(this.state.origin_first_name);
         console.log(this.state.origin_last_name);
       })
@@ -66,45 +68,45 @@ class UpdateScreen extends Component {
   };
 
   updateDetails = async () => {
-    const userId = await AsyncStorage.getItem("@id");
-    const value = await AsyncStorage.getItem("@session_token");
+    const userId = await AsyncStorage.getItem('@id');
+    const value = await AsyncStorage.getItem('@session_token');
 
     let to_send = {};
 
     if (
       this.state.first_name != this.state.origin_first_name &&
-      this.state.first_name != ""
+      this.state.first_name != ''
     ) {
-      to_send["first_name"] = this.state.first_name;
+      to_send['first_name'] = this.state.first_name;
     }
     // if (this.state.last_name != this.state.origin_last_name){
     if (
       this.state.last_name != this.state.origin_last_name &&
-      this.state.last_name != ""
+      this.state.last_name != ''
     ) {
-      to_send["last_name"] = this.state.last_name;
+      to_send['last_name'] = this.state.last_name;
     }
 
-    if (this.state.email != this.state.origin_email && this.state.email != "") {
-      to_send["email"] = this.state.email;
+    if (this.state.email != this.state.origin_email && this.state.email != '') {
+      to_send['email'] = this.state.email;
     }
 
     // check the string we're sending
     console.log(JSON.stringify(to_send));
 
-    return fetch("http://localhost:3333/api/1.0.0/user/" + userId, {
-      method: "PATCH",
+    return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
+      method: 'PATCH',
       headers: {
-        "content-type": "application/json",
-        "X-Authorization": value,
+        'content-type': 'application/json',
+        'X-Authorization': value,
       },
       body: JSON.stringify(to_send),
     })
       .then((response) => {
-        console.log("User details updated");
-        this.props.navigation.navigate("Profile", {
-          user_id: user_id,
-        }); // can probably get tid of this later
+        console.log('User details updated');
+        this.props.navigation.navigate('Profile', {
+          user_id: userId,
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -117,9 +119,9 @@ class UpdateScreen extends Component {
         <View
           style={{
             flex: 1,
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Text>Loading..</Text>

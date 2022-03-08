@@ -55,7 +55,9 @@ class FriendsScreen extends Component {
   //   };
   getListOfFriends = async () => {
     const value = await AsyncStorage.getItem('@session_token');
-    const userId = await AsyncStorage.getItem('@id');
+    const userId = this.props.route.params.user_id;
+
+    // display that person's friend NOT mine
     console.log(value);
 
     return fetch(
@@ -133,3 +135,4 @@ class FriendsScreen extends Component {
 }
 
 export default FriendsScreen;
+// post id 58 , user id: 41
