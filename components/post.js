@@ -17,6 +17,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // tod
 // individual posts not working correctly
 // fix update post
+// chcek for like and dislike IF it's my own post
+// add component did mount
 class PostScreen extends Component {
   constructor(props) {
     super(props);
@@ -27,6 +29,8 @@ class PostScreen extends Component {
       updatePost: false,
       postMessage: '',
       newPostMeesage: '',
+      loggedUserId: '',
+      isLoggedInUsersPost: false,
     };
   }
 
@@ -80,9 +84,25 @@ class PostScreen extends Component {
   // 2. if update post true, display update field
   // 3. have second button saying update finished which triggers update request
   //   import it from main page
-  componentDidMount() {
-    this.getSinglePost();
-  }
+  componentDidMount = async () => {
+    console.log('\n\n\n\n\npost component did mount:');
+
+    this.state.loggedUserId = await AsyncStorage.getItem('@id');
+
+    await this.getSinglePost();
+    await this.checkPostIsFromLoggedUser();
+    await this.getSinglePost();
+  };
+
+  checkPostIsFromLoggedUser = async () => {
+    // console.log(this.state.loggedUserId, this.state.post.author.user_id);
+    // console.log(this.state.loggedUserId == this.state.post.author.user_id);
+
+    if (this.state.loggedUserId == this.state.post.author.user_id) {
+      console.log('--- This post is from the user who is logged in--');
+      this.state.isLoggedInUsersPost = true;
+    }
+  };
 
   deletePost = async (post_id, user_id) => {
     const value = await AsyncStorage.getItem('@session_token');
@@ -141,11 +161,20 @@ class PostScreen extends Component {
       })
       .then((responseJson) => {
         this.setState({
-          isLoading: false,
+          // isLoading: false,
           post: responseJson,
         }),
           console.log('original post:');
         console.log(this.state.post);
+      })
+      .then(() => {
+        // Check if its my post
+        this.checkPostIsFromLoggedUser();
+      })
+      .then(() => {
+        this.setState({
+          isLoading: false,
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -174,35 +203,47 @@ class PostScreen extends Component {
             {this.state.post.author.last_name}
           </Text>
           <Text> {this.state.post.text}</Text>
-          <Button
-            title="Like(not sure if it works"
-            onPress={() =>
-              this.likePost(
-                this.state.post.post_id,
-                this.state.post.author.user_id
-              )
-            }
-          />
 
-          <Button
-            title="Delete post(to complete)"
-            onPress={() =>
-              this.deletePost(
-                this.state.post.post_id,
-                this.state.post.author.user_id
-              )
-            }
-          />
-          <Button title="Remove like(NOT CODED)" />
-          <Button
-            title="Update(NOT CODED)"
-            onPress={() => {
-              (this.state.updatePost = true), this.getSinglePost();
-            }}
-          />
+          {/* If it's not my post, you can like it  */}
+          {!this.state.isLoggedInUsersPost ? (
+            <Button
+              title="Like(not sure if it works"
+              onPress={() =>
+                this.likePost(
+                  this.state.post.post_id,
+                  this.state.post.author.user_id
+                )
+              }
+            />
+          ) : null}
 
-          {/* update form */}
+          {!this.state.isLoggedInUsersPost ? (
+            <Button title="Remove like(NOT CODED)" />
+          ) : null}
 
+          {!this.state.isLoggedInUsersPost ? (
+            <Button
+              title="Delete post(to complete)"
+              onPress={() =>
+                this.deletePost(
+                  this.state.post.post_id,
+                  this.state.post.author.user_id
+                )
+              }
+            />
+          ) : null}
+
+          {/* display the update button nly if its my post  */}
+          {this.state.isLoggedInUsersPost ? (
+            <Button
+              title="Update(NOT CODED)"
+              onPress={() => {
+                (this.state.updatePost = true), this.getSinglePost();
+              }}
+            />
+          ) : null}
+
+          {/* Display the update form */}
           {this.state.updatePost ? (
             <View>
               <TextInput
