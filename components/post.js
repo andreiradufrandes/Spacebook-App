@@ -41,11 +41,14 @@ class PostScreen extends Component {
     // Set the text for the new post
     let newPost = this.state.post;
     newPost.text = this.state.newPostMeesage;
-    console.log('newPost(shhould have new text: ');
 
+    console.log('old post ');
+    console.log(this.state.post);
+    console.log('newPost(shhould have new text: ');
     console.log(newPost);
     let post_id = this.state.post.post_id;
     let user_id = this.state.post.author.user_id; // not sure if the right id or my id
+    console.log('stringified text,:\n', JSON.stringify(newPost));
     // make copy of post
     // set text to something else
     // send it
@@ -57,8 +60,9 @@ class PostScreen extends Component {
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
       {
-        method: 'patch',
+        method: 'PATCH',
         headers: {
+          'content-type': 'application/json',
           'X-Authorization': value,
         },
         body: JSON.stringify(newPost),
@@ -247,6 +251,7 @@ class PostScreen extends Component {
           {this.state.updatePost ? (
             <View>
               <TextInput
+                maxLength="256"
                 placeholder="new post message"
                 onChangeText={(newPostMeesage) =>
                   this.setState({ newPostMeesage })

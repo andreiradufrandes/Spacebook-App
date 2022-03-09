@@ -12,12 +12,18 @@ import ProfilePhotoScreen from './profilePhoto';
 // const Stack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 
+// REPLACE WITH ASYNC ID
+
 // eslint-disable-next-line react/prefer-stateless-function
 class ProfileComponentScreen extends Component {
   render() {
     return (
       <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
-        <ProfileStack.Screen name="Profile" component={ProfileScreen} />
+        <ProfileStack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          //    set the initial param id to that one
+        />
         <ProfileStack.Screen name="Update" component={UpdateScreen} />
         <ProfileStack.Screen
           name="Notifications"

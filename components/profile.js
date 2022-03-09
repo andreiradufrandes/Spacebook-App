@@ -16,8 +16,11 @@ import {
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
+// import the styling
+import { Container, PrimaryButton, Center, ButtonText } from '../styles.js';
 
 import { RootSiblingParent } from 'react-native-root-siblings';
+
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // fix userInfo to store the RIGHT details of the userProfileId NOT async or something else.
@@ -113,6 +116,8 @@ class ProfileScreen extends Component {
   }
 
   componentDidMount = async () => {
+    // trying the user param
+
     const { status } = await Camera.requestCameraPermissionsAsync();
     this.setState({ hasPermission: status === 'granted' });
     this.state.isLoggedInUsersProfile = true;
@@ -158,15 +163,15 @@ class ProfileScreen extends Component {
       );
 
       // ----------------toast library--------------------
-      let toast = Toast.show('Request failed to send.', {
-        duration: Toast.durations.LONG,
-      });
+      // let toast = Toast.show('Request failed to send.', {
+      //   duration: Toast.durations.LONG,
+      // });
 
-      // You can manually hide the Toast, or it will automatically disappear after a `duration` ms timeout.
-      setTimeout(function hideToast() {
-        Toast.hide(toast);
-        console.log('toast hidden');
-      }, 3000);
+      // // You can manually hide the Toast, or it will automatically disappear after a `duration` ms timeout.
+      // setTimeout(function hideToast() {
+      //   Toast.hide(toast);
+      //   console.log('toast hidden');
+      // }, 3000);
       // ----------------toast library--------------------
     });
 
@@ -175,6 +180,7 @@ class ProfileScreen extends Component {
 
   componentWillUnmount() {
     this.unsubscribe();
+    console.log('-----------comonentwillunmountcall----------');
   }
 
   startFunction = async () => {
@@ -703,6 +709,14 @@ class ProfileScreen extends Component {
                   />
                 ) : null}
 
+                {/* Trial of primary button */}
+                <Center>
+                  <PrimaryButton
+                    onPress={() => console.log('Primary button clicked')}
+                  >
+                    <ButtonText>Primary button</ButtonText>
+                  </PrimaryButton>
+                </Center>
                 {/* Display the update button only for the user's who are logged in*/}
                 {this.state.isLoggedInUsersProfile ? (
                   <Button
@@ -754,6 +768,7 @@ class ProfileScreen extends Component {
                   <View>
                     <TextInput
                       placeholder="Add post.."
+                      maxLength="260" // change
                       onChangeText={(newPostText) =>
                         this.setState({ newPostText })
                       }

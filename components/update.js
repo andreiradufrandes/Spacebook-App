@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, TextInput, Button, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TabRouter } from '@react-navigation/native';
 
 /*
 
@@ -9,6 +10,7 @@ Left TODO:
    - display the right message 
    - check the details are correct
    - if the email exists in the database it will give you an error
+   - display exactly which input is incorrect
 */
 
 class UpdateScreen extends Component {
@@ -28,6 +30,15 @@ class UpdateScreen extends Component {
 
   componentDidMount() {
     this.getUserInfo();
+  }
+
+  // Take in the name as input, and check that it contains only letters
+  checkName(name) {
+    if (!/[^a-zA-Z]/.test(name)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   getUserInfo = async () => {
@@ -68,49 +79,69 @@ class UpdateScreen extends Component {
   };
 
   updateDetails = async () => {
-    const userId = await AsyncStorage.getItem('@id');
-    const value = await AsyncStorage.getItem('@session_token');
+    let firstNameCheck = this.checkName(this.state.first_name);
+    let lastNameCheck = this.checkName(this.state.last_name);
 
-    let to_send = {};
+    console.log('Checking names: is firstname only letters');
+    console.log(this.checkName(this.state.first_name));
+    console.log('Checking names: is lastname only letters');
+    console.log(this.checkName(this.state.last_name));
 
-    if (
-      this.state.first_name != this.state.origin_first_name &&
-      this.state.first_name != ''
-    ) {
-      to_send['first_name'] = this.state.first_name;
-    }
-    // if (this.state.last_name != this.state.origin_last_name){
-    if (
-      this.state.last_name != this.state.origin_last_name &&
-      this.state.last_name != ''
-    ) {
-      to_send['last_name'] = this.state.last_name;
-    }
+    // Check if the names entered are correct, and only send the request if they dont containt characters that are not letters
+    if (firstNameCheck && lastNameCheck) {
+      const userId = await AsyncStorage.getItem('@id');
+      const value = await AsyncStorage.getItem('@session_token');
 
-    if (this.state.email != this.state.origin_email && this.state.email != '') {
-      to_send['email'] = this.state.email;
-    }
+      // Only update the user details if they contains letters only
 
-    // check the string we're sending
-    console.log(JSON.stringify(to_send));
+      let to_send = {};
 
-    return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
-      method: 'PATCH',
-      headers: {
-        'content-type': 'application/json',
-        'X-Authorization': value,
-      },
-      body: JSON.stringify(to_send),
-    })
-      .then((response) => {
-        console.log('User details updated');
-        this.props.navigation.navigate('Profile', {
-          user_id: userId,
-        });
+      if (
+        this.state.first_name != this.state.origin_first_name &&
+        this.state.first_name != ''
+      ) {
+        to_send['first_name'] = this.state.first_name;
+      }
+      // if (this.state.last_name != this.state.origin_last_name){
+      if (
+        this.state.last_name != this.state.origin_last_name &&
+        this.state.last_name != ''
+      ) {
+        to_send['last_name'] = this.state.last_name;
+      }
+
+      if (
+        this.state.email != this.state.origin_email &&
+        this.state.email != ''
+      ) {
+        to_send['email'] = this.state.email;
+      }
+
+      // check the string we're sending
+      console.log(JSON.stringify(to_send));
+
+      return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
+        method: 'PATCH',
+        headers: {
+          'content-type': 'application/json',
+          'X-Authorization': value,
+        },
+        body: JSON.stringify(to_send),
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        .then((response) => {
+          console.log('User details updated');
+          this.props.navigation.navigate('Profile', {
+            user_id: userId,
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      console.log('WARNING: Incorrect input');
+      // TODO
+      // ADD POPUP SAYING WRONG INPUT
+    }
   };
 
   render() {
@@ -134,13 +165,16 @@ class UpdateScreen extends Component {
             placeholder="Enter first name"
             onChangeText={(first_name) => this.setState({ first_name })}
             value={this.state.first_name}
+            maxLength="40"
           />
           <TextInput
             placeholder="Enter last name"
             onChangeText={(last_name) => this.setState({ last_name })}
             value={this.state.last_name}
+            maxLength="40"
           />
           <TextInput
+            maxLength="256"
             placeholder="Enter email adress"
             onChangeText={(email) => this.setState({ email })}
             value={this.state.email}

@@ -10,6 +10,14 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import {
+  Container,
+  PrimaryButton,
+  Center,
+  TextBox,
+  ButtonText,
+  Title,
+} from '../styles.js';
 /*
 TODO 
 - Display only if the list is not empty of something
@@ -63,9 +71,9 @@ class SearchScreen extends Component {
   render() {
     //
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Container>
         {/* 37 friend now but ill remove him */}
-        <Button
+        {/* <Button
           title="take me to a friend(Leonard) profile"
           onPress={() =>
             this.props.navigation.navigate('Profile', {
@@ -90,17 +98,31 @@ class SearchScreen extends Component {
               user_id: 17,
             })
           }
-        />
+        /> */}
+
         <Text> Search for people or friends</Text>
+
+        <Title>Search for people or friends</Title>
         <TextInput
           style={styles.input}
           placeholder="search"
           onChangeText={(searchTerm) => this.setState({ searchTerm })}
           value={this.state.searchTerm}
         />
-        <Button title="search" onPress={() => this.searchName()} />
 
-        {/* {true ? <Button title="Hi" /> : <Button title="Bye" />} */}
+        <TextBox
+          placeholder="search"
+          onChangeText={(searchTerm) => this.setState({ searchTerm })}
+          value={this.state.searchTerm}
+        ></TextBox>
+
+        {/* <Button title="search" onPress={() => this.searchName()} /> */}
+        {/* Trial for primary button */}
+        <Center>
+          <PrimaryButton onPress={() => this.searchName()}>
+            <ButtonText>SEARCH</ButtonText>
+          </PrimaryButton>
+        </Center>
 
         <FlatList
           data={this.state.searchResults}
@@ -122,13 +144,16 @@ class SearchScreen extends Component {
             </View>
           )}
         />
-      </View>
+
+        {/* {true ? <Button title="Hi" /> : <Button title="Bye" />} */}
+      </Container>
     );
   }
 }
 
 export default SearchScreen;
 
+// delete later
 const styles = StyleSheet.create({
   container: {
     flex: 1,

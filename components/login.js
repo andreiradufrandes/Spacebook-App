@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,17 @@ import {
   Button,
   StyleSheet,
   TouchableOpacity,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // import TextInjection from 'react-native/Libraries/Text/TextInjection';
+
+// add isLoading
 
 // Delete this
 const storeData = async (value) => {
   try {
     const jsonValue = JSON.stringify(value);
-    await AsyncStorage.setItem("@spacebook_details", jsonValue);
+    await AsyncStorage.setItem('@spacebook_details', jsonValue);
   } catch (e) {
     console.error(e);
   }
@@ -24,17 +26,17 @@ class LoginScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: "andreifrandes@mmu.ac.uk", // change
-      password: "andreifrandes", // change
+      email: 'andreifrandes@mmu.ac.uk', // change
+      password: 'andreifrandes', // change
     };
   }
 
   login = async () => {
     console.log(JSON.stringify(this.state)); // delete later
-    return fetch("http://localhost:3333/api/1.0.0/login", {
-      method: "post",
+    return fetch('http://localhost:3333/api/1.0.0/login', {
+      method: 'post',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(this.state),
     })
@@ -42,18 +44,18 @@ class LoginScreen extends Component {
         if (response.status === 200) {
           return response.json();
         } else if (response.status === 400) {
-          throw "Invalid email or password";
+          throw 'Invalid email or password';
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .then(async (responseJson) => {
         console.log(responseJson);
-        console.log("token is " + responseJson.token);
-        await AsyncStorage.setItem("@session_token", responseJson.token);
-        await AsyncStorage.setItem("@id", responseJson.id);
+        console.log('token is ' + responseJson.token);
+        await AsyncStorage.setItem('@session_token', responseJson.token);
+        await AsyncStorage.setItem('@id', responseJson.id);
         // this.props.navigation.navigate("Practice");  // change this to main
-        this.props.navigation.navigate("Main"); // change this to main
+        this.props.navigation.navigate('Main'); // change this to main
       })
       .catch((error) => {
         console.log(error);
@@ -61,13 +63,14 @@ class LoginScreen extends Component {
   };
 
   render() {
-    const navigation = this.props.navigation; // change
+    const navigation = this.props.navigation; // delete
 
     return (
       <View style={style.container}>
         <TextInput
           style={style.input}
           placeholder="email"
+          maxLength="256"
           onChangeText={(email) => this.setState({ email })}
           value={this.state.email}
         />
@@ -77,6 +80,7 @@ class LoginScreen extends Component {
           onChangeText={(password) => this.setState({ password })}
           value={this.state.password}
           secureTextEntry={true}
+          maxLength="20" // change
         />
         <Button
           style={style.Button}
@@ -87,7 +91,7 @@ class LoginScreen extends Component {
         <Button
           style={style.Button}
           title="Sign up page"
-          onPress={() => navigation.navigate("Signup")}
+          onPress={() => navigation.navigate('Signup')}
         />
 
         {/* Get rid of thee main page button  */}
@@ -115,13 +119,13 @@ export default LoginScreen;
 const style = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
   },
   input: {
-    backgroundColor: "#edf7ff",
+    backgroundColor: '#edf7ff',
     borderRadius: 10,
     height: 50,
     // flex: 1,

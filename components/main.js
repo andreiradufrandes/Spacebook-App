@@ -1,15 +1,15 @@
-import React, { Component } from "react";
-import { View, Text } from "react-native";
+import React, { Component } from 'react';
+import { View, Text } from 'react-native';
 // import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import screens
-import ProfileScreen from "./profile";
-import SearchScreen from "./search";
-import NotificationsScreen from "./notifications";
-import LogoutScreen from "./logout";
-import ProfileComponentScreen from "./profileComponent";
+import ProfileScreen from './profile';
+import SearchScreen from './search';
+import NotificationsScreen from './notifications';
+import LogoutScreen from './logout';
+import ProfileComponentScreen from './profileComponent';
 
 const Tab = createBottomTabNavigator();
 
@@ -25,7 +25,7 @@ class MainScreen extends Component {
   }
 
   componentDidMount() {
-    this.unsubscribe = this.props.navigation.addListener("focus", () => {
+    this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.checkLoggedIn();
     });
     this.getData();
@@ -36,19 +36,19 @@ class MainScreen extends Component {
   }
 
   getData = async () => {
-    const value = await AsyncStorage.getItem("@session_token");
-    return fetch("http://localhost:3333/api/1.0.0/search", {
+    const value = await AsyncStorage.getItem('@session_token');
+    return fetch('http://localhost:3333/api/1.0.0/search', {
       headers: {
-        "X-Authorization": value,
+        'X-Authorization': value,
       },
     })
       .then((response) => {
         if (response.status === 200) {
           return response.json();
         } else if (response.status === 401) {
-          this.props.navigation.navigate("Login");
+          this.props.navigation.navigate('Login');
         } else {
-          throw "Something went wrong";
+          throw 'Something went wrong';
         }
       })
       .then((responseJson) => {
@@ -63,9 +63,9 @@ class MainScreen extends Component {
   };
 
   checkLoggedIn = async () => {
-    const value = await AsyncStorage.getItem("@session_token");
+    const value = await AsyncStorage.getItem('@session_token');
     if (value == null) {
-      this.props.navigation.navigate("Login");
+      this.props.navigation.navigate('Login');
     }
   };
 
@@ -75,9 +75,9 @@ class MainScreen extends Component {
         <View
           style={{
             flex: 1,
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Text>Loading..</Text>
@@ -88,12 +88,20 @@ class MainScreen extends Component {
         <Tab.Navigator screenOptions={{ headerShown: false }}>
           {/* <Tab.Screen name="Profile" component={ProfileScreen} /> */}
           {/* add the profile stack */}
-
+          <Tab.Screen name="Search" component={SearchScreen} />
           <Tab.Screen
             name="ProfileComponent"
             component={ProfileComponentScreen}
+            // children={()=><ProfileComponentScreen propName={propValue}/>}
+
+            // initialParams={{ user_id: 17 }} //REPLACE WIH ASYNC ID
+            // onPress={() => {
+            //   this.props.navigation.navigate('Profile', {
+            //     user_id: 17,
+            //   });
+            // }}
           />
-          <Tab.Screen name="Search" component={SearchScreen} />
+
           <Tab.Screen name="Notifications" component={NotificationsScreen} />
           <Tab.Screen name="Logout" component={LogoutScreen} />
         </Tab.Navigator>
