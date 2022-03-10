@@ -28,6 +28,7 @@ import { RootSiblingParent } from 'react-native-root-siblings';
 // fix single post
 // delete post on individual page
 // remove friend MAYBE
+// add right warning messages
 // see LIST of of friend for other user
 // repalce touchable opacity in camera
 // friends list on friends pages
@@ -421,33 +422,39 @@ class ProfileScreen extends Component {
   //   TODO
   // CHANGE SO THAT IT POSTS ON THE RIGHT PERSONS PROFILE
   addNewPost = async () => {
-    const value = await AsyncStorage.getItem('@session_token');
-    let post_to_send = {};
-    post_to_send['text'] = this.state.newPostText;
+    // Check post is not empty
 
-    // CHANGE FOR OTHER USERS
-    // const id = await AsyncStorage.getItem("@id");
-    const userId = this.state.userProfileID;
-    return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
-      method: 'post',
-      headers: {
-        'content-type': 'application/json',
-        'X-Authorization': value,
-      },
-      body: JSON.stringify(post_to_send),
-    })
-      .then((response) => {
-        if (response.status === 201) {
-          console.log('Post created');
-          this.getUserPosts();
-          this.state.newPostText = '';
-        } else {
-          throw 'Something went wrong';
-        }
+    if (this.state.newPostText !== '') {
+      const value = await AsyncStorage.getItem('@session_token');
+      let post_to_send = {};
+      post_to_send['text'] = this.state.newPostText;
+
+      // CHANGE FOR OTHER USERS
+      // const id = await AsyncStorage.getItem("@id");
+      const userId = this.state.userProfileID;
+      return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json',
+          'X-Authorization': value,
+        },
+        body: JSON.stringify(post_to_send),
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        .then((response) => {
+          if (response.status === 201) {
+            console.log('Post created');
+            this.getUserPosts();
+            this.state.newPostText = '';
+          } else {
+            throw 'Something went wrong';
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      console.log('Warning! add text before posting');
+    }
   };
   likePost = async (post_id) => {
     const value = await AsyncStorage.getItem('@session_token');

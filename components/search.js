@@ -73,7 +73,7 @@ class SearchScreen extends Component {
     return (
       <Container>
         {/* 37 friend now but ill remove him */}
-        {/* <Button
+        <Button
           title="take me to a friend(Leonard) profile"
           onPress={() =>
             this.props.navigation.navigate('Profile', {
@@ -98,7 +98,7 @@ class SearchScreen extends Component {
               user_id: 17,
             })
           }
-        /> */}
+        />
 
         <Text> Search for people or friends</Text>
 
@@ -139,6 +139,7 @@ class SearchScreen extends Component {
                     user_id: item.user_id,
                   })
                 }
+
                 //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
               />
             </View>

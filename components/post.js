@@ -4,6 +4,8 @@ import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Todo
+// UPDATE BUTTON ONLY WHEN IT'S YOUR POST
+// LIKE REMOVE LIKE BUTTON ONLY WHEN IT'S THEIR POST
 // only SHOW the update posts if they are yours
 // Maybe display old messege BY adding it to the text first
 // 1. Write query
@@ -19,6 +21,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // fix update post
 // chcek for like and dislike IF it's my own post
 // add component did mount
+// add like and remove like functions here
+
 class PostScreen extends Component {
   constructor(props) {
     super(props);
@@ -31,6 +35,7 @@ class PostScreen extends Component {
       newPostMeesage: '',
       loggedUserId: '',
       isLoggedInUsersPost: false,
+      userProfileId: '',
     };
   }
 
@@ -47,7 +52,10 @@ class PostScreen extends Component {
     console.log('newPost(shhould have new text: ');
     console.log(newPost);
     let post_id = this.state.post.post_id;
-    let user_id = this.state.post.author.user_id; // not sure if the right id or my id
+    // UNDO
+    // let user_id = this.state.post.author.user_id; // not sure if the right id or my id
+    let user_id = this.state.userProfileId; // not sure if the right id or my id
+
     console.log('stringified text,:\n', JSON.stringify(newPost));
     // make copy of post
     // set text to something else
@@ -90,12 +98,13 @@ class PostScreen extends Component {
   //   import it from main page
   componentDidMount = async () => {
     console.log('\n\n\n\n\npost component did mount:');
-
+    // this.state.userProfileId = this.navigation.params.user_id;
     this.state.loggedUserId = await AsyncStorage.getItem('@id');
 
     await this.getSinglePost();
     await this.checkPostIsFromLoggedUser();
     await this.getSinglePost();
+    console.log('user profile id: ', this.state.userProfileId);
   };
 
   checkPostIsFromLoggedUser = async () => {
@@ -141,6 +150,7 @@ class PostScreen extends Component {
     const value = await AsyncStorage.getItem('@session_token');
 
     const userId = this.props.route.params.user_id;
+    this.state.userProfileId = userId;
     const post_id = this.props.route.params.post_id;
     console.log('Post page: ');
     console.log('userId:' + userId);
@@ -225,7 +235,7 @@ class PostScreen extends Component {
             <Button title="Remove like(NOT CODED)" />
           ) : null}
 
-          {!this.state.isLoggedInUsersPost ? (
+          {this.state.isLoggedInUsersPost ? (
             <Button
               title="Delete post(to complete)"
               onPress={() =>

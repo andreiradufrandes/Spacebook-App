@@ -1,5 +1,7 @@
-import React, { Component } from "react";
-import { View, Text, TextInput, Button, Alert } from "react-native";
+import React, { Component } from 'react';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
+
+// only navigate me to LOGIN PAGE if the request successfully
 
 class SignupScreen extends Component {
   constructor(props) {
@@ -7,10 +9,10 @@ class SignupScreen extends Component {
 
     // set default values to be replaced by the user's input
     this.state = {
-      first_name: "defaultName",
-      last_name: "defaultLastName",
-      email: "defaultemail@mmu.ac.uk",
-      password: "defaultPassword",
+      first_name: 'defaultName',
+      last_name: 'defaultLastName',
+      email: 'defaultemail@mmu.ac.uk',
+      password: 'defaultPassword',
     };
   }
 
@@ -23,17 +25,17 @@ class SignupScreen extends Component {
       password: this.state.password,
     };
     console.log(user_details);
-    fetch("http://localhost:3333/api/1.0.0/user", {
-      method: "POST",
+    fetch('http://localhost:3333/api/1.0.0/user', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(user_details),
     })
       .then((response) => {
-        Alert.alert("User added successfully");
+        Alert.alert('User added successfully');
         // navigate me to main
-        this.props.navigation.navigate("Login");
+        this.props.navigation.navigate('Login');
       })
       .catch((error) => {
         console.log(error);
@@ -42,14 +44,14 @@ class SignupScreen extends Component {
 
   //  not sure if this should be here
   componentDidMount() {
-    console.log("mounted");
+    console.log('mounted');
   }
 
   render() {
     // const navigation = this.props.navigation;
 
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <TextInput
           placeholder="first_name"
           onChangeText={(first_name) => this.setState({ first_name })}
