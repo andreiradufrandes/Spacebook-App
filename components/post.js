@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, TextInput, Button, Alert } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { removeLike } from './functions';
 // Todo
 // UPDATE BUTTON ONLY WHEN IT'S YOUR POST
 // LIKE REMOVE LIKE BUTTON ONLY WHEN IT'S THEIR POST
@@ -35,9 +35,86 @@ class PostScreen extends Component {
       newPostMeesage: '',
       loggedUserId: '',
       isLoggedInUsersPost: false,
-      userProfileId: '',
+      userProfileID: '',
+      singlePost: true,
     };
   }
+
+  likePost = async (post_id) => {
+    const value = await AsyncStorage.getItem('@session_token');
+
+    // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
+    const user_id = this.state.userProfileID; // change the name of the var and in the fetch as well
+
+    // const user_id = 41; // change the name of the var and in the fetch as well
+    return fetch(
+      'http://localhost:3333/api/1.0.0/user/' +
+        user_id +
+        '/post/' +
+        post_id +
+        '/like',
+      {
+        method: 'post',
+        headers: {
+          'X-Authorization': value,
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          // If it is not the page of a single post, display all posts
+          if (!this.state.singlePost) {
+            this.getUserPosts();
+            // Refresh the individual post
+          } else {
+            this.getSinglePost();
+          }
+          console.log('Post liked!');
+        } else {
+          throw 'Something went wrong';
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  removeLike = async (post_id) => {
+    const value = await AsyncStorage.getItem('@session_token');
+    // TODO
+    // user_id was initially in the request but it didnt' work
+    const user_id = this.state.userProfileID;
+    return fetch(
+      'http://localhost:3333/api/1.0.0/user/' +
+        user_id +
+        '/post/' +
+        post_id +
+        '/like',
+      {
+        method: 'delete',
+        headers: {
+          'X-Authorization': value,
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          // If it is not the page of a single post, display all posts
+          if (!this.state.singlePost) {
+            this.getUserPosts();
+            // Refresh the individual post
+          } else {
+            this.getSinglePost();
+          }
+          console.log('Post liked!');
+        } else {
+          throw 'Something went wrong';
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   //   PATCH
   // /user/{user_id}/post/{post_id}
@@ -54,7 +131,7 @@ class PostScreen extends Component {
     let post_id = this.state.post.post_id;
     // UNDO
     // let user_id = this.state.post.author.user_id; // not sure if the right id or my id
-    let user_id = this.state.userProfileId; // not sure if the right id or my id
+    let user_id = this.state.userProfileID; // not sure if the right id or my id
 
     console.log('stringified text,:\n', JSON.stringify(newPost));
     // make copy of post
@@ -98,13 +175,13 @@ class PostScreen extends Component {
   //   import it from main page
   componentDidMount = async () => {
     console.log('\n\n\n\n\npost component did mount:');
-    // this.state.userProfileId = this.navigation.params.user_id;
+    // this.state.userProfileID = this.navigation.params.user_id;
     this.state.loggedUserId = await AsyncStorage.getItem('@id');
 
     await this.getSinglePost();
     await this.checkPostIsFromLoggedUser();
     await this.getSinglePost();
-    console.log('user profile id: ', this.state.userProfileId);
+    console.log('user profile id: ', this.state.userProfileID);
   };
 
   checkPostIsFromLoggedUser = async () => {
@@ -117,9 +194,10 @@ class PostScreen extends Component {
     }
   };
 
-  deletePost = async (post_id, user_id) => {
+  deletePost = async (post_id) => {
     const value = await AsyncStorage.getItem('@session_token');
-    console.log(post_id, user_id);
+
+    const user_id = this.state.userProfileID;
 
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
@@ -150,7 +228,7 @@ class PostScreen extends Component {
     const value = await AsyncStorage.getItem('@session_token');
 
     const userId = this.props.route.params.user_id;
-    this.state.userProfileId = userId;
+    this.state.userProfileID = userId;
     const post_id = this.props.route.params.post_id;
     console.log('Post page: ');
     console.log('userId:' + userId);
@@ -217,33 +295,26 @@ class PostScreen extends Component {
             {this.state.post.author.last_name}
           </Text>
           <Text> {this.state.post.text}</Text>
-
+          <Text> {this.state.post.numLikes} likes</Text>
           {/* If it's not my post, you can like it  */}
           {!this.state.isLoggedInUsersPost ? (
             <Button
               title="Like(not sure if it works"
-              onPress={() =>
-                this.likePost(
-                  this.state.post.post_id,
-                  this.state.post.author.user_id
-                )
-              }
+              onPress={() => this.likePost(this.state.post.post_id)}
             />
           ) : null}
-
+          {/* not sure  */}
           {!this.state.isLoggedInUsersPost ? (
-            <Button title="Remove like(NOT CODED)" />
+            <Button
+              title="Remove like(NOT CODED)"
+              onPress={() => this.removeLike(this.state.post.post_id)}
+            />
           ) : null}
 
           {this.state.isLoggedInUsersPost ? (
             <Button
               title="Delete post(to complete)"
-              onPress={() =>
-                this.deletePost(
-                  this.state.post.post_id,
-                  this.state.post.author.user_id
-                )
-              }
+              onPress={() => this.deletePost(this.state.post.post_id)}
             />
           ) : null}
 

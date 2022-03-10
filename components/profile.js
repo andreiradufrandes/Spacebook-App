@@ -113,6 +113,7 @@ class ProfileScreen extends Component {
       photo: null,
       hasProfilePicture: false,
       friendsRequestsList: [],
+      singlePost: false,
     };
   }
 
@@ -456,12 +457,15 @@ class ProfileScreen extends Component {
       console.log('Warning! add text before posting');
     }
   };
+
   likePost = async (post_id) => {
     const value = await AsyncStorage.getItem('@session_token');
     // TODO
     // user_id was initially in the request but it didnt' work
 
-    const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
+    // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
+    const user_id = this.state.userProfileID; // change the name of the var and in the fetch as well
+
     // const user_id = 41; // change the name of the var and in the fetch as well
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' +
@@ -478,8 +482,13 @@ class ProfileScreen extends Component {
     )
       .then((response) => {
         if (response.status === 200) {
-          this.getUserPosts();
-
+          // If it is not the page of a single post, display all posts
+          if (!this.state.singlePost) {
+            this.getUserPosts();
+            // Refresh the individual post
+          } else {
+            this.getSinglePost();
+          }
           console.log('Post liked!');
         } else {
           throw 'Something went wrong';
@@ -494,7 +503,7 @@ class ProfileScreen extends Component {
     const value = await AsyncStorage.getItem('@session_token');
     // TODO
     // user_id was initially in the request but it didnt' work
-    const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
+    const user_id = this.state.userProfileID;
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' +
         user_id +
@@ -510,8 +519,14 @@ class ProfileScreen extends Component {
     )
       .then((response) => {
         if (response.status === 200) {
-          this.getUserPosts();
-          console.log('Like removed');
+          // If it is not the page of a single post, display all posts
+          if (!this.state.singlePost) {
+            this.getUserPosts();
+            // Refresh the individual post
+          } else {
+            this.getSinglePost();
+          }
+          console.log('Post liked!');
         } else {
           throw 'Something went wrong';
         }
