@@ -1,6 +1,3 @@
-// undefined does NOT work
-// maybe user trow, and inside the trow set the variables to something
-
 import React, { Component } from 'react';
 import {
   View,
@@ -16,81 +13,9 @@ import {
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
-// import the styling
+
 import { Container, PrimaryButton, Center, ButtonText } from '../styles.js';
-
 import { RootSiblingParent } from 'react-native-root-siblings';
-
-// import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-// fix userInfo to store the RIGHT details of the userProfileId NOT async or something else.
-// view post on a friends' profile
-// fix single post
-// delete post on individual page
-// remove friend MAYBE
-// add right warning messages
-// see LIST of of friend for other user
-// repalce touchable opacity in camera
-// friends list on friends pages
-// display friend count on friends page
-// fix it when you go to YOUR PROFILE fro notifications or somewhere else
-// todo
-// when going on someone's profile if they added you DONT DISPLAY THE ADD BUTTON. display accept
-// change friends so that it applies only to accepted ones
-// can't like posts
-// view post doesnt work on THEIR profile
-// error for sending friend request twice
-// only update your posts
-// only delete your posts
-// present the button ONLY if its your own post
-// CHECK THAT THE USER ID IS CORRECT
-// this.props.route.params
-// update post
-// make all of them scrolable
-// make sure it works with 0 friends( the looping through) when it comes to checking if someone is a friend
-// move small stuff outside the component did mount into individual functions(like check friend for instance)
-// error for haing multiple users with same name
-// make sure the loading is right
-// display the right details on the user profile(if its me or someone else)
-// Display stuff when the user runs into errors
-// only allow for your posts to be liked by other people(and viceversa)
-// make sure you get the right posts(for example if youre on someone else's page)
-/* <Button
-title="Remove like(NOT CODED)"
-/> */
-// change getUserPosts to not have the conditional statement inside of it
-// update post no working
-// add post on the RIGHT person's profile
-// send friend requests
-// Make it so that you can go from list of friends > individual friend -> to profile. Atm if you are there and click tab navigator to go to profile component it doesnt go
-// remove likes
-// change timestamp!! <Text> Posted at {item.timestamp} </Text>
-// Add conditional to like post to display something if it's your own post
-
-// go to random person's account
-// add them as a friend
-
-// The props can be changed
-// maybe use state display message. Then on click you set that to false and not display anymore
-// on click set button to false and refresh page or something
-// move is loading to the end of component did mount event listener and otside event listener instead of individual functions
-
-const UserMessage = (props) => {
-  return (
-    <View>
-      {/* <Text>Hello, I am {props.name}!</Text> */}
-      <Text>{props.message}</Text>
-      <Button
-        title="Ok"
-        onPress={() => {
-          props.displayMessage = false;
-        }}
-        Fix
-        this
-      />
-    </View>
-  );
-};
 
 class ProfileScreen extends Component {
   constructor(props) {
@@ -114,6 +39,7 @@ class ProfileScreen extends Component {
       hasProfilePicture: false,
       friendsRequestsList: [],
       singlePost: false,
+      userRequestedFriendRequest: false,
     };
   }
 
@@ -157,6 +83,10 @@ class ProfileScreen extends Component {
       // this.getUserInfo(); // make sure they use the right ids
       this.getUserPosts();
       await this.getFriendRequests(); // To get lst of friends requests AND check if someone friend
+
+      // Check if the user sent a friend request
+
+      this.checkUserSentFriendRequest();
 
       console.log('state: ', this.state); // delete
       console.log('isFriend: ' + this.state.isFriend);
@@ -277,10 +207,41 @@ class ProfileScreen extends Component {
 
   // write a function that sets isFriend to no if it's not a friend
   // ONLY call this function IF isMyProfile == false
+  checkUserSentFriendRequest = async () => {
+    // If the user is not already a friend and this is not my profile
+    if (!this.state.isFriend && !this.state.isLoggedInUsersProfile) {
+      this.state.userRequestedFriendRequest = false;
+      // check list of frinds requests
+      console.log('friends requests list:');
+      console.log(
+        'friend whose profile i am checking: ',
+        this.state.userProfileID
+      );
+      console.log(this.state.friendsRequestsList);
+
+      this.state.friendsRequestsList.forEach((element) => {
+        if (element.user_id == this.state.userProfileID) {
+          // this.state.isFriend = true;
+          console.log(
+            'element.user_id == this.state.userProfileID',
+            element.user_id,
+            ' ',
+            this.state.userProfileID
+          );
+          this.state.userRequestedFriendRequest = true;
+          console.log('The user has sent a friend request!');
+        }
+
+        console.log(
+          'this.state.userRequestedFriendRequest: ',
+          this.state.userRequestedFriendRequest
+        );
+      });
+    }
+  };
 
   //   Could be replaced with an error( like 203 not friend from some request do do something )
   checkUserIsFriend = async () => {
-    // Set the initial value
     this.state.isFriend = false;
     const loggeduserIDCheck = await AsyncStorage.getItem('@id');
 
@@ -648,6 +609,34 @@ class ProfileScreen extends Component {
       });
   };
 
+  acceptFriendRequest = async () => {
+    // how to get the exact id i need
+
+    const value = await AsyncStorage.getItem('@session_token');
+    return fetch(
+      'http://localhost:3333/api/1.0.0/friendrequests/' +
+        this.state.userProfileID,
+      {
+        method: 'post',
+        headers: {
+          'X-Authorization': value,
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          // return response.json();
+          console.log('Friendship request accepted!');
+          // refresh page
+        } else {
+          throw 'Something went wrong';
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   // 1. Getlistoffrinedrequests
 
   // Checking IF the user added me already
@@ -770,7 +759,9 @@ class ProfileScreen extends Component {
                 ) : null}
 
                 {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
-                {!this.state.isLoggedInUsersProfile && !this.state.isFriend ? (
+                {!this.state.isLoggedInUsersProfile &&
+                !this.state.isFriend &&
+                !this.state.userRequestedFriendRequest ? (
                   <Button
                     title="Add friend"
                     onPress={() => this.addFriend()} // code it
@@ -778,6 +769,15 @@ class ProfileScreen extends Component {
                 ) : null}
               </View>
 
+              {!this.state.isLoggedInUsersProfile &&
+              !this.state.isFriend &&
+              this.state.userRequestedFriendRequest ? (
+                <Button
+                  title="Accept friend request(CODE IT)"
+                  // onPress={() => this.addFriend()} // code it
+                  onPress={() => this.acceptFriendRequest()}
+                ></Button>
+              ) : null}
               {/*------------------------------ Camera ------------------------------    */}
 
               {/* ------------------------------ BODY ------------------------------ 
@@ -809,12 +809,6 @@ class ProfileScreen extends Component {
                   {/* display only when display user message true  */}
 
                   {/* display aler ONLY when it's true */}
-                  {this.state.displayMessage ? (
-                    <UserMessage
-                      message="Delete post"
-                      displayMessage="false"
-                    ></UserMessage>
-                  ) : null}
 
                   <FlatList
                     data={this.state.userPosts}

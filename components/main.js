@@ -86,22 +86,11 @@ class MainScreen extends Component {
     } else {
       return (
         <Tab.Navigator screenOptions={{ headerShown: false }}>
-          {/* <Tab.Screen name="Profile" component={ProfileScreen} /> */}
-          {/* add the profile stack */}
-          <Tab.Screen name="Search" component={SearchScreen} />
           <Tab.Screen
             name="ProfileComponent"
             component={ProfileComponentScreen}
-            // children={()=><ProfileComponentScreen propName={propValue}/>}
-
-            // initialParams={{ user_id: 17 }} //REPLACE WIH ASYNC ID
-            // onPress={() => {
-            //   this.props.navigation.navigate('Profile', {
-            //     user_id: 17,
-            //   });
-            // }}
           />
-
+          <Tab.Screen name="Search" component={SearchScreen} />
           <Tab.Screen name="Notifications" component={NotificationsScreen} />
           <Tab.Screen name="Logout" component={LogoutScreen} />
         </Tab.Navigator>
