@@ -1,38 +1,23 @@
-const removeLike = async (post_id) => {
-  const value = await AsyncStorage.getItem('@session_token');
-  // TODO
-  // user_id was initially in the request but it didnt' work
-  const user_id = this.state.userProfileID;
-  return fetch(
-    'http://localhost:3333/api/1.0.0/user/' +
-      user_id +
-      '/post/' +
-      post_id +
-      '/like',
-    {
-      method: 'delete',
-      headers: {
-        'X-Authorization': value,
-      },
-    }
-  )
-    .then((response) => {
-      if (response.status === 200) {
-        // If it is not the page of a single post, display all posts
-        if (!this.state.singlePost) {
-          this.getUserPosts();
-          // Refresh the individual post
-        } else {
-          this.getSinglePost();
-        }
-        console.log('Post liked!');
-      } else {
-        throw 'Something went wrong';
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
+export function checkName(name) {
+  if (name == '') {
+    return false;
+  } else if (!/[^a-zA-Z]/.test(name)) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
-export default removeLike;
+// Function to check password
+// 1. Minimum amount of letter
+// 2. At least 1 number
+// 3. At least 1 uppercase letter
+// 4, Between 10 to 16 charates
+
+// Function to check post
+
+export function checkPassword(password) {
+  return /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&]){10,16}$/.test(password);
+  // at least one number
+}
+// Andreifran2!

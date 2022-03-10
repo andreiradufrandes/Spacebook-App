@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text, TextInput, Button, Alert } from 'react-native';
 
+// Import helper functions
+import { checkName, checkPassword } from './functions';
 // only navigate me to LOGIN PAGE if the request successfully
 
 class SignupScreen extends Component {
@@ -18,60 +20,80 @@ class SignupScreen extends Component {
 
   // Signup, passing the users details in
   signup = () => {
-    let user_details = {
-      first_name: this.state.first_name,
-      last_name: this.state.last_name,
-      email: this.state.email,
-      password: this.state.password,
-    };
-    console.log(user_details);
-    fetch('http://localhost:3333/api/1.0.0/user', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(user_details),
-    })
-      .then((response) => {
-        Alert.alert('User added successfully');
-        // navigate me to main
-        this.props.navigation.navigate('Login');
+    // TODO
+    // ADD PASSWORD CHECK AND EMAIL CHECK
+    // ADD USABILITY OF SPACE
+    // Add condition that checks input NOT empty
+    const firstNameCheck = checkName(this.state.first_name);
+    const lastNameCheck = checkName(this.state.last_name);
+
+    console.log('checkpassword: ', checkPassword(this.state.password));
+    // If the inputs are correct, send them to the user
+    // else, display toast error
+    if (firstNameCheck && lastNameCheck) {
+      let user_details = {
+        first_name: this.state.first_name,
+        last_name: this.state.last_name,
+        email: this.state.email,
+        password: this.state.password,
+      };
+      console.log(user_details);
+      fetch('http://localhost:3333/api/1.0.0/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user_details),
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        // add error codes
+        .then((response) => {
+          Alert.alert('User added successfully'); // replace
+          // navigate me to main
+          this.props.navigation.navigate('Login');
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      // TODO
+      // Add toast error
+      // Empty the fiels
+      console.log('incorrect input! try again!');
+    }
   };
 
-  //  not sure if this should be here
+  // Prolly best to delete from here
   componentDidMount() {
     console.log('mounted');
   }
 
   render() {
-    // const navigation = this.props.navigation;
-
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <TextInput
           placeholder="first_name"
           onChangeText={(first_name) => this.setState({ first_name })}
           value={this.state.first_name}
+          maxLength="50"
         />
         <TextInput
           placeholder="last_name"
           onChangeText={(last_name) => this.setState({ last_name })}
           value={this.state.last_name}
+          maxLength="50"
         />
         <TextInput
           placeholder="email"
           onChangeText={(email) => this.setState({ email })}
           value={this.state.email}
+          maxLength="256"
         />
         <TextInput
           placeholder="password"
           onChangeText={(password) => this.setState({ password })}
           value={this.state.password}
           secureTextEntry={true}
+          maxLength="16"
         />
         <Button
           title="Signup"

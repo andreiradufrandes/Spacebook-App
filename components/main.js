@@ -3,9 +3,6 @@ import { View, Text } from 'react-native';
 // import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Import screens
-import ProfileScreen from './profile';
 import SearchScreen from './search';
 import NotificationsScreen from './notifications';
 import LogoutScreen from './logout';

@@ -13,14 +13,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // add isLoading
 
 // Delete this
-const storeData = async (value) => {
-  try {
-    const jsonValue = JSON.stringify(value);
-    await AsyncStorage.setItem('@spacebook_details', jsonValue);
-  } catch (e) {
-    console.error(e);
-  }
-};
 
 class LoginScreen extends Component {
   constructor(props) {
@@ -63,8 +55,6 @@ class LoginScreen extends Component {
   };
 
   render() {
-    const navigation = this.props.navigation; // delete
-
     return (
       <View style={style.container}>
         <TextInput
@@ -80,7 +70,7 @@ class LoginScreen extends Component {
           onChangeText={(password) => this.setState({ password })}
           value={this.state.password}
           secureTextEntry={true}
-          maxLength="20" // change
+          maxLength="16"
         />
         <Button
           style={style.Button}
@@ -91,30 +81,14 @@ class LoginScreen extends Component {
         <Button
           style={style.Button}
           title="Sign up page"
-          onPress={() => navigation.navigate('Signup')}
+          onPress={() => this.props.navigation.navigate('Signup')}
         />
-
-        {/* Get rid of thee main page button  */}
-        {/* <Button 
-                style={style.Button}
-                title='Main page'
-                onPress={() => navigation.navigate('Main')}
-            />
-            
-            <Button 
-                style={style.Button}
-                title='Profile'
-                onPress={() => navigation.navigate('Profile')}
-            /> */}
       </View>
     );
   }
 }
 
 export default LoginScreen;
-
-// TODO
-// Delete some of this, and add it to css component outside of this
 
 const style = StyleSheet.create({
   container: {
