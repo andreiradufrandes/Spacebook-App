@@ -17,6 +17,7 @@ import {
   TextBox,
   ButtonText,
   Title,
+  Label,
 } from '../styles.js';
 /*
 TODO 
@@ -110,8 +111,9 @@ class SearchScreen extends Component {
           value={this.state.searchTerm}
         />
 
+        <Label>Enter user's name:</Label>
         <TextBox
-          placeholder="search"
+          placeholder="user's name"
           onChangeText={(searchTerm) => this.setState({ searchTerm })}
           value={this.state.searchTerm}
         ></TextBox>
@@ -133,7 +135,7 @@ class SearchScreen extends Component {
                 {item.user_givenname} {item.user_familyname}
               </Text>
               <Button
-                title="Visit Profile WITH OBJECT PASSED "
+                title="Visit Profile"
                 onPress={() =>
                   this.props.navigation.navigate('Profile', {
                     user_id: item.user_id,

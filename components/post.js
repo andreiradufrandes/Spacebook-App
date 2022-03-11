@@ -3,6 +3,14 @@ import { View, Text, TextInput, Button, Alert } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { removeLike } from './functions';
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+  Title,
+} from '../styles.js';
 // Todo
 // UPDATE BUTTON ONLY WHEN IT'S YOUR POST
 // LIKE REMOVE LIKE BUTTON ONLY WHEN IT'S THEIR POST
@@ -331,9 +339,10 @@ class PostScreen extends Component {
           {/* Display the update form */}
           {this.state.updatePost ? (
             <View>
+              <Label>New post:</Label>
               <TextInput
                 maxLength="256"
-                placeholder="new post message"
+                placeholder="New post"
                 onChangeText={(newPostMeesage) =>
                   this.setState({ newPostMeesage })
                 }

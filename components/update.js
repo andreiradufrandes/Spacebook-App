@@ -2,7 +2,14 @@ import React, { Component } from 'react';
 import { View, Text, TextInput, Button, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TabRouter } from '@react-navigation/native';
-
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+  Title,
+} from '../styles.js';
 /*
 
 Left TODO:
@@ -32,7 +39,7 @@ class UpdateScreen extends Component {
     this.getUserInfo();
   }
 
-  // Take in the name as input, and check that it contains only letters
+  // move from here to the import
   checkName(name) {
     if (!/[^a-zA-Z]/.test(name)) {
       return true;
@@ -161,18 +168,22 @@ class UpdateScreen extends Component {
     } else {
       return (
         <View>
+          <Title>Enter the details you wish you change</Title>
+          <Label>First name:</Label>
           <TextInput
             placeholder="Enter first name"
             onChangeText={(first_name) => this.setState({ first_name })}
             value={this.state.first_name}
-            maxLength="40"
+            maxLength="50"
           />
+          <Label>Last name:</Label>
           <TextInput
             placeholder="Enter last name"
             onChangeText={(last_name) => this.setState({ last_name })}
             value={this.state.last_name}
-            maxLength="40"
+            maxLength="50"
           />
+          <Label>Email:</Label>
           <TextInput
             maxLength="256"
             placeholder="Enter email adress"
@@ -180,7 +191,7 @@ class UpdateScreen extends Component {
             value={this.state.email}
           />
 
-          <Button title="Update details" onPress={() => this.updateDetails()} />
+          <Button title="Submit" onPress={() => this.updateDetails()} />
         </View>
       );
     }

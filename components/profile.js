@@ -13,8 +13,13 @@ import {
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
-
-import { Container, PrimaryButton, Center, ButtonText } from '../styles.js';
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+} from '../styles.js';
 import { RootSiblingParent } from 'react-native-root-siblings';
 
 class ProfileScreen extends Component {
@@ -707,6 +712,7 @@ class ProfileScreen extends Component {
                         height: 400,
                         borderWidth: 5,
                       }}
+                      alt="Profile image"
                     />
                   </View>
                 ) : null}
@@ -788,8 +794,9 @@ class ProfileScreen extends Component {
                   {/* Add a post only if it is my profile or a friend's profile */}
 
                   <View>
+                    <Label>New post:</Label>
                     <TextInput
-                      placeholder="Add post.."
+                      placeholder="New post"
                       maxLength="260" // change
                       onChangeText={(newPostText) =>
                         this.setState({ newPostText })

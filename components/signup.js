@@ -3,6 +3,13 @@ import { View, Text, TextInput, Button, Alert } from 'react-native';
 
 // Import helper functions
 import { checkName, checkPassword } from './functions';
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+} from '../styles.js';
 // only navigate me to LOGIN PAGE if the request successfully
 
 class SignupScreen extends Component {
@@ -70,24 +77,28 @@ class SignupScreen extends Component {
   render() {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Label>First name:</Label>
         <TextInput
           placeholder="first_name"
           onChangeText={(first_name) => this.setState({ first_name })}
           value={this.state.first_name}
           maxLength="50"
         />
+        <Label>Last name:</Label>
         <TextInput
           placeholder="last_name"
           onChangeText={(last_name) => this.setState({ last_name })}
           value={this.state.last_name}
           maxLength="50"
         />
+        <Label>Email:</Label>
         <TextInput
           placeholder="email"
           onChangeText={(email) => this.setState({ email })}
           value={this.state.email}
           maxLength="256"
         />
+        <Label>Password:</Label>
         <TextInput
           placeholder="password"
           onChangeText={(password) => this.setState({ password })}
@@ -95,6 +106,7 @@ class SignupScreen extends Component {
           secureTextEntry={true}
           maxLength="16"
         />
+        <Label>Password instructions</Label>
         <Button
           title="Signup"
           onPress={() => this.signup()}

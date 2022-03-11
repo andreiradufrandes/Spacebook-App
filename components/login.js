@@ -8,7 +8,13 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import TextInjection from 'react-native/Libraries/Text/TextInjection';
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+} from '../styles.js';
 
 // add isLoading
 
@@ -57,6 +63,7 @@ class LoginScreen extends Component {
   render() {
     return (
       <View style={style.container}>
+        <Label>Email:</Label>
         <TextInput
           style={style.input}
           placeholder="email"
@@ -64,6 +71,8 @@ class LoginScreen extends Component {
           onChangeText={(email) => this.setState({ email })}
           value={this.state.email}
         />
+        <Label>Password:</Label>
+        <Label>TODO: add instructions for password</Label>
         <TextInput
           style={style.input}
           placeholder="password"
