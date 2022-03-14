@@ -10,6 +10,7 @@ import {
   Image,
   ScrollView,
   Modal,
+  Pressable,
 } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,6 +23,10 @@ import {
   ButtonText,
 } from '../styles.js';
 import { RootSiblingParent } from 'react-native-root-siblings';
+// TODO
+// DELETE VIEW USER'S PAGE BUTTON
+// Timestamp
+// fix remove like so it only shows once AND it shows the error
 
 class ProfileScreen extends React.Component {
   constructor(props) {
@@ -388,18 +393,19 @@ class ProfileScreen extends React.Component {
         console.log(error);
       });
   };
+
   //   TODO
   // CHANGE SO THAT IT POSTS ON THE RIGHT PERSONS PROFILE
   addNewPost = async () => {
-    // Check post is not empty
-
+    // Check that the post we wanted to add is not an empty string
     if (this.state.newPostText !== '') {
       const value = await AsyncStorage.getItem('@session_token');
-      let post_to_send = {};
-      post_to_send['text'] = this.state.newPostText;
 
-      // CHANGE FOR OTHER USERS
-      // const id = await AsyncStorage.getItem("@id");
+      // Create a post object and store the user's input inside of it
+      let postToSend = {};
+      postToSend['text'] = this.state.newPostText;
+
+      // Store the id of the user who's profile we are writing on
       const userId = this.state.userProfileID;
       return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
         method: 'post',
@@ -407,22 +413,36 @@ class ProfileScreen extends React.Component {
           'content-type': 'application/json',
           'X-Authorization': value,
         },
-        body: JSON.stringify(post_to_send),
+        body: JSON.stringify(postToSend),
       })
         .then((response) => {
           if (response.status === 201) {
-            console.log('Post created');
+            this.state.errorMessage = 'Post added successfully!';
+            this.setModalVisible(true);
+
             this.getUserPosts();
             this.state.newPostText = '';
-          } else {
-            throw 'Something went wrong';
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in, and then try again!';
+            this.setModalVisible(true);
+          } else if (response.status === 404) {
+            this.state.errorMessage =
+              'Something went wrong. Make you the person whos profile you are writing on is your friend';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
           }
         })
         .catch((error) => {
           console.log(error);
         });
     } else {
-      console.log('Warning! add text before posting');
+      this.state.errorMessage =
+        'Post can not be empty! Add text and try adding it again!';
+      this.setModalVisible(true);
     }
   };
 
@@ -434,7 +454,6 @@ class ProfileScreen extends React.Component {
     // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
     const user_id = this.state.userProfileID; // change the name of the var and in the fetch as well
 
-    // const user_id = 41; // change the name of the var and in the fetch as well
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' +
         user_id +
@@ -449,17 +468,30 @@ class ProfileScreen extends React.Component {
       }
     )
       .then((response) => {
+        // If the post was liked successfully, update the page to reflect that
         if (response.status === 200) {
-          // If it is not the page of a single post, display all posts
+          // If it's the profile page, refresh all the posts
           if (!this.state.singlePost) {
             this.getUserPosts();
-            // Refresh the individual post
+            // If it's the page for an individual post, refresh it
           } else {
             this.getSinglePost();
           }
-          console.log('Post liked!');
-        } else {
-          throw 'Something went wrong';
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Make sure you are logged in, and then try again!';
+          this.setModalVisible(true);
+        } else if (response.status === 403) {
+          this.state.errorMessage =
+            'Forbidden! You can not like your own posts or posts appeaing on your profile';
+          this.setModalVisible(true);
+        } else if (response.status === 400) {
+          this.state.errorMessage = 'You have already liked this post!';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again';
+          this.setModalVisible(true);
         }
       })
       .catch((error) => {
@@ -486,17 +518,31 @@ class ProfileScreen extends React.Component {
       }
     )
       .then((response) => {
+        console.log('response code: ', response.status);
+        // If the post was liked successfully, update the page to reflect that
         if (response.status === 200) {
-          // If it is not the page of a single post, display all posts
+          // If it's the profile page, refresh all the posts
           if (!this.state.singlePost) {
             this.getUserPosts();
-            // Refresh the individual post
+            // If it's the page for an individual post, refresh it
           } else {
             this.getSinglePost();
           }
-          console.log('Post liked!');
-        } else {
-          throw 'Something went wrong';
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Make sure you are logged in, and then try again!';
+          this.setModalVisible(true);
+        } else if (response.status === 403) {
+          this.state.errorMessage =
+            'Forbidden! You can not like or unlike your own posts or posts appeaing on your profile';
+          this.setModalVisible(true);
+        } else if (response.status === 400) {
+          this.state.errorMessage = 'You have already unliked this post!';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again';
+          this.setModalVisible(true);
         }
       })
       .catch((error) => {
@@ -678,12 +724,13 @@ class ProfileScreen extends React.Component {
       });
   };
 
+  // Add a toggle function to set the visibility for the user alerts
   setModalVisible = (visible) => {
     this.setState({ modalVisible: visible });
   };
 
   render() {
-    const { modalVisible } = this.state.modalVisible; // i think
+    const { modalVisible } = this.state;
     // Display a buffer text if the data required to be displayed in not loaded yet
     if (this.state.isLoading) {
       return (
@@ -705,6 +752,38 @@ class ProfileScreen extends React.Component {
         <RootSiblingParent>
           <View>
             <ScrollView>
+              <View>
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={modalVisible}
+                  onRequestClose={() => {
+                    this.setModalVisible(!modalVisible);
+                  }}
+                >
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                      {/* <Text style={styles.modalText}>Hello World!</Text> */}
+                      {/* Display the erro you wish to display to the user */}
+                      <Text style={styles.modalText}>
+                        {this.state.errorMessage}{' '}
+                      </Text>
+                      <Pressable
+                        style={[styles.button, styles.buttonClose]}
+                        onPress={() => this.setModalVisible(!modalVisible)}
+                      >
+                        <Text style={styles.textStyle}>Ok</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </Modal>
+                {/* <Pressable
+            style={[styles.button, styles.buttonOpen]}
+            onPress={() => this.setModalVisible(true)}
+          >
+            <Text style={styles.textStyle}>Show Modal</Text>
+          </Pressable> */}
+              </View>
               {/* Modal trial */}
 
               {/* header */}
@@ -859,9 +938,9 @@ class ProfileScreen extends React.Component {
                           }}
                         ></Button>
 
-                        {this.state.isFriend ? (
+                        {/* {this.state.isFriend ? (
                           <Button title="Visit user's page(NOT CODED)" />
-                        ) : null}
+                        ) : null} */}
 
                         <Button
                           title="Like post(not sure if the right one is liked)"
@@ -923,5 +1002,46 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     color: 'white',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });

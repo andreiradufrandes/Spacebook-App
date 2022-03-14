@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 // Import helper functions
-import { checkName, checkPassword } from './functions';
+import { checkName } from './functions';
 import {
   Container,
   Label,

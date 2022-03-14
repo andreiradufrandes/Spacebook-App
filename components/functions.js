@@ -31,3 +31,22 @@ export function checkName(name) {
 //   // at least one number
 // }
 // Andreifran2!
+
+// only letters and spaces
+// /^[a-zA-Z\s]*$/;
+
+export function checkLettersAndSpaces(input) {
+  if (!/[^a-zA-Z\s]/.test(input)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export function checkLettersSpacesNumbers(input) {
+  if (!/[^0-9a-zA-Z\s]/.test(input)) {
+    return true;
+  } else {
+    return false;
+  }
+}

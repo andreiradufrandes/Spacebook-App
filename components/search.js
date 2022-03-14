@@ -5,10 +5,15 @@ import {
   TextInput,
   Button,
   Alert,
-  StyleSheet,
   FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { checkLettersAndSpaces } from './functions';
+
+// when you create name it can
 
 import {
   Container,
@@ -21,9 +26,10 @@ import {
 } from '../styles.js';
 /*
 TODO 
-- Display only if the list is not empty of something
-- fix the search to show LIMITED number of searches 
+- Display only if the list is not empty of addPost
 
+- fix the search to show LIMITED number of searches 
+- change profile component name
 
 */
 
@@ -33,46 +39,108 @@ class SearchScreen extends Component {
     this.state = {
       searchTerm: '',
       searchResults: [],
+      modalVisible: false,
+      errorMessage: '',
     };
   }
+  // Add a toggle function to set the visibility for the user alerts
+  setModalVisible = (visible) => {
+    this.setState({ modalVisible: visible });
+  };
 
   //   ADD LIMIT TO THE FETCH RESULT, AND MAKE IT LOOK LIKE THE REAL ONE
   searchName = async () => {
     const value = await AsyncStorage.getItem('@session_token');
-    console.log(value);
 
-    return fetch(
-      'http://localhost:3333/api/1.0.0/search?q=' + this.state.searchTerm,
-      {
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw 'Something went wrong';
+    console.log(
+      'lettersandspaces check: ',
+      checkLettersAndSpaces(this.state.searchTerm)
+    );
+
+    const serachTermCheck = checkLettersAndSpaces(this.state.searchTerm);
+
+    // Check that the user input contain letters only, and no numbers or special characters
+    if (!serachTermCheck) {
+      this.state.errorMessage =
+        'Incorrect input, the name can only contain letters, no numbers or  special characters. Try again!';
+      this.setModalVisible(true);
+    } else {
+      return fetch(
+        'http://localhost:3333/api/1.0.0/search?q=' + this.state.searchTerm,
+        {
+          headers: {
+            'X-Authorization': value,
+          },
         }
-      })
-      .then((responseJson) => {
-        // save the users info inside the state
-        this.setState({
-          isLoading: false, // meaning it finished and now you can display it
-          searchResults: responseJson,
-        }),
-          console.log(this.state.searchResults); // delete later
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      )
+        .then((response) => {
+          console.log('----Response code------: ', response.status);
+          if (response.status === 200) {
+            return response.json();
+          } else if (response.status === 400) {
+            this.state.errorMessage =
+              'Bad request! Make sure you have use only letters inside the search box!';
+            this.setModalVisible(true);
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in, and then try again!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        .then((responseJson) => {
+          this.setState({
+            isLoading: false,
+            searchResults: responseJson,
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
 
   render() {
-    //
+    const { modalVisible } = this.state;
+
     return (
       <Container>
+        <View>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              this.setModalVisible(!modalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                {/* <Text style={styles.modalText}>Hello World!</Text> */}
+                {/* Display the erro you wish to display to the user */}
+                <Text style={styles.modalText}>
+                  Error: {this.state.errorMessage}{' '}
+                </Text>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => this.setModalVisible(!modalVisible)}
+                >
+                  <Text style={styles.textStyle}>Ok</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
+          {/* <Pressable
+            style={[styles.button, styles.buttonOpen]}
+            onPress={() => this.setModalVisible(true)}
+            >
+            <Text style={styles.textStyle}>Show Modal</Text>
+            </Pressable> */}
+        </View>
+
         {/* 37 friend now but ill remove him */}
         <Button
           title="take me to a friend(Leonard) profile"
@@ -109,6 +177,7 @@ class SearchScreen extends Component {
           placeholder="search"
           onChangeText={(searchTerm) => this.setState({ searchTerm })}
           value={this.state.searchTerm}
+          maxLength="50"
         />
 
         <Label>Enter user's name:</Label>
@@ -116,6 +185,7 @@ class SearchScreen extends Component {
           placeholder="user's name"
           onChangeText={(searchTerm) => this.setState({ searchTerm })}
           value={this.state.searchTerm}
+          maxLength="50"
         ></TextBox>
 
         {/* <Button title="search" onPress={() => this.searchName()} /> */}
@@ -175,5 +245,46 @@ const styles = StyleSheet.create({
   },
   Button: {
     marginBottom: 50,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });

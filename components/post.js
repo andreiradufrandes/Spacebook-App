@@ -1,5 +1,14 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  ScrollView,
+  Modal,
+  Pressable,
+  StyleSheet,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Container,
@@ -43,16 +52,78 @@ class PostScreen extends Component {
       isLoggedInUsersPost: false,
       userProfileID: '',
       singlePost: true,
+      modalVisible: false,
     };
   }
 
+  // update post function
+  // On click:
+  // 1. Update post = true
+  // 2. if update post true, display update field
+  // 3. have second button saying update finished which triggers update request
+  //   import it from main page
+  componentDidMount = async () => {
+    console.log('\n\n\n\n\npost component did mount:');
+    // this.state.userProfileID = this.navigation.params.user_id;
+    this.state.loggedUserId = await AsyncStorage.getItem('@id');
+
+    await this.getSinglePost();
+    await this.checkPostIsFromLoggedUser();
+    await this.getSinglePost();
+    console.log('user profile id: ', this.state.userProfileID);
+  };
+
+  // Add a toggle function to set the visibility for the user alerts
+  setModalVisible = (visible) => {
+    this.setState({ modalVisible: visible });
+  };
+
+  // likePost = async (post_id) => {
+  //   const value = await AsyncStorage.getItem('@session_token');
+
+  //   // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
+  //   const user_id = this.state.userProfileID; // change the name of the var and in the fetch as well
+
+  //   // const user_id = 41; // change the name of the var and in the fetch as well
+  //   return fetch(
+  //     'http://localhost:3333/api/1.0.0/user/' +
+  //       user_id +
+  //       '/post/' +
+  //       post_id +
+  //       '/like',
+  //     {
+  //       method: 'post',
+  //       headers: {
+  //         'X-Authorization': value,
+  //       },
+  //     }
+  //   )
+  //     .then((response) => {
+  //       if (response.status === 200) {
+  //         // If it is not the page of a single post, display all posts
+  //         if (!this.state.singlePost) {
+  //           this.getUserPosts();
+  //           // Refresh the individual post
+  //         } else {
+  //           this.getSinglePost();
+  //         }
+  //       } else {
+  //         throw 'Something went wrong';
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // };
+
   likePost = async (post_id) => {
     const value = await AsyncStorage.getItem('@session_token');
+    // TODO
+    // user_id was initially in the request but it didnt' work
 
     // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
     const user_id = this.state.userProfileID; // change the name of the var and in the fetch as well
 
-    // const user_id = 41; // change the name of the var and in the fetch as well
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' +
         user_id +
@@ -67,17 +138,30 @@ class PostScreen extends Component {
       }
     )
       .then((response) => {
+        // If the post was liked successfully, update the page to reflect that
         if (response.status === 200) {
-          // If it is not the page of a single post, display all posts
+          // If it's the profile page, refresh all the posts
           if (!this.state.singlePost) {
             this.getUserPosts();
-            // Refresh the individual post
+            // If it's the page for an individual post, refresh it
           } else {
             this.getSinglePost();
           }
-          console.log('Post liked!');
-        } else {
-          throw 'Something went wrong';
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Make sure you are logged in, and then try again!';
+          this.setModalVisible(true);
+        } else if (response.status === 403) {
+          this.state.errorMessage =
+            'Forbidden! You can not like your own posts or posts appearing on your profile';
+          this.setModalVisible(true);
+        } else if (response.status === 400) {
+          this.state.errorMessage = 'You have already liked this post!';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again';
+          this.setModalVisible(true);
         }
       })
       .catch((error) => {
@@ -85,9 +169,49 @@ class PostScreen extends Component {
       });
   };
 
+  // removeLike = async (post_id) => {
+  //   const value = await AsyncStorage.getItem('@session_token');
+  //   // TODO
+  //   // user_id was initially in the request but it didnt' work
+  //   const user_id = this.state.userProfileID;
+  //   return fetch(
+  //     'http://localhost:3333/api/1.0.0/user/' +
+  //       user_id +
+  //       '/post/' +
+  //       post_id +
+  //       '/like',
+  //     {
+  //       method: 'delete',
+  //       headers: {
+  //         'X-Authorization': value,
+  //       },
+  //     }
+  //   )
+  //     .then((response) => {
+  //       if (response.status === 200) {
+  //         // If it is not the page of a single post, display all posts
+  //         if (!this.state.singlePost) {
+  //           this.getUserPosts();
+  //           // Refresh the individual post
+  //         } else {
+  //           this.getSinglePost();
+  //         }
+  //         console.log('Post liked!');
+  //       } else {
+  //         throw 'Something went wrong';
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // };
+
+  //   PATCH
+  // /user/{user_id}/post/{post_id}
+
   removeLike = async (post_id) => {
     const value = await AsyncStorage.getItem('@session_token');
-    // TODO
+
     // user_id was initially in the request but it didnt' work
     const user_id = this.state.userProfileID;
     return fetch(
@@ -104,17 +228,31 @@ class PostScreen extends Component {
       }
     )
       .then((response) => {
+        console.log('response code: ', response.status);
+        // If the post was liked successfully, update the page to reflect that
         if (response.status === 200) {
-          // If it is not the page of a single post, display all posts
+          // If it's the profile page, refresh all the posts
           if (!this.state.singlePost) {
             this.getUserPosts();
-            // Refresh the individual post
+            // If it's the page for an individual post, refresh it
           } else {
             this.getSinglePost();
           }
-          console.log('Post liked!');
-        } else {
-          throw 'Something went wrong';
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Make sure you are logged in, and then try again!';
+          this.setModalVisible(true);
+        } else if (response.status === 403) {
+          this.state.errorMessage =
+            'Forbidden! You can not like or unlike your own posts or posts appearing on your profile';
+          this.setModalVisible(true);
+        } else if (response.status === 400) {
+          this.state.errorMessage = 'You have already unliked this post!';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again';
+          this.setModalVisible(true);
         }
       })
       .catch((error) => {
@@ -122,8 +260,6 @@ class PostScreen extends Component {
       });
   };
 
-  //   PATCH
-  // /user/{user_id}/post/{post_id}
   updatePost = async () => {
     const value = await AsyncStorage.getItem('@session_token');
     // Set the text for the new post
@@ -171,23 +307,6 @@ class PostScreen extends Component {
       .catch((error) => {
         console.log(error);
       });
-  };
-
-  // update post function
-  // On click:
-  // 1. Update post = true
-  // 2. if update post true, display update field
-  // 3. have second button saying update finished which triggers update request
-  //   import it from main page
-  componentDidMount = async () => {
-    console.log('\n\n\n\n\npost component did mount:');
-    // this.state.userProfileID = this.navigation.params.user_id;
-    this.state.loggedUserId = await AsyncStorage.getItem('@id');
-
-    await this.getSinglePost();
-    await this.checkPostIsFromLoggedUser();
-    await this.getSinglePost();
-    console.log('user profile id: ', this.state.userProfileID);
   };
 
   checkPostIsFromLoggedUser = async () => {
@@ -280,6 +399,8 @@ class PostScreen extends Component {
   };
 
   render() {
+    const { modalVisible } = this.state;
+
     if (this.state.isLoading) {
       return (
         <View
@@ -296,6 +417,38 @@ class PostScreen extends Component {
     } else {
       return (
         <View>
+          <View>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  {/* <Text style={styles.modalText}>Hello World!</Text> */}
+                  {/* Display the erro you wish to display to the user */}
+                  <Text style={styles.modalText}>
+                    {this.state.errorMessage}{' '}
+                  </Text>
+                  <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <Text style={styles.textStyle}>Ok</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </Modal>
+            {/* <Pressable
+            style={[styles.button, styles.buttonOpen]}
+            onPress={() => this.setModalVisible(true)}
+          >
+            <Text style={styles.textStyle}>Show Modal</Text>
+          </Pressable> */}
+          </View>
           <Text>
             From {this.state.post.author.first_name}{' '}
             {this.state.post.author.last_name}
@@ -361,3 +514,65 @@ class PostScreen extends Component {
 }
 
 export default PostScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+  },
+  input: {
+    backgroundColor: '#edf7ff',
+    borderRadius: 10,
+    height: 50,
+    // flex: 1,
+    padding: 10,
+    marginBottom: 20,
+  },
+  Button: {
+    marginBottom: 50,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+});

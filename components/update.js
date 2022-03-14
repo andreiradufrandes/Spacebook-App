@@ -19,6 +19,7 @@ import {
   ButtonText,
   Title,
 } from '../styles.js';
+import { checkName } from './functions';
 /*
 
 Left TODO:
@@ -27,6 +28,9 @@ Left TODO:
    - check the details are correct
    - if the email exists in the database it will give you an error
    - display exactly which input is incorrect
+   - maybe change get user info
+   - change the 400 response code after checking the correct email
+   - check finished code examplle for login containing SCROLLVIEW 
 */
 
 class UpdateScreen extends Component {
@@ -53,14 +57,14 @@ class UpdateScreen extends Component {
     this.getUserInfo();
   }
 
-  // move from here to the import
-  checkName(name) {
-    if (!/[^a-zA-Z]/.test(name)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  // // move from here to the import
+  // checkName(name) {
+  //   if (!/[^a-zA-Z]/.test(name)) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
 
   getUserInfo = async () => {
     const userId = await AsyncStorage.getItem('@id');
@@ -100,37 +104,48 @@ class UpdateScreen extends Component {
   };
 
   updateDetails = async () => {
-    let firstNameCheck = this.checkName(this.state.first_name);
-    let lastNameCheck = this.checkName(this.state.last_name);
+    let firstNameCheck;
+    let lastNameCheck;
+    // Check if the input has been changed
+    if (this.state.first_name == '') {
+      firstNameCheck = true;
+    } else {
+      firstNameCheck = checkName(this.state.first_name);
+    }
 
-    console.log('Checking names: is firstname only letters');
-    console.log(this.checkName(this.state.first_name));
-    console.log('Checking names: is lastname only letters');
-    console.log(this.checkName(this.state.last_name));
+    if (this.state.last_name == '') {
+      lastNameCheck = true;
+    } else {
+      lastNameCheck = checkName(this.state.lastNameCheck);
+    }
 
-    // Check if the names entered are correct, and only send the request if they dont containt characters that are not letters
-    if (firstNameCheck && lastNameCheck) {
+    // Create an error for the user to inform them the first or second name is incorrect
+    if ((firstNameCheck && lastNameCheck) == false) {
+      this.state.errorMessage =
+        'First or last name incorrect! Make sure you use only letters.';
+      this.setModalVisible(true);
+      return null;
+    } else {
+      // Store the user's details to be userd in the networking requests
       const userId = await AsyncStorage.getItem('@id');
       const value = await AsyncStorage.getItem('@session_token');
 
       // Only update the user details if they contains letters only
-
       let to_send = {};
 
+      // Check the details provided by the user against their previous details, and only update the ones that have been changed
       if (
         this.state.first_name != this.state.origin_first_name &&
         this.state.first_name != ''
       ) {
         to_send['first_name'] = this.state.first_name;
       }
-      // if (this.state.last_name != this.state.origin_last_name){
       if (
         this.state.last_name != this.state.origin_last_name &&
         this.state.last_name != ''
       ) {
         to_send['last_name'] = this.state.last_name;
       }
-
       if (
         this.state.email != this.state.origin_email &&
         this.state.email != ''
@@ -138,7 +153,7 @@ class UpdateScreen extends Component {
         to_send['email'] = this.state.email;
       }
 
-      // check the string we're sending
+      // DELETE
       console.log(JSON.stringify(to_send));
 
       return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
@@ -150,18 +165,34 @@ class UpdateScreen extends Component {
         body: JSON.stringify(to_send),
       })
         .then((response) => {
-          console.log('User details updated');
-          this.props.navigation.navigate('Profile', {
-            user_id: userId,
-          });
+          console.log('responseCode: ', response.status);
+          if (response.status === 200) {
+            this.state.errorMessage = 'Details updated successfully!';
+            this.setModalVisible(true);
+            this.props.navigation.navigate('Profile', {
+              user_id: userId,
+            });
+          } else if (response.status === 400) {
+            this.state.errorMessage =
+              'This might be because the email you are trying to use is already assigned to another account, or the email provided is incorrect';
+            this.setModalVisible(true);
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Try logging in again to make sure the right details are sent to the server.';
+            this.setModalVisible(true);
+          } else if (response.status === 403) {
+            this.state.errorMessage =
+              'Forbidden! You can only update your own details.';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again.';
+            this.setModalVisible(true);
+          }
         })
         .catch((error) => {
           console.log(error);
         });
-    } else {
-      console.log('WARNING: Incorrect input');
-      // TODO
-      // ADD POPUP SAYING WRONG INPUT
     }
   };
 
@@ -214,9 +245,9 @@ class UpdateScreen extends Component {
             {/* <Pressable
             style={[styles.button, styles.buttonOpen]}
             onPress={() => this.setModalVisible(true)}
-          >
+            >
             <Text style={styles.textStyle}>Show Modal</Text>
-          </Pressable> */}
+            </Pressable> */}
           </View>
 
           <Title>Enter the details you wish you change</Title>
