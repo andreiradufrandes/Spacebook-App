@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   Button,
-  Alert,
   Modal,
   Pressable,
   StyleSheet,
@@ -27,38 +26,47 @@ class SignupScreen extends Component {
 
     // set default values to be replaced by the user's input
     this.state = {
-      first_name: 'defaultName',
-      last_name: 'defaultLastName',
-      email: 'defaultemail@mmu.ac.uk',
-      password: 'defaultPassword',
+      first_name: '',
+      last_name: '',
+      email: '',
+      password: '',
       modalVisible: false,
       errorMessage: '',
     };
   }
+
+  // Add a toggle function to set the visibility for the user alerts
   setModalVisible = (visible) => {
     this.setState({ modalVisible: visible });
   };
 
-  // Signup, passing the users details in
+  // TODO
+  // Add email check
+  // add check to see if it is empty space
   signup = () => {
-    // TODO
-    // ADD PASSWORD CHECK AND EMAIL CHECK
-    // ADD USABILITY OF SPACE
-    // Add condition that checks input NOT empty
-    console.log('signup called');
     const firstNameCheck = checkName(this.state.first_name);
     const lastNameCheck = checkName(this.state.last_name);
+    // Check the password contains more than 5 characters
+    const passwordCheck = this.state.password.length >= 5;
 
-    // This the line that makes it appear
-    // onPress={() => this.setModalVisible(true)}
+    console.log('first name chacek: ', firstNameCheck);
+    console.log('correctpassword: ', passwordCheck);
+    // Check if the first and second name contain letters only
 
-    // This makes it dissapear
-    // onPress={() => this.setModalVisible(!modalVisible)}
-
-    console.log('checkpassword: ', checkPassword(this.state.password));
-    // If the inputs are correct, send them to the user
-    // else, display toast error
-    if (firstNameCheck && lastNameCheck) {
+    // Create an error for the user to inform them the first or second name is incorrect
+    if ((firstNameCheck && lastNameCheck) == false) {
+      this.state.errorMessage =
+        'First or last name incorrect! Make sure you use only letters.';
+      this.setModalVisible(true);
+      return null;
+      // I think return null and stop here
+    } else if (passwordCheck == false) {
+      this.state.errorMessage =
+        'Password incorrect! Password must contain at least 4 characters.';
+      this.setModalVisible(true);
+      return null;
+    } else {
+      // User input is correct, set the details in a variable to be sent to the server
       let user_details = {
         first_name: this.state.first_name,
         last_name: this.state.last_name,
@@ -66,7 +74,7 @@ class SignupScreen extends Component {
         password: this.state.password,
       };
 
-      console.log(user_details);
+      // Sent a request to the server with the details provided by the user to create a new account
       fetch('http://localhost:3333/api/1.0.0/user', {
         method: 'POST',
         headers: {
@@ -74,30 +82,27 @@ class SignupScreen extends Component {
         },
         body: JSON.stringify(user_details),
       })
-        // add error codes
+        // If the account was created successfully, navigate the user to the login page. Otherwise, display the appropriate error
         .then((response) => {
-          Alert.alert('User added successfully'); // replace
-          // navigate me to main
-          this.props.navigation.navigate('Login');
+          // If the account was created successfully, inform the user and direct the mto the login page
+          if (response.status === 201) {
+            this.props.navigation.navigate('Login');
+          } else if (response.status === 400) {
+            this.state.errorMessage =
+              ' This could be because there is already an account with your email. Try loggin in instead!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
         })
         .catch((error) => {
           console.log(error);
         });
-    } else {
-      // TODO
-      // Add toast error
-      // Empty the fiels
-      this.state.error = 'error';
-      console.log('incorrect input! try again!');
-      // set the name of the error you wish to dispplay to the user
-
-      this.state.errorMessage = 'Name or password incorrect! try again';
-      // Display the error for the user
-      this.setModalVisible(true);
     }
   };
 
-  // Prolly best to delete from here
   componentDidMount() {
     console.log('mounted');
   }
@@ -105,15 +110,17 @@ class SignupScreen extends Component {
   render() {
     const { modalVisible } = this.state;
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View>
         {/* Modal code */}
+        {/* TODO 
+          replace following one with just view no styleing
+        */}
         <View style={styles.centeredView}>
           <Modal
             animationType="slide"
             transparent={true}
             visible={modalVisible}
             onRequestClose={() => {
-              Alert.alert('Modal has been closed.');
               this.setModalVisible(!modalVisible);
             }}
           >
@@ -128,7 +135,7 @@ class SignupScreen extends Component {
                   style={[styles.button, styles.buttonClose]}
                   onPress={() => this.setModalVisible(!modalVisible)}
                 >
-                  <Text style={styles.textStyle}>Hide Modal</Text>
+                  <Text style={styles.textStyle}>Ok</Text>
                 </Pressable>
               </View>
             </View>

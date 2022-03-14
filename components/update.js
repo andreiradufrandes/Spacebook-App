@@ -1,5 +1,14 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  Modal,
+  Pressable,
+  StyleSheet,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TabRouter } from '@react-navigation/native';
 import {
@@ -32,8 +41,13 @@ class UpdateScreen extends Component {
       first_name: '',
       last_name: '',
       email: '',
+      modalVisible: false,
     };
   }
+  // Add a toggle function to set the visibility for the user alerts
+  setModalVisible = (visible) => {
+    this.setState({ modalVisible: visible });
+  };
 
   componentDidMount() {
     this.getUserInfo();
@@ -152,6 +166,8 @@ class UpdateScreen extends Component {
   };
 
   render() {
+    const { modalVisible } = this.state;
+
     if (this.state.isLoading) {
       return (
         <View
@@ -168,6 +184,41 @@ class UpdateScreen extends Component {
     } else {
       return (
         <View>
+          {/* Modal code */}
+
+          <View>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  {/* <Text style={styles.modalText}>Hello World!</Text> */}
+                  {/* Display the erro you wish to display to the user */}
+                  <Text style={styles.modalText}>
+                    Error: {this.state.errorMessage}{' '}
+                  </Text>
+                  <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <Text style={styles.textStyle}>Ok</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </Modal>
+            {/* <Pressable
+            style={[styles.button, styles.buttonOpen]}
+            onPress={() => this.setModalVisible(true)}
+          >
+            <Text style={styles.textStyle}>Show Modal</Text>
+          </Pressable> */}
+          </View>
+
           <Title>Enter the details you wish you change</Title>
           <Label>First name:</Label>
           <TextInput
@@ -198,3 +249,47 @@ class UpdateScreen extends Component {
   }
 }
 export default UpdateScreen;
+
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+});

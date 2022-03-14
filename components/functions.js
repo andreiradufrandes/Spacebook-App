@@ -1,3 +1,13 @@
+// export function checkName(name) {
+//   if (name == '') {
+//     return false;
+//   } else if (!/[^a-zA-Z]{2,}/.test(name)) {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// }
+
 export function checkName(name) {
   if (name == '') {
     return false;
@@ -8,7 +18,7 @@ export function checkName(name) {
   }
 }
 
-// Function to check password
+// Function to check pasword
 // 1. Minimum amount of letter
 // 2. At least 1 number
 // 3. At least 1 uppercase letter
@@ -16,8 +26,8 @@ export function checkName(name) {
 
 // Function to check post
 
-export function checkPassword(password) {
-  return /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&]){10,16}$/.test(password);
-  // at least one number
-}
+// export function checkPassword(password) {
+//   return /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&]){10,16}$/.test(password);
+//   // at least one number
+// }
 // Andreifran2!

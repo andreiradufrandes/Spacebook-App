@@ -705,6 +705,8 @@ class ProfileScreen extends React.Component {
         <RootSiblingParent>
           <View>
             <ScrollView>
+              {/* Modal trial */}
+
               {/* header */}
               <View>
                 {/* Change the sizes */}
