@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-filename-extension */
 import React, { Component } from 'react';
 import 'react-native-gesture-handler';
 
@@ -9,6 +10,7 @@ import NotificationsScreen from './notifications';
 import FriendsScreen from './friends';
 import PostScreen from './post';
 import ProfilePhotoScreen from './profilePhoto';
+import ProfileCheck from './profileCheck';
 // const Stack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 
@@ -19,6 +21,11 @@ class ProfileComponentScreen extends Component {
   render() {
     return (
       <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+        <ProfileStack.Screen
+          name="ProfileCheck"
+          component={ProfileCheck}
+          //    set the initial param id to that one
+        />
         <ProfileStack.Screen
           name="Profile"
           component={ProfileScreen}

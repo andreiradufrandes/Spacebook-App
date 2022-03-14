@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
-import { FlatList } from 'react-native-web';
+import { View, Text, TextInput, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { removeLike } from './functions';
 import {
   Container,
   Label,

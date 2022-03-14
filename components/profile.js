@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,7 +23,7 @@ import {
 } from '../styles.js';
 import { RootSiblingParent } from 'react-native-root-siblings';
 
-class ProfileScreen extends Component {
+class ProfileScreen extends React.Component {
   constructor(props) {
     super(props);
 
@@ -45,6 +46,7 @@ class ProfileScreen extends Component {
       friendsRequestsList: [],
       singlePost: false,
       userRequestedFriendRequest: false,
+      modalVisible: false,
     };
   }
 
@@ -676,7 +678,12 @@ class ProfileScreen extends Component {
       });
   };
 
+  setModalVisible = (visible) => {
+    this.setState({ modalVisible: visible });
+  };
+
   render() {
+    const { modalVisible } = this.state.modalVisible; // i think
     // Display a buffer text if the data required to be displayed in not loaded yet
     if (this.state.isLoading) {
       return (

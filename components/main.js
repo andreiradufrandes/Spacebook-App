@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { View, Text } from 'react-native';
-// import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SearchScreen from './search';
@@ -11,7 +10,7 @@ import ProfileComponentScreen from './profileComponent';
 const Tab = createBottomTabNavigator();
 
 class MainScreen extends Component {
-  // From solution code
+
   constructor(props) {
     super(props);
 

@@ -3,10 +3,6 @@ import { View, Text, TextInput, Button, Alert } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Todo
-// Flatlist of friends
-// buttons for going to their profile
-
 class FriendsScreen extends Component {
   constructor(props) {
     super(props);
