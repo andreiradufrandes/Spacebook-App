@@ -31,6 +31,7 @@ class LoginScreen extends Component {
     this.state = {
       email: 'andreifrandes@mmu.ac.uk', // change
       password: 'andreifrandes', // change
+      // modalVisible: true,
       modalVisible: false,
     };
   }

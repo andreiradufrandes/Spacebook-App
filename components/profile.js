@@ -11,6 +11,7 @@ import {
   ScrollView,
   Modal,
   Pressable,
+  SafeAreaView,
 } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,7 +23,9 @@ import {
   Center,
   ButtonText,
 } from '../styles.js';
-import { RootSiblingParent } from 'react-native-root-siblings';
+
+import { timeAndDateExtractor } from './functions';
+// import { RootSiblingParent } from 'react-native-root-siblings';
 // TODO
 // DELETE VIEW USER'S PAGE BUTTON
 // Timestamp
@@ -32,6 +35,7 @@ import { RootSiblingParent } from 'react-native-root-siblings';
 // add friend so it works and refreshes the page or something when you accept a friend request
 // delete new post text and from render too
 // add buttons for going back maybe
+// some stuff is redundant(camera on profile page for instance) remove it
 
 class ProfileScreen extends React.Component {
   constructor(props) {
@@ -766,9 +770,11 @@ class ProfileScreen extends React.Component {
     // Display if the the page is ready
     else {
       return (
-        <RootSiblingParent>
-          <View>
-            <ScrollView>
+        // <RootSiblingParent>
+        // <View>
+        <SafeAreaView style={styles.container}>
+          <ScrollView>
+            <View>
               <View>
                 <Modal
                   animationType="slide"
@@ -931,7 +937,12 @@ class ProfileScreen extends React.Component {
                         <Text>
                           From: {item.author.first_name} {item.author.last_name}{' '}
                         </Text>
-                        <Text> Posted at {item.timestamp} </Text>
+                        <Text>
+                          {' '}
+                          Posted on:{' '}
+                          {timeAndDateExtractor(item.timestamp).at(0)} at{' '}
+                          {timeAndDateExtractor(item.timestamp).at(1)}
+                        </Text>
                         <Text> {item.numLikes} likes</Text>
 
                         {/* Display only if it's NOT my page */}
@@ -988,9 +999,11 @@ class ProfileScreen extends React.Component {
                   />
                 </View>
               ) : null}
-            </ScrollView>
-          </View>
-        </RootSiblingParent>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+        // </View>
+        // </RootSiblingParent>
       );
     }
   }

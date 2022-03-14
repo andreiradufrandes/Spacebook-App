@@ -18,6 +18,8 @@ import {
   ButtonText,
   Title,
 } from '../styles.js';
+
+import { timeAndDateExtractor } from './functions';
 // Todo
 // UPDATE BUTTON ONLY WHEN IT'S YOUR POST
 // LIKE REMOVE LIKE BUTTON ONLY WHEN IT'S THEIR POST
@@ -472,6 +474,13 @@ class PostScreen extends Component {
             {this.state.post.author.last_name}
           </Text>
           <Text> {this.state.post.text}</Text>
+          <Text>
+            {' '}
+            Posted on: {timeAndDateExtractor(this.state.post.timestamp).at(
+              0
+            )}{' '}
+            at {timeAndDateExtractor(this.state.post.timestamp).at(1)}
+          </Text>
           <Text> {this.state.post.numLikes} likes</Text>
           {/* If it's not my post, you can like it  */}
           {!this.state.isLoggedInUsersPost ? (

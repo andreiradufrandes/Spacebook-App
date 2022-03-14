@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { View, Text, TextInput, Button, Alert, ScrollView } from 'react-native';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -100,31 +100,33 @@ class FriendsScreen extends Component {
     } else {
       return (
         //   maybe delete the style AND the container
-        <View>
-          <FlatList
-            // ADD THE POSTS
-            // POPULATE WITH POST CUSTOME COMPONENT
-            data={this.state.friendsList}
-            keyExtractor={(item) => item.user_id}
-            renderItem={({ item }) => (
-              <View>
-                {/* <Text> {item.text} </Text> */}
-                <Text>
-                  {item.user_givenname} {item.user_familyname}
-                </Text>
-                <Button
-                  title="Visit user's profile"
-                  onPress={() =>
-                    this.props.navigation.navigate('Profile', {
-                      user_id: item.user_id,
-                    })
-                  }
-                  //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
-                />
-              </View>
-            )}
-          />
-        </View>
+        <ScrollView>
+          <View>
+            <FlatList
+              // ADD THE POSTS
+              // POPULATE WITH POST CUSTOME COMPONENT
+              data={this.state.friendsList}
+              keyExtractor={(item) => item.user_id}
+              renderItem={({ item }) => (
+                <View>
+                  {/* <Text> {item.text} </Text> */}
+                  <Text>
+                    {item.user_givenname} {item.user_familyname}
+                  </Text>
+                  <Button
+                    title="Visit user's profile"
+                    onPress={() =>
+                      this.props.navigation.navigate('Profile', {
+                        user_id: item.user_id,
+                      })
+                    }
+                    //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
+                  />
+                </View>
+              )}
+            />
+          </View>
+        </ScrollView>
       );
     }
   }

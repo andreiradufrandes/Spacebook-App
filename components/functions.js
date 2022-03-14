@@ -50,3 +50,9 @@ export function checkLettersSpacesNumbers(input) {
     return false;
   }
 }
+
+export function timeAndDateExtractor(timestamp) {
+  let date = timestamp.slice(0, 10);
+  let time = timestamp.slice(11, 16);
+  return [date, time];
+}

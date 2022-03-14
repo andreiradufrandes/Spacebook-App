@@ -177,7 +177,7 @@ class SignupScreen extends Component {
           secureTextEntry={true}
           maxLength="16"
         />
-        <Label>Password instructions</Label>
+        <Text>Password must contain at least 4 characters</Text>
         <Button
           title="Signup"
           onPress={() => this.signup()}
