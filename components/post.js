@@ -261,60 +261,62 @@ class PostScreen extends Component {
   };
 
   updatePost = async () => {
-    const value = await AsyncStorage.getItem('@session_token');
-    // Set the text for the new post
-    let newPost = this.state.post;
-    newPost.text = this.state.newPostMeesage;
+    console.log('this.state.newPostText: ', this.state.newPostMeesage);
+    if (this.state.newPostMeesage !== '') {
+      const value = await AsyncStorage.getItem('@session_token');
+      // Set the text for the new post
+      let newPost = this.state.post;
+      newPost.text = this.state.newPostMeesage;
 
-    console.log('old post ');
-    console.log(this.state.post);
-    console.log('newPost(shhould have new text: ');
-    console.log(newPost);
-    let post_id = this.state.post.post_id;
-    // UNDO
-    // let user_id = this.state.post.author.user_id; // not sure if the right id or my id
-    let user_id = this.state.userProfileID; // not sure if the right id or my id
+      let post_id = this.state.post.post_id;
+      // let user_id = this.state.post.author.user_id; // not sure if the right id or my id
+      let user_id = this.state.userProfileID; // not sure if the right id or my id
 
-    console.log('stringified text,:\n', JSON.stringify(newPost));
-    // make copy of post
-    // set text to something else
-    // send it
+      console.log('stringified text,:\n', JSON.stringify(newPost));
 
-    // TODO
-    // user_id was initially in the request but it didnt' work
-    // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
-
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
-      {
-        method: 'PATCH',
-        headers: {
-          'content-type': 'application/json',
-          'X-Authorization': value,
-        },
-        body: JSON.stringify(newPost),
-      }
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          this.state.updatePost = false;
-          this.getSinglePost();
-          console.log('Post updates refresh page(Take user back to page)');
-        } else {
-          throw 'Something went wrong';
+      return fetch(
+        'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
+        {
+          method: 'PATCH',
+          headers: {
+            'content-type': 'application/json',
+            'X-Authorization': value,
+          },
+          body: JSON.stringify(newPost),
         }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      )
+        .then((response) => {
+          if (response.status === 200) {
+            this.state.updatePost = false;
+            this.getSinglePost();
+            this.state.errorMessage = 'Post updated successfully!';
+            this.setModalVisible(true);
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in!';
+            this.setModalVisible(true);
+          } else if (response.status === 404) {
+            this.state.errorMessage =
+              'Make sure your new post does not go over 256 characters, and that you are updating your own post!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      this.state.errorMessage =
+        'Post can not be empty! Add text and try adding it again!';
+      this.setModalVisible(true);
+    }
   };
 
   checkPostIsFromLoggedUser = async () => {
-    // console.log(this.state.loggedUserId, this.state.post.author.user_id);
-    // console.log(this.state.loggedUserId == this.state.post.author.user_id);
-
     if (this.state.loggedUserId == this.state.post.author.user_id) {
-      console.log('--- This post is from the user who is logged in--');
       this.state.isLoggedInUsersPost = true;
     }
   };
@@ -335,11 +337,27 @@ class PostScreen extends Component {
     )
       .then((response) => {
         if (response.status === 200) {
-          console.log('post deleted');
-          //   Navigate user somewhere
-          this.props.navigation.navigate('Profile'); // maybe add something to it
-        } else {
-          throw 'Something went wrong';
+          // Add allert to inform the user the post was deleted
+          this.props.navigation.navigate('Profile', {
+            user_id: user_id,
+          });
+          // take the user BACK to thhe profile they were on
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Make sure you are logged in and try again';
+          this.setModalVisible(true);
+        } else if (response.status === 403) {
+          this.state.errorMessage =
+            'Forbidden! You can only delete your posts!';
+          this.setModalVisible(true);
+        } else if (response.status === 404) {
+          this.state.errorMessage =
+            'The post you are trying to delete does not exist anymore!';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again';
+          this.setModalVisible(true);
         }
       })
       .catch((error) => {

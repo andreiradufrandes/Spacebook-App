@@ -27,6 +27,11 @@ import { RootSiblingParent } from 'react-native-root-siblings';
 // DELETE VIEW USER'S PAGE BUTTON
 // Timestamp
 // fix remove like so it only shows once AND it shows the error
+// move ALL the posts to the invidual post as well
+// clean all the buttons so they have the right text inside of them
+// add friend so it works and refreshes the page or something when you accept a friend request
+// delete new post text and from render too
+// add buttons for going back maybe
 
 class ProfileScreen extends React.Component {
   constructor(props) {
@@ -40,9 +45,9 @@ class ProfileScreen extends React.Component {
       isLoading: true,
       userInfo: [],
       userPosts: [], // not sure, might be diferent type
-      newPostText: '',
+      newPostText: '', // delete
       postaddedWindow: '',
-      displayMessage: false, // maybe delete later
+
       friendsList: [],
       hasPermission: null,
       type: Camera.Constants.Type.back,
@@ -380,13 +385,25 @@ class ProfileScreen extends React.Component {
     )
       .then((response) => {
         if (response.status === 200) {
-          console.log('post deleted'); // delete this
-          this.state.displayMessage = true; // maybe delete later
+          this.state.errorMessage = 'Post deleted!';
+          this.setModalVisible(true);
           this.getUserPosts();
-
-          //   return response.json();
-        } else {
-          throw 'Something went wrong';
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Make sure you are logged in and try again';
+          this.setModalVisible(true);
+        } else if (response.status === 403) {
+          this.state.errorMessage =
+            'Forbidden! You can only delete your posts!';
+          this.setModalVisible(true);
+        } else if (response.status === 404) {
+          this.state.errorMessage =
+            'The post you are trying to delete does not exist anymore!';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again';
+          this.setModalVisible(true);
         }
       })
       .catch((error) => {
@@ -483,7 +500,7 @@ class ProfileScreen extends React.Component {
           this.setModalVisible(true);
         } else if (response.status === 403) {
           this.state.errorMessage =
-            'Forbidden! You can not like your own posts or posts appeaing on your profile';
+            'Forbidden! You can not like your own posts or posts appearing on your profile';
           this.setModalVisible(true);
         } else if (response.status === 400) {
           this.state.errorMessage = 'You have already liked this post!';
@@ -534,7 +551,7 @@ class ProfileScreen extends React.Component {
           this.setModalVisible(true);
         } else if (response.status === 403) {
           this.state.errorMessage =
-            'Forbidden! You can not like or unlike your own posts or posts appeaing on your profile';
+            'Forbidden! You can not like or unlike your own posts or posts appearing on your profile';
           this.setModalVisible(true);
         } else if (response.status === 400) {
           this.state.errorMessage = 'You have already unliked this post!';
@@ -963,9 +980,9 @@ class ProfileScreen extends React.Component {
                         ) : null}
 
                         {/* Add functionality for updating a post if it's on the user's profile */}
-                        {this.state.isLoggedInUsersProfile ? (
+                        {/* {this.state.isLoggedInUsersProfile ? (
                           <Button title="Update post(NOT CODED)" />
-                        ) : null}
+                        ) : null} */}
                       </View>
                     )}
                   />

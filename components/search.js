@@ -50,56 +50,58 @@ class SearchScreen extends Component {
 
   //   ADD LIMIT TO THE FETCH RESULT, AND MAKE IT LOOK LIKE THE REAL ONE
   searchName = async () => {
-    const value = await AsyncStorage.getItem('@session_token');
+    // If the search box is not empty, execute the code looking for the person
+    if (!(this.state.searchTerm === '')) {
+      const value = await AsyncStorage.getItem('@session_token');
 
-    console.log(
-      'lettersandspaces check: ',
-      checkLettersAndSpaces(this.state.searchTerm)
-    );
+      const serachTermCheck = checkLettersAndSpaces(this.state.searchTerm);
 
-    const serachTermCheck = checkLettersAndSpaces(this.state.searchTerm);
-
-    // Check that the user input contain letters only, and no numbers or special characters
-    if (!serachTermCheck) {
-      this.state.errorMessage =
-        'Incorrect input, the name can only contain letters, no numbers or  special characters. Try again!';
-      this.setModalVisible(true);
-    } else {
-      return fetch(
-        'http://localhost:3333/api/1.0.0/search?q=' + this.state.searchTerm,
-        {
-          headers: {
-            'X-Authorization': value,
-          },
-        }
-      )
-        .then((response) => {
-          console.log('----Response code------: ', response.status);
-          if (response.status === 200) {
-            return response.json();
-          } else if (response.status === 400) {
-            this.state.errorMessage =
-              'Bad request! Make sure you have use only letters inside the search box!';
-            this.setModalVisible(true);
-          } else if (response.status === 401) {
-            this.state.errorMessage =
-              'Unauthorised! Make sure you are logged in, and then try again!';
-            this.setModalVisible(true);
-          } else if (response.status === 500) {
-            this.state.errorMessage =
-              'Server error! Restart the server then try again';
-            this.setModalVisible(true);
+      // Check that the user input contain letters only, and no numbers or special characters
+      if (!serachTermCheck) {
+        this.state.errorMessage =
+          'Incorrect input, the name can only contain letters, no numbers or  special characters. Try again!';
+        this.setModalVisible(true);
+      } else {
+        return fetch(
+          'http://localhost:3333/api/1.0.0/search?q=' + this.state.searchTerm,
+          {
+            headers: {
+              'X-Authorization': value,
+            },
           }
-        })
-        .then((responseJson) => {
-          this.setState({
-            isLoading: false,
-            searchResults: responseJson,
+        )
+          .then((response) => {
+            console.log('----Response code------: ', response.status);
+            if (response.status === 200) {
+              return response.json();
+            } else if (response.status === 400) {
+              this.state.errorMessage =
+                'Bad request! Make sure you have use only letters inside the search box!';
+              this.setModalVisible(true);
+            } else if (response.status === 401) {
+              this.state.errorMessage =
+                'Unauthorised! Make sure you are logged in, and then try again!';
+              this.setModalVisible(true);
+            } else if (response.status === 500) {
+              this.state.errorMessage =
+                'Server error! Restart the server then try again';
+              this.setModalVisible(true);
+            }
+          })
+          .then((responseJson) => {
+            this.setState({
+              isLoading: false,
+              searchResults: responseJson,
+            });
+          })
+          .catch((error) => {
+            console.log(error);
           });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      }
+    } else {
+      this.state.errorMessage =
+        "Search box can not be empty! Add person's name and try again";
+      this.setModalVisible(true);
     }
   };
 
