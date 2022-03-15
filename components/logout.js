@@ -22,19 +22,22 @@ class LogoutScreen extends Component {
   }
 
   componentDidMount() {
-    this._unsubscribe = this.props.navigation.addListener('focus', () => {
+    // Add an event listener to check if the user is logged in everytime they navigate to the logout page
+    this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.checkLoggedIn();
     });
   }
 
   componentWillUnmount() {
-    this._unsubscribe();
+    this.unsubscribe();
   }
 
+  // Add a toggle function to set the visibility of the alerts, to be be used during networking requests displaying allerts for the user
   setModalVisible = (visible) => {
     this.setState({ modalVisible: visible });
   };
 
+  // Check if the user is logged in, and navigate them back to the login page if the are not logged in
   checkLoggedIn = async () => {
     const value = await AsyncStorage.getItem('@session_token');
     if (value !== null) {
@@ -44,33 +47,42 @@ class LogoutScreen extends Component {
     }
   };
 
+  // Add a function to log out the user
   logout = async () => {
-    let token = await AsyncStorage.getItem('@session_token');
+    // Get the user's token to be used for authorising the fetch request
+    const token = await AsyncStorage.getItem('@session_token');
+
+    // Remove the authentification token from the Async library before logging out
     await AsyncStorage.removeItem('@session_token');
-    return fetch('http://localhost:3333/api/1.0.0/logout', {
-      method: 'post',
-      headers: {
-        'X-Authorization': token,
-      },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('response code:', response.status);
-          this.props.navigation.navigate('Login');
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Logout failed! This is because you are not logged in!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
+    return (
+      fetch('http://localhost:3333/api/1.0.0/logout', {
+        method: 'post',
+        headers: {
+          'X-Authorization': token,
+        },
       })
-      .catch((error) => {
-        console.log(error);
-        // ToastAndroid.show(error, ToastAndroid.SHORT);
-      });
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          // Navigate the user to the login page if they have logged out successfully
+          if (response.status === 200) {
+            console.log('response code:', response.status);
+            this.props.navigation.navigate('Login');
+            // Display differnt error alerts for the user if the netwroking request was unsuccessful
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Logout failed! This is because you are not logged in!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        // Throw an error if one is to occur
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   render() {
@@ -79,6 +91,7 @@ class LogoutScreen extends Component {
     return (
       <View>
         <View style={styles.centeredView}>
+          {/* Add a component to display messages for the user */}
           <Modal
             animationType="slide"
             transparent={true}
@@ -89,8 +102,6 @@ class LogoutScreen extends Component {
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-                {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                {/* Display the erro you wish to display to the user */}
                 <Text style={styles.modalText}>{this.state.errorMessage} </Text>
                 <Pressable
                   style={[styles.button, styles.buttonClose]}
@@ -101,14 +112,9 @@ class LogoutScreen extends Component {
               </View>
             </View>
           </Modal>
-          {/* <Pressable
-      style={[styles.button, styles.buttonOpen]}
-      onPress={() => this.setModalVisible(true)}
-    >
-      <Text style={styles.textStyle}>Show Modal</Text>
-    </Pressable> */}
         </View>
 
+        {/* Add a button to log the user out  */}
         <Button title="Logout" onPress={() => this.logout()} />
       </View>
     );

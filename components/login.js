@@ -18,20 +18,12 @@ import {
   ButtonText,
 } from '../styles.js';
 
-// TODO
-// add isLoading
-// change default email and password
-// delete console logs
-// Comment
-// check email check
-
 class LoginScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
       email: 'andreifrandes@mmu.ac.uk', // change
       password: 'andreifrandes', // change
-      // modalVisible: true,
       modalVisible: false,
     };
   }
@@ -42,39 +34,42 @@ class LoginScreen extends Component {
   };
 
   login = async () => {
-    return fetch('http://localhost:3333/api/1.0.0/login', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(this.state),
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else if (response.status === 400) {
-          // Add error
-          this.state.errorMessage = 'Invalid email or password! Try again';
-          this.setModalVisible(true);
-          throw 'Invalid email or password';
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
+    // Send a request to the server to log the user in
+    return (
+      fetch('http://localhost:3333/api/1.0.0/login', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.state),
       })
-      .then(async (responseJson) => {
-        console.log(responseJson);
-        console.log('token is ' + responseJson.token);
-        // Store the users details in Async library to be used thourghout the ap
-        await AsyncStorage.setItem('@session_token', responseJson.token);
-        await AsyncStorage.setItem('@id', responseJson.id);
-        // this.props.navigation.navigate("Practice");  // change this to main
-        this.props.navigation.navigate('Main'); // change this to main
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        // Check if the request was successful and log the user in if it was
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          } else if (response.status === 400) {
+            // Display a message for the user informing them that the emai and password they used is wrong
+            this.state.errorMessage = 'Invalid email or password! Try again';
+            this.setModalVisible(true);
+            throw 'Invalid email or password';
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        .then(async (responseJson) => {
+          // Once logged in store the users token and id to be used throughtout the app for authorisation and requests
+          await AsyncStorage.setItem('@session_token', responseJson.token);
+          await AsyncStorage.setItem('@id', responseJson.id);
+          // Once the user's details have been stored, navigate them to the main page
+          this.props.navigation.navigate('Main');
+        })
+        // Throw an error if one is to occur
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   render() {
@@ -82,7 +77,7 @@ class LoginScreen extends Component {
 
     return (
       <View style={styles.container}>
-        {/* <View style={styles.centeredView}> */}
+        {/* Add a component to display messages for the user when accepting and decling friends requests */}
         <View>
           <Modal
             animationType="slide"
@@ -94,8 +89,6 @@ class LoginScreen extends Component {
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-                {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                {/* Display the erro you wish to display to the user */}
                 <Text style={styles.modalText}>{this.state.errorMessage} </Text>
                 <Pressable
                   style={[styles.button, styles.buttonClose]}
@@ -106,14 +99,8 @@ class LoginScreen extends Component {
               </View>
             </View>
           </Modal>
-          {/* <Pressable
-            style={[styles.button, styles.buttonOpen]}
-            onPress={() => this.setModalVisible(true)}
-          >
-            <Text style={styles.textStyle}>Show Modal</Text>
-          </Pressable> */}
         </View>
-
+        {/* Display the instructions and buttons for th user to log in */}
         <Label>Email:</Label>
         <TextInput
           style={styles.input}
@@ -139,9 +126,10 @@ class LoginScreen extends Component {
           onPress={() => this.login()}
         />
 
+        {/* Allow the user to navigate to the signup page by using the button */}
         <Button
           style={styles.Button}
-          title="Sign up page"
+          title="SIGN UP PAGE"
           onPress={() => this.props.navigation.navigate('Signup')}
         />
       </View>

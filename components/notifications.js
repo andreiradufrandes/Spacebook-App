@@ -13,16 +13,6 @@ import {
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/*
-To implement 
-- button for accepting request IF they're not my friend
-- add scrollview to notifications
-- wait when you sign it and show notification if the signup process worked OR log them directly
-- maybe add back button
-- maybe take user to that person's profile after accepting them
-- add is loading to all pages(maybe)
-*/
-
 class NotificationsScreen extends Component {
   constructor(props) {
     super(props);
@@ -35,123 +25,140 @@ class NotificationsScreen extends Component {
       modalVisible: false,
     };
   }
-
+  // Add a toggle function to set the visibility of the alerts, to be be used during netwroking requests displaying allerts for the user
   setModalVisible = (visible) => {
     this.setState({ modalVisible: visible });
   };
 
   componentDidMount() {
-    // Event listener
+    // Add an event listener to refresh the friend requests when navigating to the notificaitons screen
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
-      console.log('n\n\n\n\n\n\nEvent listenern\n\n\n\n\n');
       this.getFriendRequests();
     });
   }
 
   componentWillUnmount() {
-    // this.getFriendRequests();
     this.unsubscribe();
   }
 
+  // Add a request to get the friend requests for a given user
+
   getFriendRequests = async () => {
+    // Get the user's token to be used for authorising the fetch request
     const value = await AsyncStorage.getItem('@session_token');
-    console.log(value);
 
-    return fetch('http://localhost:3333/api/1.0.0/friendrequests', {
-      headers: {
-        'X-Authorization': value,
-      },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw 'Something went wrong';
-        }
+    return (
+      fetch('http://localhost:3333/api/1.0.0/friendrequests', {
+        headers: {
+          'X-Authorization': value,
+        },
       })
-      .then((responseJson) => {
-        this.setState({
-          friendsRequests: responseJson,
-          isLoading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        // Return the response from the server if the request is successful
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            throw 'Something went wrong';
+          }
+        })
+        // Store the friends requests in the state to be displayed later, and set the loading variable to false in order to render the page
+        .then((responseJson) => {
+          this.setState({
+            friendsRequests: responseJson,
+            isLoading: false,
+          });
+        })
+        // Throw and error if something goes wrong
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
+  // Add a function to accept a friend request
   acceptFriendRequest = async (id) => {
-    // how to get the exact id i need
-    console.log(id);
+    // Get the user's token to be used for authorising the fetch request, as well as their ID be able to like the right post
     const value = await AsyncStorage.getItem('@session_token');
-    return fetch('http://localhost:3333/api/1.0.0/friendrequests/' + id, {
-      method: 'post',
-      headers: {
-        'X-Authorization': value,
-      },
-    })
-      .then((response) => {
-        console.log(response.status);
-        if (response.status === 200) {
-          this.getFriendRequests();
-          this.state.errorMessage = 'Frind request accepted!';
-          this.setModalVisible(true);
-        } else if (response.status === 404) {
-          this.state.errorMessage =
-            'Something went wront! Try logging out and back in before attempting it again';
-          this.setModalVisible(true);
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Try logging out and then back in before attempting it again!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
+    return (
+      fetch('http://localhost:3333/api/1.0.0/friendrequests/' + id, {
+        method: 'post',
+        headers: {
+          'X-Authorization': value,
+        },
       })
-
-      .catch((error) => {
-        console.log(error);
-      });
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          // Check if the request was successful and inform the user the friend request was accepted
+          if (response.status === 200) {
+            this.getFriendRequests();
+            this.state.errorMessage = 'Frind request accepted!';
+            this.setModalVisible(true);
+            // Display differnt error alerts for the user if the netwroking request was unsuccessful
+          } else if (response.status === 404) {
+            this.state.errorMessage =
+              'Something went wront! Try logging out and back in before attempting it again';
+            this.setModalVisible(true);
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Try logging out and then back in before attempting it again!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        // Throw an error if one is to occur
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
+  // Add a function that declines a friend request when the user click a button
   declineFriendRequest = async (id) => {
-    console.log(id);
+    // Get the user's token to be used for authorising the fetch request
     const value = await AsyncStorage.getItem('@session_token');
-    return fetch('http://localhost:3333/api/1.0.0/friendrequests/' + id, {
-      method: 'delete',
-      headers: {
-        'X-Authorization': value,
-      },
-    })
-      .then((response) => {
-        console.log(response.status);
-        if (response.status === 200) {
-          this.getFriendRequests();
-          this.state.errorMessage = 'Friend request declined!';
-          this.setModalVisible(true);
-        } else if (response.status === 404) {
-          this.state.errorMessage =
-            'Something went wront! Try logging out and back in before attempting it again';
-          this.setModalVisible(true);
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Try logging out and then back in before attempting it again!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
+    // Send a request to delete the given friend request
+    return (
+      fetch('http://localhost:3333/api/1.0.0/friendrequests/' + id, {
+        method: 'delete',
+        headers: {
+          'X-Authorization': value,
+        },
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          // Check if the friend request was deleted successfully and inform the user if it was
+          if (response.status === 200) {
+            this.getFriendRequests();
+            this.state.errorMessage = 'Friend request declined!';
+            this.setModalVisible(true);
+            // Display different alerts for the user if the request was unssuccesful
+          } else if (response.status === 404) {
+            this.state.errorMessage =
+              'Something went wront! Try logging out and back in before attempting it again';
+            this.setModalVisible(true);
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Try logging out and then back in before attempting it again!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        // Throw an error if one is to occur
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   render() {
     const { modalVisible } = this.state;
+    // Check if the component is still loading, and render a message for the user to let them know the page is loading
     if (this.state.isLoading) {
       return (
         <View
@@ -165,9 +172,12 @@ class NotificationsScreen extends Component {
           <Text>Loading..</Text>
         </View>
       );
+      // Display the friend requests once they have once they have been store inside the state
     } else {
       return (
+        // Wrap the code in a Scroll view element to allow the ability to scroll
         <ScrollView>
+          {/* Add a component to display messages for the user when accepting and decling friends requests */}
           <View style={styles.centeredView}>
             <Modal
               animationType="slide"
@@ -179,8 +189,6 @@ class NotificationsScreen extends Component {
             >
               <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                  {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                  {/* Display the erro you wish to display to the user */}
                   <Text style={styles.modalText}>
                     {this.state.errorMessage}{' '}
                   </Text>
@@ -193,14 +201,9 @@ class NotificationsScreen extends Component {
                 </View>
               </View>
             </Modal>
-            {/* <Pressable
-            style={[styles.button, styles.buttonOpen]}
-            onPress={() => this.setModalVisible(true)}
-          >
-            <Text style={styles.textStyle}>Show Modal</Text>
-          </Pressable> */}
           </View>
           <View>
+            {/* Display the list of friends requests */}
             <FlatList
               data={this.state.friendsRequests}
               keyExtractor={(item) => item.user_id}
@@ -209,6 +212,7 @@ class NotificationsScreen extends Component {
                   <Text>
                     Friend request from {item.first_name} {item.last_name}
                   </Text>
+                  {/* Add a button with the functionality of traveling to the user's profile */}
                   <Button
                     title="Visit user's profile"
                     onPress={() =>
@@ -216,9 +220,9 @@ class NotificationsScreen extends Component {
                         user_id: item.user_id,
                       })
                     }
-                    //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
                   />
 
+                  {/* Add a button for accepting the friend request and navigating to their profile once this is done */}
                   <Button
                     title="Accept friend request"
                     onPress={() => {
@@ -228,6 +232,7 @@ class NotificationsScreen extends Component {
                       });
                     }}
                   />
+                  {/* Add a button for declining the friend request and navigating to their profile once this is done */}
                   <Button
                     title="Decline friend request"
                     onPress={() => this.declineFriendRequest(item.user_id)}
@@ -241,6 +246,7 @@ class NotificationsScreen extends Component {
     }
   }
 }
+
 export default NotificationsScreen;
 
 const styles = StyleSheet.create({
