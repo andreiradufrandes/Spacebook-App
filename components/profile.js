@@ -87,22 +87,29 @@ class ProfileScreen extends React.Component {
     // ---------------------------------------------------------------
     this.parentUnsubscribe = this.props.navigation
       .getParent()
-      .addListener('tabPress', (e) => {
+      .addListener('tabPress', async (e) => {
         console.log('-------------ON PROFILE FROM TAB-------------------');
-        // ONLY GETS TRIGGERED WHEN I USE THE TAB NAVIGATOR
-        // take user to his own profile
-        console.log('this.state.loggedUserId', this.state.loggedUserId);
+
+        // Nagivate the user
         this.props.navigation.navigate('Profile', {
           user_id: this.state.loggedUserId,
         });
+
+        // ––––––– unsure about -–––––––
+        this.state.loggedUserId = await AsyncStorage.getItem('@id');
+
+        await this.startFunction();
+        this.getProfileImage(); // not sure if it should be here
+        // this.getUserInfo(); // make sure they use the right ids
+        this.getUserPosts();
+        await this.getFriendRequests();
+
+        // ––––––– unsure about -–––––––
       });
     // ---------------------------------------------------------------
 
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.state.loggedUserId = await AsyncStorage.getItem('@id');
-      console.log(
-        '\n\n\n\n\n\n\n\n\n#Function called: Event listener insided component did mount'
-      );
 
       let userCheck = typeof this.props.route.params;
       console.log('user check INSIDE event listener');
