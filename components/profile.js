@@ -65,26 +65,20 @@ class ProfileScreen extends React.Component {
   }
 
   componentDidMount = async () => {
-    // trying the user param
-
+    // When the user loggs in
     const { status } = await Camera.requestCameraPermissionsAsync();
     this.setState({ hasPermission: status === 'granted' });
     this.state.isLoggedInUsersProfile = true;
     this.state.loggedUserId = await AsyncStorage.getItem('@id');
 
-    // Display the logged in user's information and posts once they log in
-    this.state.userProfileID = await AsyncStorage.getItem('@id');
+    this.state.userProfileID = this.state.loggedUserId;
     // These get called WHEN i go  on someones prifile
     this.getProfileImage();
     this.getUserInfo();
     this.getUserPosts();
 
-    let userCheck = typeof this.props.route.params;
-    console.log('user check WHEN logging it event listener');
-    console.log('userCheck: ' + userCheck);
-    console.log('userCheck === undefined: ' + (userCheck === 'undefined'));
-
     // ---------------------------------------------------------------
+    // When the users travels to their profile using the tab navigator
     this.parentUnsubscribe = this.props.navigation
       .getParent()
       .addListener('tabPress', async (e) => {
@@ -96,36 +90,31 @@ class ProfileScreen extends React.Component {
         });
 
         // ––––––– unsure about -–––––––
-        this.state.loggedUserId = await AsyncStorage.getItem('@id');
 
         await this.startFunction();
-        this.getProfileImage(); // not sure if it should be here
+        // this.getProfileImage(); // not sure if it should be here
         // this.getUserInfo(); // make sure they use the right ids
-        this.getUserPosts();
-        await this.getFriendRequests();
+
+        //
 
         // ––––––– unsure about -–––––––
       });
     // ---------------------------------------------------------------
 
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
-      this.state.loggedUserId = await AsyncStorage.getItem('@id');
+      console.log('\n\n\n\n\n\n\n       Unsubsribe func callled\n\n\n\n');
+      // this.state.loggedUserId = await AsyncStorage.getItem('@id');
 
-      let userCheck = typeof this.props.route.params;
-      console.log('user check INSIDE event listener');
-      console.log('userCheck: ' + userCheck);
-      console.log('userCheck === undefined: ' + (userCheck === 'undefined'));
-      console.log('params : ' + this.props.route.params);
+      // let userCheck = typeof this.props.route.params;
+      // console.log('user check INSIDE event listener');
+      // console.log('userCheck: ' + userCheck);
+      // console.log('userCheck === undefined: ' + (userCheck === 'undefined'));
+      // console.log('params : ' + this.props.route.params);
 
       await this.startFunction();
-      this.getProfileImage(); // not sure if it should be here
+      // this.getProfileImage(); // not sure if it should be here
       // this.getUserInfo(); // make sure they use the right ids
-      this.getUserPosts();
-      await this.getFriendRequests(); // To get lst of friends requests AND check if someone friend
-
-      // Check if the user sent a friend request
-
-      this.checkUserSentFriendRequest();
+      // this.getUserPosts();
 
       console.log('state: ', this.state); // delete
       console.log('isFriend: ' + this.state.isFriend);
@@ -163,7 +152,7 @@ class ProfileScreen extends React.Component {
   startFunction = async () => {
     console.log('#function called: startFunction');
     // Resetting parameter
-
+    this.state.loggedUserId = await AsyncStorage.getItem('@id');
     let AsyncStorageID = await AsyncStorage.getItem('@id'); // maye delete
     this.state.userProfileID = AsyncStorageID; /// set it to MY id for now
     let userCheck = typeof this.props.route.params;
@@ -213,6 +202,11 @@ class ProfileScreen extends React.Component {
         this.getUserPosts();
       }
     }
+
+    this.getProfileImage();
+    await this.getFriendRequests();
+    // Check if the user sent a friend request
+    this.checkUserSentFriendRequest();
   };
 
   getListOfFriends = async () => {
