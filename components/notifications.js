@@ -41,8 +41,16 @@ class NotificationsScreen extends Component {
   };
 
   componentDidMount() {
-    console.log('Notifications page');
-    this.getFriendRequests();
+    // Event listener
+    this.unsubscribe = this.props.navigation.addListener('focus', async () => {
+      console.log('n\n\n\n\n\n\nEvent listenern\n\n\n\n\n');
+      this.getFriendRequests();
+    });
+  }
+
+  componentWillUnmount() {
+    // this.getFriendRequests();
+    this.unsubscribe();
   }
 
   getFriendRequests = async () => {
@@ -63,10 +71,9 @@ class NotificationsScreen extends Component {
       })
       .then((responseJson) => {
         this.setState({
-          isLoading: false,
           friendsRequests: responseJson,
-        }),
-          console.log(this.state.friendsRequests);
+          isLoading: false,
+        });
       })
       .catch((error) => {
         console.log(error);

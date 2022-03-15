@@ -43,7 +43,8 @@ class SearchScreen extends Component {
       errorMessage: '',
       searchLimit: 5,
       initialOffset: 5,
-      searchOffset: -5,
+      offectCounter: 0,
+      firstCycle: true,
     };
   }
   // Add a toggle function to set the visibility for the user alerts
@@ -108,118 +109,232 @@ class SearchScreen extends Component {
   //   }
   // };
 
-  //   ADD LIMIT TO THE FETCH RESULT, AND MAKE IT LOOK LIKE THE REAL ONE
   searchName = async (direction) => {
+    // ---------------------------------
     this.state.isLoading = true;
-    console.log(direction);
+    // console.log('at the beginning of the search', this.state);
+
+    // do the checks
+    // ---------------------------------
     // If the search box is not empty, execute the code looking for the person
     if (!(this.state.searchTerm === '')) {
       const value = await AsyncStorage.getItem('@session_token');
       const serachTermCheck = checkLettersAndSpaces(this.state.searchTerm);
 
-      // currect offset - or pluse the offset
-      let directionOffest = this.state.searchOffset;
-      // If you want to see the following results, offset stays positive
-      if (direction == 'nextResults') {
-        // Direction forwards, therefore offset will be positive
-        directionOffest = this.state.initialOffset;
-        console.log('next results');
-        console.log('directionOffest: ', directionOffest);
-      }
-      // Previous results want to be displayed therefor directionOffset is negative
-      else if (direction == 'previousResults') {
-        directionOffest = directionOffest - this.state.initialOffset;
-        console.log('previous results');
-        console.log('directionOffest: ', directionOffest);
-      }
-
-      // Then move in that direction IF
-
-      // increase offset
-      // 1. if offset 0
-      // First time it runs it will be -5 + 5 = 0
-
-      // Check that you are not on the last page OR the first one  when you go back
-      // check IF it is the first round
-      // if it is not the first turn
-      if (this.state.searchOffset != -5) {
-        if (this.state.searchResults.length >= this.state.searchLimit) {
-        }
-
-        // if it is the first turn
-      } else {
-        this.state.searchOffset += this.state.searchLimit;
-      }
-
-      // Check the limit to see if you've reached the end
-
-      // Increase offset at each turn to display the right pagination
-      this.state.searchOffset += this.state.searchLimit;
-
-      //    dont increase
-      // otherwise
-      // increase BY limit each turn
-      // 2. If you passed it and reached the end of list
-      //  STOP
-      // by
-
-      // Check that the user input contain letters only, and no numbers or special characters
+      // Checkk input
       if (!serachTermCheck) {
         this.state.errorMessage =
           'Incorrect input, the name can only contain letters, no numbers or  special characters. Try again!';
         this.setModalVisible(true);
       } else {
-        return fetch(
-          'http://localhost:3333/api/1.0.0/search?q=' +
-            this.state.searchTerm +
-            '&limit=' +
-            this.state.searchLimit +
-            '&offset=' +
-            this.state.searchOffset,
-          {
-            headers: {
-              'X-Authorization': value,
-            },
-          }
-        )
-          .then((response) => {
-            console.log('----Response code------: ', response.status);
-            if (response.status === 200) {
-              return response.json();
-            } else if (response.status === 400) {
-              this.state.errorMessage =
-                'Bad request! Make sure you have use only letters inside the search box!';
-              this.setModalVisible(true);
-            } else if (response.status === 401) {
-              this.state.errorMessage =
-                'Unauthorised! Make sure you are logged in, and then try again!';
-              this.setModalVisible(true);
-            } else if (response.status === 500) {
-              this.state.errorMessage =
-                'Server error! Restart the server then try again';
-              this.setModalVisible(true);
-            }
-          })
-          .then((responseJson) => {
-            this.setState({
-              isLoading: false,
-              searchResults: responseJson,
-            });
-            console.log(
-              'searchResults length:',
-              this.state.searchResults.length
-            );
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        console.log(
+          '\n\nStep1(after increasing offsetCounter)\noffsetCounter: ',
+          this.state.offectCounter,
+          '\n searchResults size: ',
+          this.state.searchResults.length
+        );
+
+        // ---------------Check the direction----------------
+        let signedOffset = 0;
+        // If the direction is backwards, make the offset negative
+        if (direction == 'previousResults') {
+          signedOffset -= this.state.initialOffset;
+          this.state.firstCycle = true;
+          // If going backwards limit NOT reached
+          // If the direction is forward, keep the offset positive
+        } else {
+          signedOffset = this.state.initialOffset;
+        }
+        console.log('signedOffset:', signedOffset);
+        // ----------------check if you have reached the end or not---------------
+        // ------End reached
+        if (
+          this.state.searchResults.length < this.state.initialOffset &&
+          !this.state.firstCycle
+        ) {
+          console.log('-You have reached the last page');
+          this.state.errorMessage =
+            'You have reached the last page of search results';
+          this.setModalVisible(true);
+        }
+        // ------End NOT reached
+        else {
+          // Continue
+          console.log('-You have NOT yet reached the last page');
+          this.state.firstCycle = false;
+          this.state.offectCounter += signedOffset;
+        }
       }
+
+      /*
+
+
+          A lot of checks AFTER which we sent the request
+
+
+        */
+
+      return fetch(
+        'http://localhost:3333/api/1.0.0/search?q=' +
+          this.state.searchTerm +
+          '&limit=' +
+          this.state.searchLimit +
+          '&offset=' +
+          this.state.offectCounter,
+        {
+          headers: {
+            'X-Authorization': value,
+          },
+        }
+      )
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          } else if (response.status === 400) {
+            this.state.errorMessage =
+              'Bad request! Make sure you have use only letters inside the search box!';
+            this.setModalVisible(true);
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in, and then try again!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        .then((responseJson) => {
+          this.setState({
+            isLoading: false,
+            searchResults: responseJson,
+          });
+          console.log('searchResults length:', this.state.searchResults.length);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      // error checking dw about it
     } else {
       this.state.errorMessage =
         "Search box can not be empty! Add person's name and try again";
       this.setModalVisible(true);
     }
   };
+
+  // //   ADD LIMIT TO THE FETCH RESULT, AND MAKE IT LOOK LIKE THE REAL ONE
+  // searchName = async (direction) => {
+  //   this.state.isLoading = true;
+  //   console.log(direction);
+  //   // If the search box is not empty, execute the code looking for the person
+  //   if (!(this.state.searchTerm === '')) {
+  //     const value = await AsyncStorage.getItem('@session_token');
+  //     const serachTermCheck = checkLettersAndSpaces(this.state.searchTerm);
+
+  //     // currect offset - or pluse the offset
+  //     let directionOffest = this.state.offectCounter;
+  //     // If you want to see the following results, offset stays positive
+  //     if (direction == 'nextResults') {
+  //       // Direction forwards, therefore offset will be positive
+  //       directionOffest = this.state.initialOffset;
+  //       console.log('next results');
+  //       console.log('directionOffest: ', directionOffest);
+  //     }
+  //     // Previous results want to be displayed therefor directionOffset is negative
+  //     else if (direction == 'previousResults') {
+  //       directionOffest = directionOffest - this.state.initialOffset;
+  //       console.log('previous results');
+  //       console.log('directionOffest: ', directionOffest);
+  //     }
+
+  //     // Then move in that direction IF
+
+  //     // increase offset
+  //     // 1. if offset 0
+  //     // First time it runs it will be -5 + 5 = 0
+
+  //     // Check that you are not on the last page OR the first one  when you go back
+  //     // check IF it is the first round
+  //     // if it is not the first turn
+  //     if (this.state.offectCounter != -5) {
+  //       if (this.state.searchResults.length >= this.state.searchLimit) {
+  //       }
+
+  //       // if it is the first turn
+  //     } else {
+  //       this.state.offectCounter += this.state.searchLimit;
+  //     }
+
+  //     // Check the limit to see if you've reached the end
+
+  //     // Increase offset at each turn to display the right pagination
+  //     this.state.offectCounter += this.state.searchLimit;
+
+  //     //    dont increase
+  //     // otherwise
+  //     // increase BY limit each turn
+  //     // 2. If you passed it and reached the end of list
+  //     //  STOP
+  //     // by
+
+  //     // Check that the user input contain letters only, and no numbers or special characters
+  //     if (!serachTermCheck) {
+  //       this.state.errorMessage =
+  //         'Incorrect input, the name can only contain letters, no numbers or  special characters. Try again!';
+  //       this.setModalVisible(true);
+  //     } else {
+  //       return fetch(
+  //         'http://localhost:3333/api/1.0.0/search?q=' +
+  //           this.state.searchTerm +
+  //           '&limit=' +
+  //           this.state.searchLimit +
+  //           '&offset=' +
+  //           this.state.offectCounter,
+  //         {
+  //           headers: {
+  //             'X-Authorization': value,
+  //           },
+  //         }
+  //       )
+  //         .then((response) => {
+  //           console.log('----Response code------: ', response.status);
+  //           if (response.status === 200) {
+  //             return response.json();
+  //           } else if (response.status === 400) {
+  //             this.state.errorMessage =
+  //               'Bad request! Make sure you have use only letters inside the search box!';
+  //             this.setModalVisible(true);
+  //           } else if (response.status === 401) {
+  //             this.state.errorMessage =
+  //               'Unauthorised! Make sure you are logged in, and then try again!';
+  //             this.setModalVisible(true);
+  //           } else if (response.status === 500) {
+  //             this.state.errorMessage =
+  //               'Server error! Restart the server then try again';
+  //             this.setModalVisible(true);
+  //           }
+  //         })
+  //         .then((responseJson) => {
+  //           this.setState({
+  //             isLoading: false,
+  //             searchResults: responseJson,
+  //           });
+  //           console.log(
+  //             'searchResults length:',
+  //             this.state.searchResults.length
+  //           );
+  //         })
+  //         .catch((error) => {
+  //           console.log(error);
+  //         });
+  //     }
+  //   } else {
+  //     this.state.errorMessage =
+  //       "Search box can not be empty! Add person's name and try again";
+  //     this.setModalVisible(true);
+  //   }
+  // };
 
   render() {
     const { modalVisible } = this.state;

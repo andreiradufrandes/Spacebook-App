@@ -47,7 +47,7 @@ class SignupScreen extends Component {
     const firstNameCheck = checkName(this.state.first_name);
     const lastNameCheck = checkName(this.state.last_name);
     // Check the password contains more than 5 characters
-    const passwordCheck = this.state.password.length >= 5;
+    const passwordCheck = this.state.password.length > 5;
 
     console.log('first name chacek: ', firstNameCheck);
     console.log('correctpassword: ', passwordCheck);
@@ -62,7 +62,7 @@ class SignupScreen extends Component {
       // I think return null and stop here
     } else if (passwordCheck == false) {
       this.state.errorMessage =
-        'Password incorrect! Password must contain at least 4 characters.';
+        'Password incorrect! Password must be greater than 5 characters.';
       this.setModalVisible(true);
       return null;
     } else {
@@ -177,7 +177,7 @@ class SignupScreen extends Component {
           secureTextEntry={true}
           maxLength="16"
         />
-        <Text>Password must contain at least 4 characters</Text>
+        <Text>Password must contain greater than 5 characters</Text>
         <Button
           title="Signup"
           onPress={() => this.signup()}

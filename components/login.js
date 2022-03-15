@@ -132,7 +132,7 @@ class LoginScreen extends Component {
           secureTextEntry={true}
           maxLength="16"
         />
-        <Text>Password must be at least 5 characters long</Text>
+
         <Button
           style={styles.Button}
           title="LOGIN"
