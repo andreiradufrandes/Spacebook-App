@@ -41,6 +41,9 @@ class SearchScreen extends Component {
       searchResults: [],
       modalVisible: false,
       errorMessage: '',
+      searchLimit: 5,
+      initialOffset: 5,
+      searchOffset: -5,
     };
   }
   // Add a toggle function to set the visibility for the user alerts
@@ -49,12 +52,115 @@ class SearchScreen extends Component {
   };
 
   //   ADD LIMIT TO THE FETCH RESULT, AND MAKE IT LOOK LIKE THE REAL ONE
-  searchName = async () => {
+  // searchName = async () => {
+  //   // If the search box is not empty, execute the code looking for the person
+  //   if (!(this.state.searchTerm === '')) {
+  //     const value = await AsyncStorage.getItem('@session_token');
+
+  //     const serachTermCheck = checkLettersAndSpaces(this.state.searchTerm);
+
+  //     // Check that the user input contain letters only, and no numbers or special characters
+  //     if (!serachTermCheck) {
+  //       this.state.errorMessage =
+  //         'Incorrect input, the name can only contain letters, no numbers or  special characters. Try again!';
+  //       this.setModalVisible(true);
+  //     } else {
+  //       return fetch(
+  //         'http://localhost:3333/api/1.0.0/search?q=' + this.state.searchTerm,
+  //         {
+  //           headers: {
+  //             'X-Authorization': value,
+  //           },
+  //         }
+  //       )
+  //         .then((response) => {
+  //           console.log('----Response code------: ', response.status);
+  //           if (response.status === 200) {
+  //             return response.json();
+  //           } else if (response.status === 400) {
+  //             this.state.errorMessage =
+  //               'Bad request! Make sure you have use only letters inside the search box!';
+  //             this.setModalVisible(true);
+  //           } else if (response.status === 401) {
+  //             this.state.errorMessage =
+  //               'Unauthorised! Make sure you are logged in, and then try again!';
+  //             this.setModalVisible(true);
+  //           } else if (response.status === 500) {
+  //             this.state.errorMessage =
+  //               'Server error! Restart the server then try again';
+  //             this.setModalVisible(true);
+  //           }
+  //         })
+  //         .then((responseJson) => {
+  //           this.setState({
+  //             isLoading: false,
+  //             searchResults: responseJson,
+  //           });
+  //         })
+  //         .catch((error) => {
+  //           console.log(error);
+  //         });
+  //     }
+  //   } else {
+  //     this.state.errorMessage =
+  //       "Search box can not be empty! Add person's name and try again";
+  //     this.setModalVisible(true);
+  //   }
+  // };
+
+  //   ADD LIMIT TO THE FETCH RESULT, AND MAKE IT LOOK LIKE THE REAL ONE
+  searchName = async (direction) => {
+    console.log(direction);
     // If the search box is not empty, execute the code looking for the person
     if (!(this.state.searchTerm === '')) {
       const value = await AsyncStorage.getItem('@session_token');
-
       const serachTermCheck = checkLettersAndSpaces(this.state.searchTerm);
+
+      // currect offset - or pluse the offset
+      let directionOffest = this.state.searchOffset;
+      // If you want to see the following results, offset stays positive
+      if (direction == 'nextResults') {
+        // Direction forwards, therefore offset will be positive
+        directionOffest = this.state.initialOffset;
+        console.log('next results');
+        console.log('directionOffest: ', directionOffest);
+      }
+      // Previous results want to be displayed therefor directionOffset is negative
+      else if (direction == 'previousResults') {
+        directionOffest = directionOffest - this.state.initialOffset;
+        console.log('previous results');
+        console.log('directionOffest: ', directionOffest);
+      }
+
+      // Then move in that direction IF
+
+      // increase offset
+      // 1. if offset 0
+      // First time it runs it will be -5 + 5 = 0
+
+      // Check that you are not on the last page OR the first one  when you go back
+      // check IF it is the first round
+      // if it is not the first turn
+      if (this.state.searchOffset != -5) {
+        if (this.state.searchResults.length >= this.state.searchLimit) {
+        }
+
+        // if it is the first turn
+      } else {
+        this.state.searchOffset += this.state.searchLimit;
+      }
+
+      // Check the limit to see if you've reached the end
+
+      // Increase offset at each turn to display the right pagination
+      this.state.searchOffset += this.state.searchLimit;
+
+      //    dont increase
+      // otherwise
+      // increase BY limit each turn
+      // 2. If you passed it and reached the end of list
+      //  STOP
+      // by
 
       // Check that the user input contain letters only, and no numbers or special characters
       if (!serachTermCheck) {
@@ -63,7 +169,12 @@ class SearchScreen extends Component {
         this.setModalVisible(true);
       } else {
         return fetch(
-          'http://localhost:3333/api/1.0.0/search?q=' + this.state.searchTerm,
+          'http://localhost:3333/api/1.0.0/search?q=' +
+            this.state.searchTerm +
+            '&limit=' +
+            this.state.searchLimit +
+            '&offset=' +
+            this.state.searchOffset,
           {
             headers: {
               'X-Authorization': value,
@@ -93,6 +204,10 @@ class SearchScreen extends Component {
               isLoading: false,
               searchResults: responseJson,
             });
+            console.log(
+              'searchResults length:',
+              this.state.searchResults.length
+            );
           })
           .catch((error) => {
             console.log(error);
@@ -143,25 +258,6 @@ class SearchScreen extends Component {
             </Pressable> */}
         </View>
 
-        {/* 37 friend now but ill remove him */}
-        <Button
-          title="take me to a friend(Leonard) profile"
-          onPress={() =>
-            this.props.navigation.navigate('Profile', {
-              user_id: 40,
-            })
-          }
-        />
-
-        <Button
-          title="take me to a stranger's(harold) profile ( )"
-          onPress={() =>
-            this.props.navigation.navigate('Profile', {
-              user_id: 42,
-            })
-          }
-        />
-
         <Button
           title="take me to Andrei's profile"
           onPress={() =>
@@ -171,16 +267,7 @@ class SearchScreen extends Component {
           }
         />
 
-        <Text> Search for people or friends</Text>
-
         <Title>Search for people or friends</Title>
-        <TextInput
-          style={styles.input}
-          placeholder="search"
-          onChangeText={(searchTerm) => this.setState({ searchTerm })}
-          value={this.state.searchTerm}
-          maxLength="50"
-        />
 
         <Label>Enter user's name:</Label>
         <TextBox
@@ -193,7 +280,7 @@ class SearchScreen extends Component {
         {/* <Button title="search" onPress={() => this.searchName()} /> */}
         {/* Trial for primary button */}
         <Center>
-          <PrimaryButton onPress={() => this.searchName()}>
+          <PrimaryButton onPress={() => this.searchName('initialResults')}>
             <ButtonText>SEARCH</ButtonText>
           </PrimaryButton>
         </Center>
@@ -219,6 +306,19 @@ class SearchScreen extends Component {
             </View>
           )}
         />
+
+        <Center>
+          {/* plus limin  */}
+          <PrimaryButton onPress={() => this.searchName('previousResults')}>
+            <ButtonText>Previous results</ButtonText>
+          </PrimaryButton>
+        </Center>
+        <Center>
+          {/* minus limit  */}
+          <PrimaryButton onPress={() => this.searchName('nextResults')}>
+            <ButtonText>More results</ButtonText>
+          </PrimaryButton>
+        </Center>
 
         {/* {true ? <Button title="Hi" /> : <Button title="Bye" />} */}
       </Container>

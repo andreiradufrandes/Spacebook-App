@@ -56,12 +56,8 @@ class LogoutScreen extends Component {
       .then((response) => {
         if (response.status === 200) {
           console.log('response code:', response.status);
-          // this.state.errorMessage = 'Logout successful!';
-          // this.setModalVisible(true);
           this.props.navigation.navigate('Login');
         } else if (response.status === 401) {
-          // Delete
-          // means YOURE ALREADY LOGGED OUT
           this.state.errorMessage =
             'Logout failed! This is because you are not logged in!';
           this.setModalVisible(true);
