@@ -22,13 +22,14 @@ class ProfileComponentScreen extends Component {
     return (
       <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
         <ProfileStack.Screen
-          name="ProfileCheck"
-          component={ProfileCheck}
-          //    set the initial param id to that one
-        />
-        <ProfileStack.Screen
           name="Profile"
           component={ProfileScreen}
+          //    set the initial param id to that one
+        />
+        {/* Delete later maybe */}
+        <ProfileStack.Screen
+          name="ProfileCheck"
+          component={ProfileCheck}
           //    set the initial param id to that one
         />
         <ProfileStack.Screen name="Update" component={UpdateScreen} />

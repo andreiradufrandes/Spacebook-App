@@ -84,9 +84,20 @@ class ProfileScreen extends React.Component {
     console.log('userCheck: ' + userCheck);
     console.log('userCheck === undefined: ' + (userCheck === 'undefined'));
 
-    // camera stuff
-    // let paramsCheck = this.props.route.params;
-    // Event listener
+    // ---------------------------------------------------------------
+    this.parentUnsubscribe = this.props.navigation
+      .getParent()
+      .addListener('tabPress', (e) => {
+        console.log('-------------ON PROFILE FROM TAB-------------------');
+        // ONLY GETS TRIGGERED WHEN I USE THE TAB NAVIGATOR
+        // take user to his own profile
+        console.log('this.state.loggedUserId', this.state.loggedUserId);
+        this.props.navigation.navigate('Profile', {
+          user_id: this.state.loggedUserId,
+        });
+      });
+    // ---------------------------------------------------------------
+
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.state.loggedUserId = await AsyncStorage.getItem('@id');
       console.log(
@@ -131,7 +142,13 @@ class ProfileScreen extends React.Component {
     console.log('state: ', this.state); // delete
   };
 
+  // ---------------------------------------------------------------
+  //          Trial for listening to parent
+
+  // Listening to parent component
+
   componentWillUnmount() {
+    this.parentUnsubscribe();
     this.unsubscribe();
     console.log('-----------comonentwillunmountcall----------');
   }
