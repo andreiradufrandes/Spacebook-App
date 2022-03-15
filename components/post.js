@@ -20,33 +20,15 @@ import {
 } from '../styles.js';
 
 import { timeAndDateExtractor } from './functions';
-// Todo
-// UPDATE BUTTON ONLY WHEN IT'S YOUR POST
-// LIKE REMOVE LIKE BUTTON ONLY WHEN IT'S THEIR POST
-// only SHOW the update posts if they are yours
-// Maybe display old messege BY adding it to the text first
-// 1. Write query
-// 2. Pass stuff from the profile post(like the post id or whatever, to take you here )
-// 3. Add did mount of whatever
-// /user/{user_id}/post/{post_id}
-// 4. display it
-// get post_id from post when you nagivate here
-// Refresh page when updated
-// import delete post instead of rewriting it
-// tod
-// individual posts not working correctly
-// fix update post
-// chcek for like and dislike IF it's my own post
-// add component did mount
-// add like and remove like functions here
 
 class PostScreen extends Component {
   constructor(props) {
     super(props);
 
+    // Save the required variables for the netwroking query in the state to be used throughtout the component
     this.state = {
       isLoading: true,
-      post: [], // maybe change this
+      post: [],
       updatePost: false,
       postMessage: '',
       newPostMeesage: '',
@@ -75,231 +57,54 @@ class PostScreen extends Component {
     console.log('user profile id: ', this.state.userProfileID);
   };
 
-  // Add a toggle function to set the visibility for the user alerts
+  // Add a toggle function to set the visibility of the alerts, to be be used during netwroking requests displaying allerts for the user
   setModalVisible = (visible) => {
     this.setState({ modalVisible: visible });
   };
 
-  // likePost = async (post_id) => {
-  //   const value = await AsyncStorage.getItem('@session_token');
-
-  //   // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
-  //   const user_id = this.state.userProfileID; // change the name of the var and in the fetch as well
-
-  //   // const user_id = 41; // change the name of the var and in the fetch as well
-  //   return fetch(
-  //     'http://localhost:3333/api/1.0.0/user/' +
-  //       user_id +
-  //       '/post/' +
-  //       post_id +
-  //       '/like',
-  //     {
-  //       method: 'post',
-  //       headers: {
-  //         'X-Authorization': value,
-  //       },
-  //     }
-  //   )
-  //     .then((response) => {
-  //       if (response.status === 200) {
-  //         // If it is not the page of a single post, display all posts
-  //         if (!this.state.singlePost) {
-  //           this.getUserPosts();
-  //           // Refresh the individual post
-  //         } else {
-  //           this.getSinglePost();
-  //         }
-  //       } else {
-  //         throw 'Something went wrong';
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // };
-
+  // Function to like a given post
   likePost = async (post_id) => {
+    // Get the user's token to be used for authorising the fetch request, as well as their ID be able to like the right post
     const value = await AsyncStorage.getItem('@session_token');
-    // TODO
-    // user_id was initially in the request but it didnt' work
-
-    // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
     const user_id = this.state.userProfileID; // change the name of the var and in the fetch as well
 
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' +
-        user_id +
-        '/post/' +
-        post_id +
-        '/like',
-      {
-        method: 'post',
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        // If the post was liked successfully, update the page to reflect that
-        if (response.status === 200) {
-          // If it's the profile page, refresh all the posts
-          if (!this.state.singlePost) {
-            this.getUserPosts();
-            // If it's the page for an individual post, refresh it
-          } else {
-            this.getSinglePost();
-          }
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Make sure you are logged in, and then try again!';
-          this.setModalVisible(true);
-        } else if (response.status === 403) {
-          this.state.errorMessage =
-            'Forbidden! You can not like your own posts or posts appearing on your profile';
-          this.setModalVisible(true);
-        } else if (response.status === 400) {
-          this.state.errorMessage = 'You have already liked this post!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  // removeLike = async (post_id) => {
-  //   const value = await AsyncStorage.getItem('@session_token');
-  //   // TODO
-  //   // user_id was initially in the request but it didnt' work
-  //   const user_id = this.state.userProfileID;
-  //   return fetch(
-  //     'http://localhost:3333/api/1.0.0/user/' +
-  //       user_id +
-  //       '/post/' +
-  //       post_id +
-  //       '/like',
-  //     {
-  //       method: 'delete',
-  //       headers: {
-  //         'X-Authorization': value,
-  //       },
-  //     }
-  //   )
-  //     .then((response) => {
-  //       if (response.status === 200) {
-  //         // If it is not the page of a single post, display all posts
-  //         if (!this.state.singlePost) {
-  //           this.getUserPosts();
-  //           // Refresh the individual post
-  //         } else {
-  //           this.getSinglePost();
-  //         }
-  //         console.log('Post liked!');
-  //       } else {
-  //         throw 'Something went wrong';
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // };
-
-  //   PATCH
-  // /user/{user_id}/post/{post_id}
-
-  removeLike = async (post_id) => {
-    const value = await AsyncStorage.getItem('@session_token');
-
-    // user_id was initially in the request but it didnt' work
-    const user_id = this.state.userProfileID;
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' +
-        user_id +
-        '/post/' +
-        post_id +
-        '/like',
-      {
-        method: 'delete',
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        console.log('response code: ', response.status);
-        // If the post was liked successfully, update the page to reflect that
-        if (response.status === 200) {
-          // If it's the profile page, refresh all the posts
-          if (!this.state.singlePost) {
-            this.getUserPosts();
-            // If it's the page for an individual post, refresh it
-          } else {
-            this.getSinglePost();
-          }
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Make sure you are logged in, and then try again!';
-          this.setModalVisible(true);
-        } else if (response.status === 403) {
-          this.state.errorMessage =
-            'Forbidden! You can not like or unlike your own posts or posts appearing on your profile';
-          this.setModalVisible(true);
-        } else if (response.status === 400) {
-          this.state.errorMessage = 'You have already unliked this post!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  updatePost = async () => {
-    console.log('this.state.newPostText: ', this.state.newPostMeesage);
-    if (this.state.newPostMeesage !== '') {
-      const value = await AsyncStorage.getItem('@session_token');
-      // Set the text for the new post
-      let newPost = this.state.post;
-      newPost.text = this.state.newPostMeesage;
-
-      let post_id = this.state.post.post_id;
-      // let user_id = this.state.post.author.user_id; // not sure if the right id or my id
-      let user_id = this.state.userProfileID; // not sure if the right id or my id
-
-      console.log('stringified text,:\n', JSON.stringify(newPost));
-
-      return fetch(
-        'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
+    // Send a fetch request that add a like to the given post
+    return (
+      fetch(
+        'http://localhost:3333/api/1.0.0/user/' +
+          user_id +
+          '/post/' +
+          post_id +
+          '/like',
         {
-          method: 'PATCH',
+          method: 'post',
           headers: {
-            'content-type': 'application/json',
             'X-Authorization': value,
           },
-          body: JSON.stringify(newPost),
         }
       )
+        // Return a promise and different messages for the user depending on if the request was successful or not
         .then((response) => {
+          // Check if the post was liked successfully, and refresh it to update the number of likes
           if (response.status === 200) {
-            this.state.updatePost = false;
-            this.getSinglePost();
-            this.state.errorMessage = 'Post updated successfully!';
-            this.setModalVisible(true);
+            // If it's the profile page, refresh all the posts
+            if (!this.state.singlePost) {
+              this.getUserPosts();
+              // If it's the page for an individual post, refresh it
+            } else {
+              this.getSinglePost();
+            }
+            // Display differnt alerts for the user if the netwroking request was unsuccessful
           } else if (response.status === 401) {
             this.state.errorMessage =
-              'Unauthorised! Make sure you are logged in!';
+              'Unauthorised! Make sure you are logged in, and then try again!';
             this.setModalVisible(true);
-          } else if (response.status === 404) {
+          } else if (response.status === 403) {
             this.state.errorMessage =
-              'Make sure your new post does not go over 256 characters, and that you are updating your own post!';
+              'Forbidden! You can not like your own posts or posts appearing on your profile';
+            this.setModalVisible(true);
+          } else if (response.status === 400) {
+            this.state.errorMessage = 'You have already liked this post!';
             this.setModalVisible(true);
           } else if (response.status === 500) {
             this.state.errorMessage =
@@ -307,9 +112,125 @@ class PostScreen extends Component {
             this.setModalVisible(true);
           }
         })
+        // Throw an error if one is to occur
         .catch((error) => {
           console.log(error);
-        });
+        })
+    );
+  };
+
+  // Function to remove likes from a given post
+  removeLike = async (post_id) => {
+    // Get the user's token to be used for authorising the fetch request, as well as their ID be able remove likes from  the right post
+    const value = await AsyncStorage.getItem('@session_token');
+    const user_id = this.state.userProfileID;
+    return (
+      fetch(
+        'http://localhost:3333/api/1.0.0/user/' +
+          user_id +
+          '/post/' +
+          post_id +
+          '/like',
+        {
+          method: 'delete',
+          headers: {
+            'X-Authorization': value,
+          },
+        }
+      )
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          // Check if the post was unliked successfully, and refresh it to update the number of likes
+          if (response.status === 200) {
+            // If it's the profile page, refresh all the posts
+            if (!this.state.singlePost) {
+              this.getUserPosts();
+              // If it's the page for an individual post page, refresh just that one post
+            } else {
+              this.getSinglePost();
+            }
+            // Display different alerts for the user if the netwroking request was unsuccessful
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in, and then try again!';
+            this.setModalVisible(true);
+          } else if (response.status === 403) {
+            this.state.errorMessage =
+              'Forbidden! You can not like or unlike your own posts or posts appearing on your profile';
+            this.setModalVisible(true);
+          } else if (response.status === 400) {
+            this.state.errorMessage = 'You have already unliked this post!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        // Throw an error if one is to occur
+        .catch((error) => {
+          console.log(error);
+        })
+    );
+  };
+
+  // Create a function to update the a given post
+  updatePost = async () => {
+    // Check that the user has added a new message before subbmitting the request
+    if (this.state.newPostMeesage !== '') {
+      // Get the user's token to be used for authorising the fetch request, as well as their ID be able to update the right post
+      const value = await AsyncStorage.getItem('@session_token');
+      let userId = this.state.userProfileID;
+      let postId = this.state.post.post_id;
+
+      // Create a temporary variable to copy the old post's content, and replace the text of the post with the user's input
+      let newPost = this.state.post;
+      newPost.text = this.state.newPostMeesage;
+
+      // Create a fetch request to update the old post with the new text
+      return (
+        fetch(
+          'http://localhost:3333/api/1.0.0/user/' + userId + '/post/' + postId,
+          {
+            method: 'PATCH',
+            headers: {
+              'content-type': 'application/json',
+              'X-Authorization': value,
+            },
+            body: JSON.stringify(newPost),
+          }
+        )
+          // Return a promise and different messages for the user depending on if the request was successful or not
+          .then((response) => {
+            if (response.status === 200) {
+              // If the post was updated successfully, set the toggel variable to false to let the compinent know it's been updated already
+              this.state.updatePost = false;
+              // Refresh the post to display the new contents
+              this.getSinglePost();
+              // Display a message for the user adivising them that the post has been updated successfuly
+              this.state.errorMessage = 'Post updated successfully!';
+              this.setModalVisible(true);
+              // Display different alerts for the user if the netwroking request was unsuccessful, advising them on what the issue is
+            } else if (response.status === 401) {
+              this.state.errorMessage =
+                'Unauthorised! Make sure you are logged in!';
+              this.setModalVisible(true);
+            } else if (response.status === 404) {
+              this.state.errorMessage =
+                'Make sure your new post does not go over 256 characters, and that you are updating your own post!';
+              this.setModalVisible(true);
+            } else if (response.status === 500) {
+              this.state.errorMessage =
+                'Server error! Restart the server then try again';
+              this.setModalVisible(true);
+            }
+          })
+          // Throw and error with explaining the problem that occured with the post
+          .catch((error) => {
+            console.log(error);
+          })
+      );
+      // If the user has not entered a new message before subbmiting the updated post, alert them that they should do this first
     } else {
       this.state.errorMessage =
         'Post can not be empty! Add text and try adding it again!';
@@ -317,6 +238,7 @@ class PostScreen extends Component {
     }
   };
 
+  // Create a function to check if a certain post is from the user who is logged in, in order to display the right buttons on the page and have the right functionality
   checkPostIsFromLoggedUser = async () => {
     if (this.state.loggedUserId == this.state.post.author.user_id) {
       this.state.isLoggedInUsersPost = true;
@@ -367,13 +289,16 @@ class PostScreen extends Component {
       });
   };
 
+  // Create a request to retrive a given post from the server
   getSinglePost = async () => {
-    // const userId = await AsyncStorage.getItem('@id');
-
+    // Get the user's token to be used for authorising the fetch request, as well as their ID be able to retrieve the right post
     const value = await AsyncStorage.getItem('@session_token');
-
     const userId = this.props.route.params.user_id;
+
+    // Store the id of the user's who's profile we are on to be used for other requests checking the profile owner
     this.state.userProfileID = userId;
+
+    // Store the post id to be used for requests
     const post_id = this.props.route.params.post_id;
     console.log('Post page: ');
     console.log('userId:' + userId);
@@ -381,46 +306,50 @@ class PostScreen extends Component {
 
     // GET POST ID FROM NAVIGATE. WHATEVER
 
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' + userId + '/post/' + post_id,
-      {
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw 'Something went wrong';
+    return (
+      fetch(
+        'http://localhost:3333/api/1.0.0/user/' + userId + '/post/' + post_id,
+        {
+          headers: {
+            'X-Authorization': value,
+          },
         }
-      })
-      .then((responseJson) => {
-        this.setState({
-          // isLoading: false,
-          post: responseJson,
-        }),
-          console.log('original post:');
-        console.log(this.state.post);
-      })
-      .then(() => {
-        // Check if its my post
-        this.checkPostIsFromLoggedUser();
-      })
-      .then(() => {
-        this.setState({
-          isLoading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      )
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            throw 'Something went wrong';
+          }
+        })
+        // If the request was successful, update the user's state to store the post
+        .then((responseJson) => {
+          this.setState({
+            post: responseJson,
+          });
+        })
+        .then(() => {
+          // Call the function to check if the post if from the logged user or not
+          this.checkPostIsFromLoggedUser();
+        })
+        // Once the previous requests have finished, set isLoading to false to render the component on the page
+        .then(() => {
+          this.setState({
+            isLoading: false,
+          });
+        })
+        // Display the error to the user in case something goes wrong
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   render() {
     const { modalVisible } = this.state;
 
+    // Check if the component is still loading, and render a message for the user to let them know the page is loading
     if (this.state.isLoading) {
       return (
         <View
@@ -434,10 +363,12 @@ class PostScreen extends Component {
           <Text>Loading..</Text>
         </View>
       );
+      // If the request was successful, render the post on the page
     } else {
       return (
         <View>
           <View>
+            {/* Create a modal alert to display the alert message for the user */}
             <Modal
               animationType="slide"
               transparent={true}
@@ -448,8 +379,7 @@ class PostScreen extends Component {
             >
               <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                  {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                  {/* Display the erro you wish to display to the user */}
+                  {/* Set the message to be displayed for the user  */}
                   <Text style={styles.modalText}>
                     {this.state.errorMessage}{' '}
                   </Text>
@@ -462,78 +392,79 @@ class PostScreen extends Component {
                 </View>
               </View>
             </Modal>
-            {/* <Pressable
-            style={[styles.button, styles.buttonOpen]}
-            onPress={() => this.setModalVisible(true)}
-          >
-            <Text style={styles.textStyle}>Show Modal</Text>
-          </Pressable> */}
           </View>
-          <Text>
-            From {this.state.post.author.first_name}{' '}
-            {this.state.post.author.last_name}
-          </Text>
-          <Text> {this.state.post.text}</Text>
-          <Text>
-            {' '}
-            Posted on: {timeAndDateExtractor(this.state.post.timestamp).at(
-              0
-            )}{' '}
-            at {timeAndDateExtractor(this.state.post.timestamp).at(1)}
-          </Text>
-          <Text> {this.state.post.numLikes} likes</Text>
-          {/* If it's not my post, you can like it  */}
-          {!this.state.isLoggedInUsersPost ? (
-            <Button
-              title="Like(not sure if it works"
-              onPress={() => this.likePost(this.state.post.post_id)}
-            />
-          ) : null}
-          {/* not sure  */}
-          {!this.state.isLoggedInUsersPost ? (
-            <Button
-              title="Remove like(NOT CODED)"
-              onPress={() => this.removeLike(this.state.post.post_id)}
-            />
-          ) : null}
 
-          {this.state.isLoggedInUsersPost ? (
-            <Button
-              title="Delete post(to complete)"
-              onPress={() => this.deletePost(this.state.post.post_id)}
-            />
-          ) : null}
+          {/* Display the post withe the relevant details */}
+          <View>
+            <Text>
+              From {this.state.post.author.first_name}{' '}
+              {this.state.post.author.last_name}
+            </Text>
+            <Text> {this.state.post.text}</Text>
+            <Text>
+              {' '}
+              Posted on: {timeAndDateExtractor(this.state.post.timestamp).at(
+                0
+              )}{' '}
+              at {timeAndDateExtractor(this.state.post.timestamp).at(1)}
+            </Text>
+            <Text> {this.state.post.numLikes} likes</Text>
 
-          {/* display the update button nly if its my post  */}
-          {this.state.isLoggedInUsersPost ? (
-            <Button
-              title="Update(NOT CODED)"
-              onPress={() => {
-                (this.state.updatePost = true), this.getSinglePost();
-              }}
-            />
-          ) : null}
-
-          {/* Display the update form */}
-          {this.state.updatePost ? (
-            <View>
-              <Label>New post:</Label>
-              <TextInput
-                maxLength="256"
-                placeholder="New post"
-                onChangeText={(newPostMeesage) =>
-                  this.setState({ newPostMeesage })
-                }
-                value={this.state.newPostMeesage}
-              />
+            {/* Allow the user to like the post if it is not their own post */}
+            {!this.state.isLoggedInUsersPost ? (
               <Button
-                title="Submit updated post"
+                title="Like"
+                onPress={() => this.likePost(this.state.post.post_id)}
+              />
+            ) : null}
+
+            {/* Allow the user to remove like from the post if it is not their own post */}
+            {!this.state.isLoggedInUsersPost ? (
+              <Button
+                title="Remove Like"
+                onPress={() => this.removeLike(this.state.post.post_id)}
+              />
+            ) : null}
+
+            {/* Allow the user to delete the post, ony if it is their post */}
+            {this.state.isLoggedInUsersPost ? (
+              <Button
+                title="Delete post"
+                onPress={() => this.deletePost(this.state.post.post_id)}
+              />
+            ) : null}
+
+            {/* Display a button to allow the user to update the post if it is their own post  */}
+            {this.state.isLoggedInUsersPost ? (
+              <Button
+                title="Update"
                 onPress={() => {
-                  this.updatePost();
+                  (this.state.updatePost = true), this.getSinglePost();
                 }}
               />
-            </View>
-          ) : null}
+            ) : null}
+
+            {/* Update the user's post with the new message if the user calls for it */}
+            {this.state.updatePost ? (
+              <View>
+                <Label>New post:</Label>
+                <TextInput
+                  maxLength="256"
+                  placeholder="New post"
+                  onChangeText={(newPostMeesage) =>
+                    this.setState({ newPostMeesage })
+                  }
+                  value={this.state.newPostMeesage}
+                />
+                <Button
+                  title="Submit updated post"
+                  onPress={() => {
+                    this.updatePost();
+                  }}
+                />
+              </View>
+            ) : null}
+          </View>
         </View>
       );
     }
