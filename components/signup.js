@@ -183,6 +183,11 @@ class SignupScreen extends Component {
           onPress={() => this.signup()}
           // take me to login
         />
+        <Button
+          title="Back to login page"
+          onPress={() => this.props.navigation.navigate('Login')}
+          // take me to login
+        />
       </View>
     );
   }

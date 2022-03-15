@@ -123,7 +123,7 @@ class LoginScreen extends Component {
           value={this.state.email}
         />
         <Label>Password:</Label>
-        <Label>TODO: add instructions for password</Label>
+
         <TextInput
           style={styles.input}
           placeholder="password"
@@ -132,6 +132,7 @@ class LoginScreen extends Component {
           secureTextEntry={true}
           maxLength="16"
         />
+        <Text>Password must be at least 5 characters long</Text>
         <Button
           style={styles.Button}
           title="LOGIN"

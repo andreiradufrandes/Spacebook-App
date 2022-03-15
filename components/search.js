@@ -110,6 +110,7 @@ class SearchScreen extends Component {
 
   //   ADD LIMIT TO THE FETCH RESULT, AND MAKE IT LOOK LIKE THE REAL ONE
   searchName = async (direction) => {
+    this.state.isLoading = true;
     console.log(direction);
     // If the search box is not empty, execute the code looking for the person
     if (!(this.state.searchTerm === '')) {

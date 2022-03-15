@@ -61,6 +61,7 @@ class ProfileScreen extends React.Component {
       singlePost: false,
       userRequestedFriendRequest: false,
       modalVisible: false,
+      friendRequestSent: false,
     };
   }
 
@@ -73,83 +74,43 @@ class ProfileScreen extends React.Component {
 
     this.state.userProfileID = this.state.loggedUserId;
     // These get called WHEN i go  on someones prifile
-    this.getProfileImage();
-    this.getUserInfo();
-    this.getUserPosts();
+
+    await this.getUserInfo();
+    await this.getUserPosts();
+    await this.getProfileImage();
+
+    console.log('\n\n\n\n\n\n\n\ncomponent did mount\n\n\n\n\n\n\n\nn');
 
     // ---------------------------------------------------------------
     // When the users travels to their profile using the tab navigator
     this.parentUnsubscribe = this.props.navigation
       .getParent()
       .addListener('tabPress', async (e) => {
-        console.log('-------------ON PROFILE FROM TAB-------------------');
-
         // Nagivate the user
         this.props.navigation.navigate('Profile', {
           user_id: this.state.loggedUserId,
         });
 
-        // ––––––– unsure about -–––––––
-
         await this.startFunction();
-        // this.getProfileImage(); // not sure if it should be here
-        // this.getUserInfo(); // make sure they use the right ids
-
-        //
-
-        // ––––––– unsure about -–––––––
       });
-    // ---------------------------------------------------------------
 
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
-      console.log('\n\n\n\n\n\n\n       Unsubsribe func callled\n\n\n\n');
-      // this.state.loggedUserId = await AsyncStorage.getItem('@id');
-
-      // let userCheck = typeof this.props.route.params;
-      // console.log('user check INSIDE event listener');
-      // console.log('userCheck: ' + userCheck);
-      // console.log('userCheck === undefined: ' + (userCheck === 'undefined'));
-      // console.log('params : ' + this.props.route.params);
-
       await this.startFunction();
-      // this.getProfileImage(); // not sure if it should be here
-      // this.getUserInfo(); // make sure they use the right ids
-      // this.getUserPosts();
-
-      console.log('state: ', this.state); // delete
-      console.log('isFriend: ' + this.state.isFriend);
-      console.log(
-        'above SHOULD have isFriend =  true when travelling to friend profile'
-      );
-
-      // ----------------toast library--------------------
-      // let toast = Toast.show('Request failed to send.', {
-      //   duration: Toast.durations.LONG,
-      // });
-
-      // // You can manually hide the Toast, or it will automatically disappear after a `duration` ms timeout.
-      // setTimeout(function hideToast() {
-      //   Toast.hide(toast);
-      //   console.log('toast hidden');
-      // }, 3000);
-      // ----------------toast library--------------------
     });
-
-    console.log('state: ', this.state); // delete
   };
-
-  // ---------------------------------------------------------------
-  //          Trial for listening to parent
-
-  // Listening to parent component
 
   componentWillUnmount() {
     this.parentUnsubscribe();
     this.unsubscribe();
-    console.log('-----------comonentwillunmountcall----------');
   }
 
   startFunction = async () => {
+    this.state.isLoading = true;
+    this.state.friendRequestSent = false;
+    console.log(
+      '\n\n\n\nState in starter function beginning\n\n\n',
+      this.state
+    );
     console.log('#function called: startFunction');
     // Resetting parameter
     this.state.loggedUserId = await AsyncStorage.getItem('@id');
@@ -187,26 +148,29 @@ class ProfileScreen extends React.Component {
         this.state.isFriend
     ); // delete
 
-    this.state.userPosts = []; // refresh it // redo this cleare or in a function
+    // this.state.userPosts = []; // refresh it // redo this cleare or in a function
 
     // Get user info should depend on whose user's page we're on
-    this.getUserInfo();
+    await this.getUserInfo();
     //   1. User logged in
 
     // get the posts for is logged in used && and for friends as well
-    if (this.state.isLoggedInUsersProfile) {
-      this.getUserPosts();
-    } else {
-      // 2. This is NOT my profile, isLoggedInUsersProfile == false, but a frien'ds
-      if (this.state.isFriend) {
-        this.getUserPosts();
-      }
+    // if (this.state.isLoggedInUsersProfile) {
+    //   await this.getUserPosts();
+    // } else {
+    //   // 2. This is NOT my profile, isLoggedInUsersProfile == false, but a frien'ds
+    //   if (this.state.isFriend) {
+    //     await this.getUserPosts();
+    //   }
+    // }
+    if (this.state.isLoggedInUsersProfile || this.state.isFriend) {
+      await this.getUserPosts();
     }
 
-    this.getProfileImage();
     await this.getFriendRequests();
     // Check if the user sent a friend request
     this.checkUserSentFriendRequest();
+    this.getProfileImage();
   };
 
   getListOfFriends = async () => {
@@ -234,7 +198,7 @@ class ProfileScreen extends React.Component {
       .then((responseJson) => {
         console.log('list of friends repsonseJson: ' + responseJson);
         this.setState({
-          isLoading: false,
+          // isLoading: false,
           friendsList: responseJson,
         });
         console.log('list of friends friendsList: ' + this.state.friendsList);
@@ -380,7 +344,7 @@ class ProfileScreen extends React.Component {
         .then((responseJson) => {
           this.setState({
             //   NOT sure if we need this here
-            isLoading: false, // meaning it finished and now you can display it
+            // isLoading: false, // meaning it finished and now you can display it
             userPosts: responseJson,
           });
         })
@@ -613,13 +577,23 @@ class ProfileScreen extends React.Component {
       .then((response) => {
         console.log('response status inside addFriend: ' + response.status);
         if (response.status === 201) {
-          // maybe be 200 NOT sure
-          console.log('Friend request sent successfully');
-          //   TODO, REFRESH PAGE SO THAT IT DISPLAYS EVERYTHING
-          // change ifFriend to true
-          this.state.isFriend = true;
-        } else {
-          throw "Something went wrong.Friend couldn't be added ";
+          // Send add friend alert
+          this.state.errorMessage = 'Friend request sent!';
+          this.setModalVisible(true);
+          //        REFLECT THAT
+          this.state.friendRequestSent = true;
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Make sure you are logged in and try again';
+          this.setModalVisible(true);
+        } else if (response.status === 403) {
+          this.state.errorMessage =
+            'Friend request sent already! Wait for the user to answer it';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again';
+          this.setModalVisible(true);
         }
       })
       .catch((error) => {
@@ -690,6 +664,7 @@ class ProfileScreen extends React.Component {
         this.setState({
           photo: data,
           hasProfilePicture: true,
+          isLoading: false,
         });
         // Call getUserInfo so it displays the image now
       })
@@ -717,11 +692,23 @@ class ProfileScreen extends React.Component {
     )
       .then((response) => {
         if (response.status === 200) {
-          // return response.json();
-          console.log('Friendship request accepted!');
+          this.state.errorMessage = 'Friend request accepted!';
+          this.setModalVisible(true);
+          // Refresh the page to reflect friendship request was accepted
+          this.startFunction(); // delete - this just refreshes the page
           // refresh page
-        } else {
-          throw 'Something went wrong';
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Make sure you are logged in and try again';
+          this.setModalVisible(true);
+        } else if (response.status === 404) {
+          this.state.errorMessage =
+            'User not found! Log out and back in then try again';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again';
+          this.setModalVisible(true);
         }
       })
       .catch((error) => {
@@ -750,7 +737,7 @@ class ProfileScreen extends React.Component {
       })
       .then((responseJson) => {
         this.setState({
-          isLoading: false,
+          // isLoading: false,
           friendsRequestsList: responseJson,
         }),
           console.log(
@@ -896,7 +883,8 @@ class ProfileScreen extends React.Component {
                 {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
                 {!this.state.isLoggedInUsersProfile &&
                 !this.state.isFriend &&
-                !this.state.userRequestedFriendRequest ? (
+                !this.state.userRequestedFriendRequest &&
+                !this.state.friendRequestSent ? (
                   <Button
                     title="Add friend"
                     onPress={() => this.addFriend()} // code it
@@ -908,7 +896,7 @@ class ProfileScreen extends React.Component {
               !this.state.isFriend &&
               this.state.userRequestedFriendRequest ? (
                 <Button
-                  title="Accept friend request(CODE IT)"
+                  title="Accept friend request"
                   // onPress={() => this.addFriend()} // code it
                   onPress={() => this.acceptFriendRequest()}
                 ></Button>
@@ -974,7 +962,7 @@ class ProfileScreen extends React.Component {
                       ></Button> */}
 
                         <Button
-                          title="View post(CORRECTED)"
+                          title="View post"
                           // NOT SURE IF I CAN PASS POST ID LIKE THIS
                           onPress={() => {
                             this.props.navigation.navigate('Post', {
@@ -989,19 +977,19 @@ class ProfileScreen extends React.Component {
                         ) : null} */}
 
                         <Button
-                          title="Like post(not sure if the right one is liked)"
+                          title="Like post"
                           onPress={() => this.likePost(item.post_id)}
                         />
 
                         <Button
-                          title="Remove like (not finished)"
+                          title="Remove like"
                           onPress={() => this.removeLike(item.post_id)}
                         />
 
                         {/* Allow the user to delete a post if it's on their own profile */}
                         {this.state.isLoggedInUsersProfile ? (
                           <Button
-                            title="Delete post(complete)"
+                            title="Delete post"
                             onPress={() =>
                               this.deletePost(item.post_id, item.author.user_id)
                             }

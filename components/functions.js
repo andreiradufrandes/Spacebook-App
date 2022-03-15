@@ -56,3 +56,26 @@ export function timeAndDateExtractor(timestamp) {
   let time = timestamp.slice(11, 16);
   return [date, time];
 }
+
+/*
+
+Uppercase and lowercase letters (A-Z and a-z)
+Numeric characters (0-9)
+Special characters - ! # $ % & ' * + - / = ? ^ _ ` { | } ~
+Period, dot, or full stop (.) with the condition that it cannot be the first or last letter of the email and cannot repeat one after another.
+
+
+
+
+valid email
+/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+
+*/
+
+export function checkEmail(email) {
+  if (/[^0-9a-zA-Z\s]/.test(email)) {
+    return true;
+  } else {
+    return false;
+  }
+}
