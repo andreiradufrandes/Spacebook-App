@@ -134,35 +134,43 @@ class SearchScreen extends Component {
           this.state.searchResults.length
         );
 
-        // ---------------Check the direction----------------
-        let signedOffset = 0;
-        // If the direction is backwards, make the offset negative
-        if (direction == 'previousResults') {
-          signedOffset -= this.state.initialOffset;
-          this.state.firstCycle = true;
-          // If going backwards limit NOT reached
-          // If the direction is forward, keep the offset positive
-        } else {
-          signedOffset = this.state.initialOffset;
-        }
-        console.log('signedOffset:', signedOffset);
-        // ----------------check if you have reached the end or not---------------
-        // ------End reached
-        if (
-          this.state.searchResults.length < this.state.initialOffset &&
-          !this.state.firstCycle
-        ) {
-          console.log('-You have reached the last page');
+        // Check the left limit was teached. If it wasn't, continue with th request
+        if (direction == 'previousResults' && this.state.offectCounter <= 0) {
+          console.log('You have reached the first page');
           this.state.errorMessage =
-            'You have reached the last page of search results';
+            'You have reached the first search results! you can only go forward from here';
           this.setModalVisible(true);
-        }
-        // ------End NOT reached
-        else {
-          // Continue
-          console.log('-You have NOT yet reached the last page');
-          this.state.firstCycle = false;
-          this.state.offectCounter += signedOffset;
+        } else {
+          // ---------------Check the direction----------------
+          let signedOffset = 0;
+          // If the direction is backwards, make the offset negative
+          if (direction == 'previousResults') {
+            signedOffset -= this.state.initialOffset;
+            this.state.firstCycle = true;
+            // If going backwards limit NOT reached
+            // If the direction is forward, keep the offset positive
+          } else {
+            signedOffset = this.state.initialOffset;
+          }
+          console.log('signedOffset:', signedOffset);
+          // ----------------check if you have reached the end or not---------------
+          // ------End reached
+          if (
+            this.state.searchResults.length < this.state.initialOffset &&
+            !this.state.firstCycle
+          ) {
+            console.log('-You have reached the last page');
+            this.state.errorMessage =
+              'You have reached the last page of search results';
+            this.setModalVisible(true);
+          }
+          // ------End NOT reached
+          else {
+            // Continue
+            console.log('-You have NOT yet reached the last page');
+            this.state.firstCycle = false;
+            this.state.offectCounter += signedOffset;
+          }
         }
       }
 
