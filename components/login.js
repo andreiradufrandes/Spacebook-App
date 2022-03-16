@@ -16,6 +16,9 @@ import {
   PrimaryButton,
   Center,
   ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
 } from '../styles.js';
 import { greaterThan } from 'react-native-reanimated';
 
@@ -77,8 +80,10 @@ class LoginScreen extends Component {
     const { modalVisible } = this.state;
 
     return (
-      <View style={styles.container}>
-        <View style={styles.loginBox}>
+      // <View style={styles.container}>
+      <Container>
+        {/* <View style={styles.loginBox}> */}
+        <BoxContainer>
           {/* Add a component to display messages for the user when accepting and decling friends requests */}
           <View>
             <Modal
@@ -105,7 +110,7 @@ class LoginScreen extends Component {
             </Modal>
           </View>
           {/* Display the instructions and buttons for th user to log in */}
-          <Label>Email:</Label>
+          {/* <Label>Email:</Label>
           <TextInput
             style={styles.input}
             placeholder="email"
@@ -122,8 +127,22 @@ class LoginScreen extends Component {
             value={this.state.password}
             secureTextEntry={true}
             maxLength="16"
-          />
+          /> */}
+          <Label>Email:</Label>
+          <Input
+            onChangeText={(email) => this.setState({ email })}
+            value={this.state.email}
+            maxLength="256"
+          ></Input>
 
+          <Label>Password:</Label>
+          <Input
+            onChangeText={(password) => this.setState({ password })}
+            value={this.state.password}
+            secureTextEntry={true}
+            maxLength="16"
+          ></Input>
+          {/* 
           <View style={styles.ButtonContainer}>
             <Button
               style={styles.Button}
@@ -131,15 +150,32 @@ class LoginScreen extends Component {
               onPress={() => this.login()}
             />
 
-            {/* Allow the user to navigate to the signup page by using the button */}
+            
             <Button
               style={styles.Button}
               title="SIGN UP PAGE"
               onPress={() => this.props.navigation.navigate('Signup')}
             />
-          </View>
-        </View>
-      </View>
+          </View> */}
+
+          {/* <View style={styles.ButtonContainer}> */}
+          <ButtonContainer>
+            <PrimaryButton onPress={() => this.login()}>
+              <ButtonText>LOGIN</ButtonText>
+            </PrimaryButton>
+
+            <PrimaryButton
+              onPress={() => this.props.navigation.navigate('Signup')}
+            >
+              <ButtonText>SIGN UP</ButtonText>
+            </PrimaryButton>
+          </ButtonContainer>
+
+          {/* </View> */}
+        </BoxContainer>
+        {/* </View> */}
+      </Container>
+      // </View>
     );
   }
 }
@@ -166,6 +202,7 @@ const styles = StyleSheet.create({
   loginBox: {
     // flex: 1,
     // height: '40%',
+
     width: '80%',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -173,6 +210,7 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     backgroundColor: '#ffffff',
   },
+
   input: {
     backgroundColor: '#ffffff',
 
