@@ -17,6 +17,7 @@ import {
   Center,
   ButtonText,
 } from '../styles.js';
+import { greaterThan } from 'react-native-reanimated';
 
 class LoginScreen extends Component {
   constructor(props) {
@@ -77,87 +78,122 @@ class LoginScreen extends Component {
 
     return (
       <View style={styles.container}>
-        {/* Add a component to display messages for the user when accepting and decling friends requests */}
-        <View>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              this.setModalVisible(!modalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <Text style={styles.modalText}>{this.state.errorMessage} </Text>
-                <Pressable
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => this.setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.textStyle}>Ok</Text>
-                </Pressable>
+        <View style={styles.loginBox}>
+          {/* Add a component to display messages for the user when accepting and decling friends requests */}
+          <View>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <Text style={styles.modalText}>
+                    {this.state.errorMessage}{' '}
+                  </Text>
+                  <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <Text style={styles.textStyle}>Ok</Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          </Modal>
+            </Modal>
+          </View>
+          {/* Display the instructions and buttons for th user to log in */}
+          <Label>Email:</Label>
+          <TextInput
+            style={styles.input}
+            placeholder="email"
+            maxLength="256"
+            onChangeText={(email) => this.setState({ email })}
+            value={this.state.email}
+          />
+          <Label>Password:</Label>
+
+          <TextInput
+            style={styles.input}
+            placeholder="password"
+            onChangeText={(password) => this.setState({ password })}
+            value={this.state.password}
+            secureTextEntry={true}
+            maxLength="16"
+          />
+
+          <View style={styles.ButtonContainer}>
+            <Button
+              style={styles.Button}
+              title="LOGIN"
+              onPress={() => this.login()}
+            />
+
+            {/* Allow the user to navigate to the signup page by using the button */}
+            <Button
+              style={styles.Button}
+              title="SIGN UP PAGE"
+              onPress={() => this.props.navigation.navigate('Signup')}
+            />
+          </View>
         </View>
-        {/* Display the instructions and buttons for th user to log in */}
-        <Label>Email:</Label>
-        <TextInput
-          style={styles.input}
-          placeholder="email"
-          maxLength="256"
-          onChangeText={(email) => this.setState({ email })}
-          value={this.state.email}
-        />
-        <Label>Password:</Label>
-
-        <TextInput
-          style={styles.input}
-          placeholder="password"
-          onChangeText={(password) => this.setState({ password })}
-          value={this.state.password}
-          secureTextEntry={true}
-          maxLength="16"
-        />
-
-        <Button
-          style={styles.Button}
-          title="LOGIN"
-          onPress={() => this.login()}
-        />
-
-        {/* Allow the user to navigate to the signup page by using the button */}
-        <Button
-          style={styles.Button}
-          title="SIGN UP PAGE"
-          onPress={() => this.props.navigation.navigate('Signup')}
-        />
       </View>
     );
   }
 }
 
 export default LoginScreen;
+// Dimension of he screen
 
 const styles = StyleSheet.create({
   container: {
+    // flex: 1,
+    // backgroundColor: '#fff',
+    // alignItems: 'center',
+    // justifyContent: 'center',
+    // flexDirection: 'column',
+    backgroundColor: '#520f9A', // remove
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'column',
+    alignItems: 'center',
+    alignContent: 'space-between',
+    minHeight: '100%',
+    minHeight: '100vh',
+  },
+  loginBox: {
+    // flex: 1,
+    // height: '40%',
+    width: '80%',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: 20,
+    maxWidth: 500,
+    backgroundColor: '#ffffff',
   },
   input: {
-    backgroundColor: '#edf7ff',
-    borderRadius: 10,
-    height: 50,
-    // flex: 1,
-    padding: 10,
-    marginBottom: 20,
+    backgroundColor: '#ffffff',
+
+    height: 51,
+    // // flex: 1,
+    padding: 8,
+    // marginBottom: 20,
+    marginBottom: '20px',
+    borderWidth: 2,
+    borderColor: 'black',
+  },
+  ButtonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   Button: {
-    marginBottom: 50,
+    marginBottom: '10px',
   },
+
+  // All of this is modal
   centeredView: {
     flex: 1,
     justifyContent: 'center',
