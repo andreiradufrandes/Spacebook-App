@@ -17,6 +17,9 @@ import {
   PrimaryButton,
   Center,
   ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
 } from '../styles.js';
 // only navigate me to LOGIN PAGE if the request successfully
 
@@ -110,75 +113,77 @@ class SignupScreen extends Component {
   render() {
     const { modalVisible } = this.state;
     return (
-      <View>
-        {/* Modal code */}
-        {/* TODO 
+      <Container>
+        {/* <View style={styles.loginBox}> */}
+        <BoxContainer>
+          {/* Modal code */}
+          {/* TODO 
           replace following one with just view no styleing
         */}
-        <View style={styles.centeredView}>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              this.setModalVisible(!modalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                {/* Display the erro you wish to display to the user */}
-                <Text style={styles.modalText}>
-                  Error: {this.state.errorMessage}{' '}
-                </Text>
-                <Pressable
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => this.setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.textStyle}>Ok</Text>
-                </Pressable>
+          <View style={styles.centeredView}>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  {/* <Text style={styles.modalText}>Hello World!</Text> */}
+                  {/* Display the erro you wish to display to the user */}
+                  <Text style={styles.modalText}>
+                    Error: {this.state.errorMessage}{' '}
+                  </Text>
+                  <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <Text style={styles.textStyle}>Ok</Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          </Modal>
-          {/* <Pressable
+            </Modal>
+            {/* <Pressable
             style={[styles.button, styles.buttonOpen]}
             onPress={() => this.setModalVisible(true)}
           >
             <Text style={styles.textStyle}>Show Modal</Text>
           </Pressable> */}
-        </View>
+          </View>
 
-        <Label>First name:</Label>
-        <TextInput
-          placeholder="first_name"
-          onChangeText={(first_name) => this.setState({ first_name })}
-          value={this.state.first_name}
-          maxLength="50"
-        />
-        <Label>Last name:</Label>
-        <TextInput
-          placeholder="last_name"
-          onChangeText={(last_name) => this.setState({ last_name })}
-          value={this.state.last_name}
-          maxLength="50"
-        />
-        <Label>Email:</Label>
-        <TextInput
-          placeholder="email"
-          onChangeText={(email) => this.setState({ email })}
-          value={this.state.email}
-          maxLength="256"
-        />
-        <Label>Password:</Label>
-        <TextInput
-          placeholder="password"
-          onChangeText={(password) => this.setState({ password })}
-          value={this.state.password}
-          secureTextEntry={true}
-          maxLength="16"
-        />
-        <Text>Password must contain greater than 5 characters</Text>
-        <Button
+          <Label>First name:</Label>
+          <Input
+            placeholder="first name"
+            onChangeText={(first_name) => this.setState({ first_name })}
+            value={this.state.first_name}
+            maxLength="100"
+          ></Input>
+          <Label>Last name:</Label>
+          <Input
+            placeholder="last name"
+            onChangeText={(last_name) => this.setState({ last_name })}
+            value={this.state.last_name}
+            maxLength="100"
+          ></Input>
+          <Label>Email:</Label>
+          <Input
+            placeholder="email"
+            onChangeText={(email) => this.setState({ email })}
+            value={this.state.email}
+            maxLength="256"
+          ></Input>
+          <Label>Password:</Label>
+          <Input
+            placeholder="password"
+            onChangeText={(password) => this.setState({ password })}
+            value={this.state.password}
+            secureTextEntry={true}
+            maxLength="16"
+          ></Input>
+          <Text>(Password must contain greater than 5 characters)</Text>
+          {/* <Button
           title="Signup"
           onPress={() => this.signup()}
           // take me to login
@@ -187,8 +192,21 @@ class SignupScreen extends Component {
           title="Back to login page"
           onPress={() => this.props.navigation.navigate('Login')}
           // take me to login
-        />
-      </View>
+        /> */}
+          <ButtonContainer>
+            <PrimaryButton onPress={() => this.signup()}>
+              <ButtonText>SIGN UP</ButtonText>
+            </PrimaryButton>
+
+            <PrimaryButton
+              onPress={() => this.props.navigation.navigate('Login')}
+            >
+              <ButtonText>LOGIN PAGE</ButtonText>
+            </PrimaryButton>
+          </ButtonContainer>
+        </BoxContainer>
+        {/* </View> */}
+      </Container>
     );
   }
 }

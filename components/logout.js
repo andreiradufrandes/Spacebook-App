@@ -8,6 +8,16 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
+} from '../styles.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class LogoutScreen extends Component {
@@ -89,34 +99,42 @@ class LogoutScreen extends Component {
     const { modalVisible } = this.state;
 
     return (
-      <View>
-        <View style={styles.centeredView}>
-          {/* Add a component to display messages for the user */}
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              this.setModalVisible(!modalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <Text style={styles.modalText}>{this.state.errorMessage} </Text>
-                <Pressable
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => this.setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.textStyle}>Ok</Text>
-                </Pressable>
+      <Container>
+        {/* <View style={styles.loginBox}> */}
+        <BoxContainer>
+          <View style={styles.centeredView}>
+            {/* Add a component to display messages for the user */}
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <Text style={styles.modalText}>
+                    {this.state.errorMessage}{' '}
+                  </Text>
+                  <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <Text style={styles.textStyle}>Ok</Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          </Modal>
-        </View>
+            </Modal>
+          </View>
 
-        {/* Add a button to log the user out  */}
-        <Button title="Logout" onPress={() => this.logout()} />
-      </View>
+          {/* Add a button to log the user out  */}
+          {/* <Button title="Logout" onPress={() => this.logout()} /> */}
+          <PrimaryButton onPress={() => this.logout()}>
+            <ButtonText>LOG OUT</ButtonText>
+          </PrimaryButton>
+        </BoxContainer>
+      </Container>
     );
   }
 }

@@ -51,7 +51,7 @@ export const ButtonContainer = styled.View`
 
 export const PrimaryButton = styled.TouchableOpacity`
   background-color: #5d3754;
-  flex: 1;
+  // flex: 1;
   margin-bottom: 10px;
   text-align: center;
   max-width: 160px;
@@ -108,7 +108,7 @@ export const Container = styled.View`
   flex-direction: column;
   align-items: center;
   align-content: space-between;
-  // min-eight: 100%;
+
   min-height: 100vh;
   background-color: #520f9a;
 `;
