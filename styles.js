@@ -114,7 +114,7 @@ export const Container = styled.View`
   // align-items: center;
   // align-content: space-between;
   min-height: 100vh;
-  background-color: #520f9a;
+  background-color: #483fcd;
 `;
 
 export const ContainerCentred = styled.View`
@@ -166,7 +166,6 @@ export const Header = styled.View`
   margin-bottom: 20px;
 `;
 export const Body = styled.View`
-  background-color: red;
   flex: 3;
   width: 100%;
   max-width: 500px;
@@ -184,14 +183,16 @@ export const Body = styled.View`
 // maybe width
 
 export const FriendBox = styled.View`
-  flex-direction: row;
+  // flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  // align-items: center;
   background-color: #ffffff;
   margin-bottom: 5px;
   padding: 10px;
-  flex-wrap: wrap;
+  // flex-wrap: wrap;
   column-gap: 20px;
 `;
 
-export const BodyText = styled.Text``;
+export const BodyText = styled.Text`
+  margin-bottom: 10px;
+`;

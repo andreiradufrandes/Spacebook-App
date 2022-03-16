@@ -10,6 +10,24 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
+  ContainerCentred,
+  Title,
+  Header,
+  Body,
+  ContainerScroll,
+  ScrollViewContainer,
+  FriendBox,
+  BodyText,
+} from '../styles.js';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -175,73 +193,77 @@ class NotificationsScreen extends Component {
       // Display the friend requests once they have once they have been store inside the state
     } else {
       return (
-        // Wrap the code in a Scroll view element to allow the ability to scroll
-        <ScrollView>
-          {/* Add a component to display messages for the user when accepting and decling friends requests */}
-          <View style={styles.centeredView}>
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                this.setModalVisible(!modalVisible);
-              }}
-            >
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  <Text style={styles.modalText}>
-                    {this.state.errorMessage}{' '}
-                  </Text>
-                  <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => this.setModalVisible(!modalVisible)}
-                  >
-                    <Text style={styles.textStyle}>Ok</Text>
-                  </Pressable>
+        <Container>
+          <ScrollView>
+            <Title>Friend requests</Title>
+            {/* Add a component to display messages for the user when accepting and decling friends requests */}
+            <View style={styles.centeredView}>
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                  this.setModalVisible(!modalVisible);
+                }}
+              >
+                <View style={styles.centeredView}>
+                  <View style={styles.modalView}>
+                    <Text style={styles.modalText}>
+                      {this.state.errorMessage}{' '}
+                    </Text>
+                    <Pressable
+                      style={[styles.button, styles.buttonClose]}
+                      onPress={() => this.setModalVisible(!modalVisible)}
+                    >
+                      <Text style={styles.textStyle}>Ok</Text>
+                    </Pressable>
+                  </View>
                 </View>
-              </View>
-            </Modal>
-          </View>
-          <View>
-            {/* Display the list of friends requests */}
-            <FlatList
-              data={this.state.friendsRequests}
-              keyExtractor={(item) => item.user_id}
-              renderItem={({ item }) => (
-                <View>
-                  <Text>
-                    Friend request from {item.first_name} {item.last_name}
-                  </Text>
-                  {/* Add a button with the functionality of traveling to the user's profile */}
-                  <Button
-                    title="Visit user's profile"
-                    onPress={() =>
-                      this.props.navigation.navigate('Profile', {
-                        user_id: item.user_id,
-                      })
-                    }
-                  />
+              </Modal>
+            </View>
+            <View>
+              {/* Display the list of friends requests */}
+              <FlatList
+                data={this.state.friendsRequests}
+                keyExtractor={(item) => item.user_id}
+                renderItem={({ item }) => (
+                  <FriendBox>
+                    <BodyText>
+                      Friend request from: {item.first_name} {item.last_name}
+                    </BodyText>
 
-                  {/* Add a button for accepting the friend request and navigating to their profile once this is done */}
-                  <Button
-                    title="Accept friend request"
-                    onPress={() => {
-                      this.acceptFriendRequest(item.user_id);
-                      this.props.navigation.navigate('Profile', {
-                        user_id: item.user_id,
-                      });
-                    }}
-                  />
-                  {/* Add a button for declining the friend request and navigating to their profile once this is done */}
-                  <Button
-                    title="Decline friend request"
-                    onPress={() => this.declineFriendRequest(item.user_id)}
-                  />
-                </View>
-              )}
-            />
-          </View>
-        </ScrollView>
+                    <ButtonContainer>
+                      <PrimaryButton
+                        onPress={() => this.declineFriendRequest(item.user_id)}
+                      >
+                        <ButtonText>{'ACCEPT'}</ButtonText>
+                      </PrimaryButton>
+                      <PrimaryButton
+                        onPress={() =>
+                          this.props.navigation.navigate('Profile', {
+                            user_id: item.user_id,
+                          })
+                        }
+                      >
+                        <ButtonText>{' PROFILE'}</ButtonText>
+                      </PrimaryButton>
+                      <PrimaryButton
+                        onPress={() => {
+                          this.acceptFriendRequest(item.user_id);
+                          this.props.navigation.navigate('Profile', {
+                            user_id: item.user_id,
+                          });
+                        }}
+                      >
+                        <ButtonText>{'DECLINE'}</ButtonText>
+                      </PrimaryButton>
+                    </ButtonContainer>
+                  </FriendBox>
+                )}
+              />
+            </View>
+          </ScrollView>
+        </Container>
       );
     }
   }
