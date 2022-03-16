@@ -16,7 +16,14 @@ import {
   PrimaryButton,
   Center,
   ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
   Title,
+  ContainerCentred,
+  BodyText,
+  PostInput,
+  PostText,
 } from '../styles.js';
 
 import { timeAndDateExtractor } from './functions';
@@ -367,6 +374,112 @@ class PostScreen extends Component {
     } else {
       return (
         <View>
+          {/* ------------------------------------------------------------------------------------- */}
+          <ContainerCentred>
+            {/* <View style={styles.loginBox}> */}
+            <BoxContainer>
+              <View>
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={modalVisible}
+                  onRequestClose={() => {
+                    this.setModalVisible(!modalVisible);
+                  }}
+                >
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                      <Text style={styles.modalText}>
+                        {this.state.errorMessage}{' '}
+                      </Text>
+                      <Pressable
+                        style={[styles.button, styles.buttonClose]}
+                        onPress={() => this.setModalVisible(!modalVisible)}
+                      >
+                        <Text style={styles.textStyle}>Ok</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </Modal>
+              </View>
+
+              <BodyText>
+                From: {this.state.post.author.first_name}{' '}
+                {this.state.post.author.last_name}
+              </BodyText>
+              <PostText>"{this.state.post.text}"</PostText>
+              <BodyText>
+                {' '}
+                Posted on:{' '}
+                {timeAndDateExtractor(this.state.post.timestamp).at(0)} at{' '}
+                {timeAndDateExtractor(this.state.post.timestamp).at(1)}
+              </BodyText>
+              <BodyText> {this.state.post.numLikes} likes</BodyText>
+              {!this.state.isLoggedInUsersPost ? (
+                <PrimaryButton
+                  onPress={() => this.likePost(this.state.post.post_id)}
+                >
+                  <ButtonText>{'LIKE'}</ButtonText>
+                </PrimaryButton>
+              ) : null}
+              {!this.state.isLoggedInUsersPost ? (
+                <PrimaryButton
+                  onPress={() => this.removeLike(this.state.post.post_id)}
+                >
+                  <ButtonText>{'REMOVE LIKE'}</ButtonText>
+                </PrimaryButton>
+              ) : null}
+
+              {this.state.isLoggedInUsersPost ? (
+                <PrimaryButton
+                  onPress={() => this.deletePost(this.state.post.post_id)}
+                >
+                  <ButtonText>{'DELETE'}</ButtonText>
+                </PrimaryButton>
+              ) : null}
+
+              {this.state.isLoggedInUsersPost ? (
+                <PrimaryButton
+                  onPress={() => {
+                    (this.state.updatePost = true), this.getSinglePost();
+                  }}
+                >
+                  <ButtonText>{'UPDATE'}</ButtonText>
+                </PrimaryButton>
+              ) : null}
+
+              {this.state.updatePost ? (
+                <View>
+                  <Label>New post:</Label>
+                  <PostInput
+                    maxLength="256"
+                    multiline={true}
+                    onChangeText={(newPostMeesage) =>
+                      this.setState({ newPostMeesage })
+                    }
+                    value={this.state.newPostMeesage}
+                  />
+
+                  {/* <Button
+                  title="Submit updated post"
+                  onPress={() => {
+                    this.updatePost();
+                  }}
+                /> */}
+
+                  <PrimaryButton
+                    onPress={() => {
+                      this.updatePost();
+                    }}
+                  >
+                    <ButtonText>{'SUBMIT'}</ButtonText>
+                  </PrimaryButton>
+                </View>
+              ) : null}
+            </BoxContainer>
+            {/* </View> */}
+          </ContainerCentred>
+          {/* ------------------------------------------------------------------------------------- */}
           <View>
             {/* Create a modal alert to display the alert message for the user */}
             <Modal
@@ -397,7 +510,7 @@ class PostScreen extends Component {
           {/* Display the post withe the relevant details */}
           <View>
             <Text>
-              From {this.state.post.author.first_name}{' '}
+              From: {this.state.post.author.first_name}{' '}
               {this.state.post.author.last_name}
             </Text>
             <Text> {this.state.post.text}</Text>

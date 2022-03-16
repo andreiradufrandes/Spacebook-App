@@ -97,6 +97,18 @@ export const Label = styled.Text`
   font-family: Roboto-Medium;
   letter-spacing: 1.25;
 `;
+export const PostInput = styled.TextInput`
+  backgroundcolor: '#ffffff';
+  height: 150px;
+  padding: 8px;
+  margin-bottom: 20px;
+  border-width: 2px;
+  border-color: black;
+  font-size: 16px;
+  letter-spacing: 0.15;
+  font-style: Roboto-Regular;
+  width: 100%;
+`;
 
 /*
 
@@ -157,16 +169,19 @@ export const BoxContainer = styled.View`
 */
 export const Header = styled.View`
   background-color: #ffffff;
-  flex: 1;
+  // flex: 1;
   // justify-content: center;
   // align-items: center;
   padding: 10px;
   width: 100%;
   max-width: 500px;
-  margin-bottom: 20px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  margin-bottom: 10px;
 `;
 export const Body = styled.View`
-  flex: 3;
+  // flex: 3;
+
   width: 100%;
   max-width: 500px;
 `;
@@ -193,6 +208,66 @@ export const FriendBox = styled.View`
   column-gap: 20px;
 `;
 
+/*
+
+        Text
+
+
+*/
 export const BodyText = styled.Text`
   margin-bottom: 10px;
+  font-size: 16px;
+  font-family: Roboto-Medium;
+`;
+
+export const Name = styled.Text`
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-family: Roboto-Medium;
+  font-weight: bold
+  letter-spacing: 2px;
+`;
+
+export const PostText = styled.Text`
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-family: Roboto-Medium;
+  font-style: italic;
+  background-color: #dfdefe;
+  text-align: center;
+  padding: 10px;
+`;
+
+/*
+
+        Profile image
+
+
+*/
+export const ProfileImage = styled.Image`
+  width: 170;
+  height: 170;
+  border-radius: 20px;
+  margin bottom : 10px;
+`;
+/*
+
+        New post
+
+
+*/
+export const NewPostBox = styled.View`
+  // align-items: center;
+  background-color: #ffffff;
+  margin-bottom: 5px;
+  padding: 10px;
+`;
+
+export const PostContainer = styled.View`
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  max-width: 500px;
+  background-color: #ffffff;
+  margin-bottom: 5px;
 `;

@@ -22,6 +22,20 @@ import {
   PrimaryButton,
   Center,
   ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
+  Title,
+  ContainerCentred,
+  BodyText,
+  PostInput,
+  PostText,
+  Header,
+  Body,
+  ProfileImage,
+  Name,
+  PostContainer,
+  NewPostBox,
 } from '../styles.js';
 
 import { timeAndDateExtractor } from './functions';
@@ -775,11 +789,11 @@ class ProfileScreen extends React.Component {
     // Display if the the page is ready
     else {
       return (
-        // <RootSiblingParent>
-        // <View>
-        <SafeAreaView style={styles.container}>
+        <Container>
+          {/* <SafeAreaView style={styles.container}> */}
           <ScrollView>
-            <View>
+            <Header>
+              {/* <View> */}
               <View>
                 <Modal
                   animationType="slide"
@@ -805,79 +819,57 @@ class ProfileScreen extends React.Component {
                     </View>
                   </View>
                 </Modal>
-                {/* <Pressable
-            style={[styles.button, styles.buttonOpen]}
-            onPress={() => this.setModalVisible(true)}
-          >
-            <Text style={styles.textStyle}>Show Modal</Text>
-          </Pressable> */}
               </View>
-              {/* Modal trial */}
 
               {/* header */}
               <View>
-                {/* Change the sizes */}
                 {this.state.hasProfilePicture ? (
-                  <View style={styles.container}>
-                    <Image
-                      source={{
-                        uri: this.state.photo,
-                      }}
-                      style={{
-                        width: 400,
-                        height: 400,
-                        borderWidth: 5,
-                      }}
-                      alt="Profile image"
-                    />
-                  </View>
-                ) : null}
-
-                {this.state.isLoggedInUsersProfile ? (
-                  <Button
-                    title="Update profile picture"
-                    onPress={() =>
-                      this.props.navigation.navigate('ProfilePhoto')
-                    }
-                  />
-                ) : null}
-
-                {/* Trial of primary button */}
-                <Center>
-                  <PrimaryButton
-                    onPress={() => console.log('Primary button clicked')}
-                  >
-                    <ButtonText>Primary button</ButtonText>
-                  </PrimaryButton>
-                </Center>
-                {/* Display the update button only for the user's who are logged in*/}
-                {this.state.isLoggedInUsersProfile ? (
-                  <Button
-                    title="Update details"
-                    onPress={() => this.props.navigation.navigate('Update')}
+                  <ProfileImage
+                    source={{
+                      uri: this.state.photo,
+                    }}
+                    alt="Profile image"
                   />
                 ) : null}
 
                 {/* Display the details of the user's who's profile we are on */}
-                <Text>
+                <Name>
+                  Name:{' '}
                   {this.state.userInfo.first_name +
                     ' ' +
                     this.state.userInfo.last_name}
-                </Text>
-                <Text>{this.state.userInfo.email}</Text>
+                </Name>
+                <BodyText>Email: {this.state.userInfo.email}</BodyText>
+                {this.state.isLoggedInUsersProfile ? (
+                  <PrimaryButton
+                    onPress={() =>
+                      this.props.navigation.navigate('ProfilePhoto')
+                    }
+                  >
+                    <ButtonText>UPDATE PHOTO</ButtonText>
+                  </PrimaryButton>
+                ) : null}
+                {this.state.isLoggedInUsersProfile ? (
+                  <PrimaryButton
+                    onPress={() => this.props.navigation.navigate('Update')}
+                  >
+                    <ButtonText>UPDATE PROFILE</ButtonText>
+                  </PrimaryButton>
+                ) : null}
                 {/* Replace where ti */}
                 {/* <Text> {this.state.userInfo.friend_count + ' friends'}</Text>  */}
 
                 {/* Display the list of friends for the user who is logged in only*/}
                 {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
-                  <Button
-                    title="See list of friends"
+                  <PrimaryButton
                     onPress={() =>
                       this.props.navigation.navigate('Friends', {
                         user_id: this.state.userProfileID,
                       })
                     }
-                  ></Button>
+                  >
+                    <ButtonText>FRIENDS</ButtonText>
+                  </PrimaryButton>
                 ) : null}
 
                 {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
@@ -901,55 +893,54 @@ class ProfileScreen extends React.Component {
                   onPress={() => this.acceptFriendRequest()}
                 ></Button>
               ) : null}
-              {/*------------------------------ Camera ------------------------------    */}
+            </Header>
+            {/*------------------------------ Camera ------------------------------    */}
 
-              {/* ------------------------------ BODY ------------------------------ 
-
-          {/* Display someone's posts, as well as the option to add a post only for the logged in user's profile and for their friends */}
+            {/* move this inside the statement */}
+            <Body>
+              {/* Display someone's posts, as well as the option to add a post only for the logged in user's profile and for their friends */}
               {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
                 <View>
                   {/* Add a post only if it is my profile or a friend's profile */}
 
-                  <View>
+                  <NewPostBox>
                     <Label>New post:</Label>
-                    <TextInput
-                      placeholder="New post"
-                      maxLength="260" // change
+                    <PostInput
+                      maxLength="260"
+                      multiline={true}
                       onChangeText={(newPostText) =>
                         this.setState({ newPostText })
                       }
                       value={this.state.newPostText}
                     />
-                    <Button
-                      //  TODO
-                      //  This changes if it's on someone else's profile
-                      title="Add post"
-                      onPress={() => this.addNewPost()}
-                    />
-                  </View>
+
+                    <PrimaryButton onPress={() => this.addNewPost()}>
+                      <ButtonText>{'ADD POST'}</ButtonText>
+                    </PrimaryButton>
+                  </NewPostBox>
 
                   {/*   Display user's posts as a flatlist, with the option to like, remove like, delete, update posts,
                  and visit person's profile, depending on the posts are from */}
                   {/* display only when display user message true  */}
 
                   {/* display aler ONLY when it's true */}
-
+                  <Title>Profile wall</Title>
                   <FlatList
                     data={this.state.userPosts}
                     keyExtractor={(item) => item.post_id}
                     renderItem={({ item }) => (
-                      <View>
-                        <Text> {item.text} </Text>
-                        <Text>
+                      <PostContainer>
+                        <PostText>"{item.text}"</PostText>
+                        <BodyText>
                           From: {item.author.first_name} {item.author.last_name}{' '}
-                        </Text>
-                        <Text>
+                        </BodyText>
+                        <BodyText>
                           {' '}
                           Posted on:{' '}
                           {timeAndDateExtractor(item.timestamp).at(0)} at{' '}
                           {timeAndDateExtractor(item.timestamp).at(1)}
-                        </Text>
-                        <Text> {item.numLikes} likes</Text>
+                        </BodyText>
+                        <BodyText> {item.numLikes} likes</BodyText>
 
                         {/* Display only if it's NOT my page */}
                         {/* <Button
@@ -961,55 +952,54 @@ class ProfileScreen extends React.Component {
                         }}
                       ></Button> */}
 
-                        <Button
-                          title="View post"
-                          // NOT SURE IF I CAN PASS POST ID LIKE THIS
+                        <PrimaryButton
                           onPress={() => {
                             this.props.navigation.navigate('Post', {
                               user_id: this.state.userProfileID,
                               post_id: item.post_id,
                             });
                           }}
-                        ></Button>
-
+                        >
+                          <ButtonText>{'VIEW POST'}</ButtonText>
+                        </PrimaryButton>
                         {/* {this.state.isFriend ? (
                           <Button title="Visit user's page(NOT CODED)" />
                         ) : null} */}
-
-                        <Button
-                          title="Like post"
+                        <PrimaryButton
                           onPress={() => this.likePost(item.post_id)}
-                        />
+                        >
+                          <ButtonText>{'LIKE'}</ButtonText>
+                        </PrimaryButton>
 
-                        <Button
-                          title="Remove like"
+                        <PrimaryButton
                           onPress={() => this.removeLike(item.post_id)}
-                        />
+                        >
+                          <ButtonText>{'DISLIKE'}</ButtonText>
+                        </PrimaryButton>
 
                         {/* Allow the user to delete a post if it's on their own profile */}
                         {this.state.isLoggedInUsersProfile ? (
-                          <Button
-                            title="Delete post"
+                          <PrimaryButton
                             onPress={() =>
                               this.deletePost(item.post_id, item.author.user_id)
                             }
-                          />
+                          >
+                            <ButtonText>{'DELETE'}</ButtonText>
+                          </PrimaryButton>
                         ) : null}
 
                         {/* Add functionality for updating a post if it's on the user's profile */}
                         {/* {this.state.isLoggedInUsersProfile ? (
                           <Button title="Update post(NOT CODED)" />
                         ) : null} */}
-                      </View>
+                      </PostContainer>
                     )}
                   />
                 </View>
               ) : null}
-            </View>
+            </Body>
           </ScrollView>
-        </SafeAreaView>
-        // </View>
-        // </RootSiblingParent>
+        </Container>
       );
     }
   }
