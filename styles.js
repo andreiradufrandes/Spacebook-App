@@ -34,6 +34,8 @@ export const Title = styled.Text`
   text-align: center;
   font-family: Roboto-Black;
   font-weight: bold;
+  margin-bottom: 15px;
+  margin-top: 15px;
 `;
 
 /*
@@ -47,14 +49,16 @@ export const Title = styled.Text`
 export const ButtonContainer = styled.View`
   flex-direction: row;
   justify-content: space-between;
+  width: 100%;
 `;
 
 export const PrimaryButton = styled.TouchableOpacity`
   background-color: #5d3754;
-  // flex: 1;
   margin-bottom: 10px;
   text-align: center;
   max-width: 160px;
+  // background-color: #5d3754;
+  background-color: #3831a0;
 `;
 
 // Change the color according to accesibility
@@ -64,7 +68,7 @@ export const ButtonText = styled.Text`
   font-size: 14px;
   font-family: Roboto-Medium;
   letter-spacing: 1.25;
-  background-color: #5d3754;
+  // background-color: #5d3754;
 `;
 
 /*
@@ -84,7 +88,8 @@ export const Input = styled.TextInput`
   border-color: black;
   font-size: 16px;
   letter-spacing: 0.15;
-  font-style: Roboto-Regular !important;
+  font-style: Roboto-Regular;
+  width: 100%;
 `;
 export const Label = styled.Text`
   font-size: 16px;
@@ -104,18 +109,32 @@ export const Container = styled.View`
   flex-direction: column;
   background-color: #ffffff;
   padding: 5px;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
-  align-content: space-between;
-
+  // justify-content: center;
+  // flex-direction: column;
+  // align-items: center;
+  // align-content: space-between;
   min-height: 100vh;
   background-color: #520f9a;
 `;
 
+export const ContainerCentred = styled.View`
+  flex: 1;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 5px;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #483fcd;
+`;
+
+export const ScrollViewContainer = styled.ScrollView`
+  flex: 1;
+`;
+
 /*
 
-        signuploginbox
+        BoxContainer
 
 
 */
@@ -126,4 +145,53 @@ export const BoxContainer = styled.View`
   padding: 20px;
   max-width: 500px;
   background-color: #ffffff;
+  // background-color: #c1bdfd;
+  // flex: 1;
 `;
+
+/*
+
+        Header & body
+
+
+*/
+export const Header = styled.View`
+  background-color: #ffffff;
+  flex: 1;
+  // justify-content: center;
+  // align-items: center;
+  padding: 10px;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 20px;
+`;
+export const Body = styled.View`
+  background-color: red;
+  flex: 3;
+  width: 100%;
+  max-width: 500px;
+`;
+
+/*
+
+        Friend box for notification, friendlist, etc
+
+
+*/
+
+// 2 items per row
+// space between
+// maybe width
+
+export const FriendBox = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  margin-bottom: 5px;
+  padding: 10px;
+  flex-wrap: wrap;
+  column-gap: 20px;
+`;
+
+export const BodyText = styled.Text``;

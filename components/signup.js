@@ -20,6 +20,7 @@ import {
   ButtonContainer,
   Input,
   BoxContainer,
+  ContainerCentred,
 } from '../styles.js';
 // only navigate me to LOGIN PAGE if the request successfully
 
@@ -113,7 +114,7 @@ class SignupScreen extends Component {
   render() {
     const { modalVisible } = this.state;
     return (
-      <Container>
+      <ContainerCentred>
         {/* <View style={styles.loginBox}> */}
         <BoxContainer>
           {/* Modal code */}
@@ -206,7 +207,7 @@ class SignupScreen extends Component {
           </ButtonContainer>
         </BoxContainer>
         {/* </View> */}
-      </Container>
+      </ContainerCentred>
     );
   }
 }

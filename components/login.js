@@ -19,6 +19,8 @@ import {
   ButtonContainer,
   Input,
   BoxContainer,
+  Title,
+  ContainerCentred,
 } from '../styles.js';
 import { greaterThan } from 'react-native-reanimated';
 
@@ -81,7 +83,7 @@ class LoginScreen extends Component {
 
     return (
       // <View style={styles.container}>
-      <Container>
+      <ContainerCentred>
         {/* <View style={styles.loginBox}> */}
         <BoxContainer>
           {/* Add a component to display messages for the user when accepting and decling friends requests */}
@@ -128,6 +130,7 @@ class LoginScreen extends Component {
             secureTextEntry={true}
             maxLength="16"
           /> */}
+          <Title>Login</Title>
           <Label>Email:</Label>
           <Input
             onChangeText={(email) => this.setState({ email })}
@@ -174,7 +177,7 @@ class LoginScreen extends Component {
           {/* </View> */}
         </BoxContainer>
         {/* </View> */}
-      </Container>
+      </ContainerCentred>
       // </View>
     );
   }

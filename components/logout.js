@@ -17,6 +17,7 @@ import {
   ButtonContainer,
   Input,
   BoxContainer,
+  ContainerCentred,
 } from '../styles.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

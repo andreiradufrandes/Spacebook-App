@@ -17,12 +17,21 @@ import { checkLettersAndSpaces } from './functions';
 
 import {
   Container,
+  Label,
   PrimaryButton,
   Center,
-  TextBox,
   ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
+  ContainerCentred,
   Title,
-  Label,
+  Header,
+  Body,
+  ContainerScroll,
+  ScrollViewContainer,
+  FriendBox,
+  BodyText,
 } from '../styles.js';
 /*
 TODO 
@@ -347,8 +356,134 @@ class SearchScreen extends Component {
   render() {
     const { modalVisible } = this.state;
 
+    // return (
+    //   <Container>
+    //     <View>
+    //       <Modal
+    //         animationType="slide"
+    //         transparent={true}
+    //         visible={modalVisible}
+    //         onRequestClose={() => {
+    //           this.setModalVisible(!modalVisible);
+    //         }}
+    //       >
+    //         <View style={styles.centeredView}>
+    //           <View style={styles.modalView}>
+    //             {/* <Text style={styles.modalText}>Hello World!</Text> */}
+    //             {/* Display the erro you wish to display to the user */}
+    //             <Text style={styles.modalText}>
+    //               Error: {this.state.errorMessage}{' '}
+    //             </Text>
+    //             <Pressable
+    //               style={[styles.button, styles.buttonClose]}
+    //               onPress={() => this.setModalVisible(!modalVisible)}
+    //             >
+    //               <Text style={styles.textStyle}>Ok</Text>
+    //             </Pressable>
+    //           </View>
+    //         </View>
+    //       </Modal>
+    //       {/* <Pressable
+    //         style={[styles.button, styles.buttonOpen]}
+    //         onPress={() => this.setModalVisible(true)}
+    //         >
+    //         <Text style={styles.textStyle}>Show Modal</Text>
+    //         </Pressable> */}
+    //     </View>
+
+    //     <Button
+    //       title="take me to Andrei's profile"
+    //       onPress={() =>
+    //         this.props.navigation.navigate('Profile', {
+    //           user_id: 17,
+    //         })
+    //       }
+    //     />
+
+    //     <Title>Search for people or friends</Title>
+
+    //     <Label>Enter user's name:</Label>
+    //     <TextBox
+    //       placeholder="user's name"
+    //       onChangeText={(searchTerm) => this.setState({ searchTerm })}
+    //       value={this.state.searchTerm}
+    //       maxLength="50"
+    //     ></TextBox>
+
+    //     {/* <Button title="search" onPress={() => this.searchName()} /> */}
+    //     {/* Trial for primary button */}
+    //     <Center>
+    //       <PrimaryButton onPress={() => this.searchName('initialResults')}>
+    //         <ButtonText>SEARCH</ButtonText>
+    //       </PrimaryButton>
+    //     </Center>
+
+    //     <FlatList
+    //       data={this.state.searchResults}
+    //       keyExtractor={(item) => item.user_id}
+    //       renderItem={({ item }) => (
+    //         <View>
+    //           <Text>
+    //             {item.user_givenname} {item.user_familyname}
+    //           </Text>
+    //           <Button
+    //             title="Visit Profile"
+    //             onPress={() =>
+    //               this.props.navigation.navigate('Profile', {
+    //                 user_id: item.user_id,
+    //               })
+    //             }
+
+    //             //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
+    //           />
+    //         </View>
+    //       )}
+    //     />
+
+    //     <Center>
+    //       {/* plus limin  */}
+    //       <PrimaryButton onPress={() => this.searchName('previousResults')}>
+    //         <ButtonText>Previous results</ButtonText>
+    //       </PrimaryButton>
+    //     </Center>
+    //     <Center>
+    //       {/* minus limit  */}
+    //       <PrimaryButton onPress={() => this.searchName('nextResults')}>
+    //         <ButtonText>More results</ButtonText>
+    //       </PrimaryButton>
+    //     </Center>
+
+    //     {/* {true ? <Button title="Hi" /> : <Button title="Bye" />} */}
+    //   </Container>
+    // );
+
     return (
-      <Container>
+      // <Container>
+      <ContainerCentred>
+        <Header>
+          <Title>Search for people or friends</Title>
+          <Label>Name:</Label>
+          <Input
+            placeholder="user's name"
+            onChangeText={(searchTerm) => this.setState({ searchTerm })}
+            value={this.state.searchTerm}
+            maxLength="50"
+          ></Input>
+
+          <ButtonContainer>
+            <PrimaryButton onPress={() => this.searchName('previousResults')}>
+              <ButtonText>{'<'}</ButtonText>
+            </PrimaryButton>
+            <PrimaryButton onPress={() => this.searchName('initialResults')}>
+              <ButtonText>SEARCH</ButtonText>
+            </PrimaryButton>
+            <PrimaryButton onPress={() => this.searchName('nextResults')}>
+              <ButtonText>{'>'}</ButtonText>
+            </PrimaryButton>
+          </ButtonContainer>
+        </Header>
+
+        {/*   modal */}
         <View>
           <Modal
             animationType="slide"
@@ -381,7 +516,7 @@ class SearchScreen extends Component {
             <Text style={styles.textStyle}>Show Modal</Text>
             </Pressable> */}
         </View>
-
+        {/* 
         <Button
           title="take me to Andrei's profile"
           onPress={() =>
@@ -389,63 +524,67 @@ class SearchScreen extends Component {
               user_id: 17,
             })
           }
-        />
+        /> */}
 
-        <Title>Search for people or friends</Title>
+        {/* <Title>Search for people or friends</Title>
 
-        <Label>Enter user's name:</Label>
-        <TextBox
+        <Label>Enter user's name:</Label> */}
+        {/* <TextBox
           placeholder="user's name"
           onChangeText={(searchTerm) => this.setState({ searchTerm })}
           value={this.state.searchTerm}
           maxLength="50"
-        ></TextBox>
+        ></TextBox> */}
 
         {/* <Button title="search" onPress={() => this.searchName()} /> */}
         {/* Trial for primary button */}
-        <Center>
+        {/* <Center>
           <PrimaryButton onPress={() => this.searchName('initialResults')}>
             <ButtonText>SEARCH</ButtonText>
           </PrimaryButton>
-        </Center>
+        </Center> */}
 
-        <FlatList
-          data={this.state.searchResults}
-          keyExtractor={(item) => item.user_id}
-          renderItem={({ item }) => (
-            <View>
-              <Text>
-                {item.user_givenname} {item.user_familyname}
-              </Text>
-              <Button
-                title="Visit Profile"
-                onPress={() =>
-                  this.props.navigation.navigate('Profile', {
-                    user_id: item.user_id,
-                  })
-                }
+        <Body>
+          <FlatList
+            data={this.state.searchResults}
+            keyExtractor={(item) => item.user_id}
+            renderItem={({ item }) => (
+              // <View>
+              //   <Text>
+              //     {item.user_givenname} {item.user_familyname}
+              //   </Text>
+              //   <Button
+              //     title="Visit Profile"
+              //     onPress={() =>
+              //       this.props.navigation.navigate('Profile', {
+              //         user_id: item.user_id,
+              //       })
+              //     }
 
-                //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
-              />
-            </View>
-          )}
-        />
+              //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
+              // />
 
-        <Center>
-          {/* plus limin  */}
-          <PrimaryButton onPress={() => this.searchName('previousResults')}>
-            <ButtonText>Previous results</ButtonText>
-          </PrimaryButton>
-        </Center>
-        <Center>
-          {/* minus limit  */}
-          <PrimaryButton onPress={() => this.searchName('nextResults')}>
-            <ButtonText>More results</ButtonText>
-          </PrimaryButton>
-        </Center>
+              <FriendBox>
+                <BodyText>
+                  {item.user_givenname} {item.user_familyname}{' '}
+                </BodyText>
+                <PrimaryButton
+                  onPress={() =>
+                    this.props.navigation.navigate('Profile', {
+                      user_id: item.user_id,
+                    })
+                  }
+                >
+                  <ButtonText>{'VISIT PROFILE'}</ButtonText>
+                </PrimaryButton>
+              </FriendBox>
+            )}
+          />
+        </Body>
 
         {/* {true ? <Button title="Hi" /> : <Button title="Bye" />} */}
-      </Container>
+      </ContainerCentred>
+      // </Container>
     );
   }
 }
