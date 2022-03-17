@@ -48,6 +48,7 @@ class SearchScreen extends Component {
     super(props);
     this.state = {
       searchTerm: '',
+      previousSearchTerm: '',
       searchResults: [],
       modalVisible: false,
       errorMessage: '',
@@ -148,6 +149,8 @@ class SearchScreen extends Component {
           this.state.searchResults.length
         );
 
+        console.log('\n\n\nsearchTerm: ' + this.state.searchTerm);
+
         // Check the left limit was teached. If it wasn't, continue with th request
         if (direction == 'previousResults' && this.state.offectCounter <= 0) {
           console.log('You have reached the first page');
@@ -202,12 +205,36 @@ class SearchScreen extends Component {
       }
 
       console.log(
-        'searchLimit = ' +
+        'NNPARAMETERS BEFORE SEARCHNsearchLimit = ' +
           this.state.searchLimit +
           '\noffsetCounter =' +
           this.state.offectCounter,
         '\nsignedOffset = ' + signedOffset
       );
+
+      // Check if we are looking for a new term, and flag it in the state if that is the case
+      if (this.state.previousSearchTerm == '') {
+        this.state.previousSearchTerm = this.state.searchTerm;
+      } else {
+        if (this.state.previousSearchTerm != this.state.searchTerm) {
+          console.log('New search term being looked for!');
+          /*
+
+              Set variables to show its a new search
+            // NNPARAMETERS BEFORE SEARCHNsearchLimit = 5
+           // offsetCounter =0 
+            // signedOffset = 5
+
+            // SET THE FLAG AS WELL
+            */
+          this.state.offectCounter = 0;
+          // Set the previous search term to the new one at the end
+          this.state.previousSearchTerm = this.state.searchTerm;
+
+          // UNSURE ABOUT
+          this.state.firstCycle = true; // undo
+        }
+      }
 
       return fetch(
         'http://localhost:3333/api/1.0.0/search?q=' +
