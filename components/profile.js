@@ -36,6 +36,7 @@ import {
   ProfileImage,
   Name,
   PostContainer,
+  ScrollViewContainer,
   NewPostBox,
 } from '../styles.js';
 
@@ -797,40 +798,45 @@ class ProfileScreen extends React.Component {
     // Display if the the page is ready
     else {
       return (
-        <Container>
+        <ContainerCentred>
           {/* <SafeAreaView style={styles.container}> */}
-          <ScrollView>
+          <ScrollViewContainer>
+            <View>
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                  this.setModalVisible(!modalVisible);
+                }}
+              >
+                <View style={styles.centeredView}>
+                  <View style={styles.modalView}>
+                    {/* <Text style={styles.modalText}>Hello World!</Text> */}
+                    {/* Display the erro you wish to display to the user */}
+                    <Text style={styles.modalText}>
+                      {this.state.errorMessage}{' '}
+                    </Text>
+                    <Pressable
+                      style={[styles.button, styles.buttonClose]}
+                      onPress={() => this.setModalVisible(!modalVisible)}
+                    >
+                      <Text style={styles.textStyle}>Ok</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </Modal>
+            </View>
             <Header>
               {/* <View> */}
-              <View>
-                <Modal
-                  animationType="slide"
-                  transparent={true}
-                  visible={modalVisible}
-                  onRequestClose={() => {
-                    this.setModalVisible(!modalVisible);
-                  }}
-                >
-                  <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                      {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                      {/* Display the erro you wish to display to the user */}
-                      <Text style={styles.modalText}>
-                        {this.state.errorMessage}{' '}
-                      </Text>
-                      <Pressable
-                        style={[styles.button, styles.buttonClose]}
-                        onPress={() => this.setModalVisible(!modalVisible)}
-                      >
-                        <Text style={styles.textStyle}>Ok</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                </Modal>
-              </View>
 
               {/* header */}
               <View>
+                <Title>
+                  {this.state.userInfo.first_name +
+                    ' ' +
+                    this.state.userInfo.last_name}
+                </Title>
                 {this.state.hasProfilePicture ? (
                   <ProfileImage
                     source={{
@@ -840,55 +846,49 @@ class ProfileScreen extends React.Component {
                   />
                 ) : null}
 
-                {/* Display the details of the user's who's profile we are on */}
-                <Name>
-                  Name:{' '}
-                  {this.state.userInfo.first_name +
-                    ' ' +
-                    this.state.userInfo.last_name}
-                </Name>
                 <BodyText>Email: {this.state.userInfo.email}</BodyText>
-                {this.state.isLoggedInUsersProfile ? (
-                  <PrimaryButton
-                    onPress={() =>
-                      this.props.navigation.navigate('ProfilePhoto')
-                    }
-                  >
-                    <ButtonText>UPDATE PHOTO</ButtonText>
-                  </PrimaryButton>
-                ) : null}
-                {this.state.isLoggedInUsersProfile ? (
-                  <PrimaryButton
-                    onPress={() => this.props.navigation.navigate('Update')}
-                  >
-                    <ButtonText>UPDATE PROFILE</ButtonText>
-                  </PrimaryButton>
-                ) : null}
-                {/* Replace where ti */}
-                {/* <Text> {this.state.userInfo.friend_count + ' friends'}</Text>  */}
+                <ButtonContainer>
+                  {this.state.isLoggedInUsersProfile ? (
+                    <PrimaryButton
+                      onPress={() =>
+                        this.props.navigation.navigate('ProfilePhoto')
+                      }
+                    >
+                      <ButtonText>PHOTO</ButtonText>
+                    </PrimaryButton>
+                  ) : null}
+                  {this.state.isLoggedInUsersProfile ? (
+                    <PrimaryButton
+                      onPress={() => this.props.navigation.navigate('Update')}
+                    >
+                      <ButtonText>UPDATE</ButtonText>
+                    </PrimaryButton>
+                  ) : null}
+                  {/* Replace where ti */}
+                  {/* <Text> {this.state.userInfo.friend_count + ' friends'}</Text>  */}
 
-                {/* Display the list of friends for the user who is logged in only*/}
-                {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
-                  <PrimaryButton
-                    onPress={() =>
-                      this.props.navigation.navigate('Friends', {
-                        user_id: this.state.userProfileID,
-                      })
-                    }
-                  >
-                    <ButtonText>FRIENDS</ButtonText>
-                  </PrimaryButton>
-                ) : null}
+                  {/* Display the list of friends for the user who is logged in only*/}
+                  {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
+                    <PrimaryButton
+                      onPress={() =>
+                        this.props.navigation.navigate('Friends', {
+                          user_id: this.state.userProfileID,
+                        })
+                      }
+                    >
+                      <ButtonText>FRIENDS</ButtonText>
+                    </PrimaryButton>
+                  ) : null}
+                </ButtonContainer>
 
                 {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
                 {!this.state.isLoggedInUsersProfile &&
                 !this.state.isFriend &&
                 !this.state.userRequestedFriendRequest &&
                 !this.state.friendRequestSent ? (
-                  <Button
-                    title="Add friend"
-                    onPress={() => this.addFriend()} // code it
-                  ></Button>
+                  <PrimaryButton onPress={() => this.addFriend()}>
+                    <ButtonText>ADD FRIEND</ButtonText>
+                  </PrimaryButton>
                 ) : null}
               </View>
 
@@ -1009,8 +1009,8 @@ class ProfileScreen extends React.Component {
                 </View>
               ) : null}
             </Body>
-          </ScrollView>
-        </Container>
+          </ScrollViewContainer>
+        </ContainerCentred>
       );
     }
   }

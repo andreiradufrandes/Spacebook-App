@@ -17,6 +17,10 @@ import {
   PrimaryButton,
   Center,
   ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
+  ContainerCentred,
   Title,
 } from '../styles.js';
 import { checkName } from './functions';
@@ -214,67 +218,71 @@ class UpdateScreen extends Component {
       );
     } else {
       return (
-        <View>
-          {/* Modal code */}
-
-          <View>
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                this.setModalVisible(!modalVisible);
-              }}
-            >
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                  {/* Display the erro you wish to display to the user */}
-                  <Text style={styles.modalText}>
-                    Error: {this.state.errorMessage}{' '}
-                  </Text>
-                  <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => this.setModalVisible(!modalVisible)}
-                  >
-                    <Text style={styles.textStyle}>Ok</Text>
-                  </Pressable>
+        <ContainerCentred>
+          {/* <View style={styles.loginBox}> */}
+          <BoxContainer>
+            <View>
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                  this.setModalVisible(!modalVisible);
+                }}
+              >
+                <View style={styles.centeredView}>
+                  <View style={styles.modalView}>
+                    {/* <Text style={styles.modalText}>Hello World!</Text> */}
+                    {/* Display the erro you wish to display to the user */}
+                    <Text style={styles.modalText}>
+                      Error: {this.state.errorMessage}{' '}
+                    </Text>
+                    <Pressable
+                      style={[styles.button, styles.buttonClose]}
+                      onPress={() => this.setModalVisible(!modalVisible)}
+                    >
+                      <Text style={styles.textStyle}>Ok</Text>
+                    </Pressable>
+                  </View>
                 </View>
-              </View>
-            </Modal>
-            {/* <Pressable
+              </Modal>
+              {/* <Pressable
             style={[styles.button, styles.buttonOpen]}
             onPress={() => this.setModalVisible(true)}
             >
             <Text style={styles.textStyle}>Show Modal</Text>
             </Pressable> */}
-          </View>
+            </View>
 
-          <Title>Enter the details you wish you change</Title>
-          <Label>First name:</Label>
-          <TextInput
-            placeholder="Enter first name"
-            onChangeText={(first_name) => this.setState({ first_name })}
-            value={this.state.first_name}
-            maxLength="50"
-          />
-          <Label>Last name:</Label>
-          <TextInput
-            placeholder="Enter last name"
-            onChangeText={(last_name) => this.setState({ last_name })}
-            value={this.state.last_name}
-            maxLength="50"
-          />
-          <Label>Email:</Label>
-          <TextInput
-            maxLength="256"
-            placeholder="Enter email adress"
-            onChangeText={(email) => this.setState({ email })}
-            value={this.state.email}
-          />
+            <Title>Update profile</Title>
+            <Label>First name:</Label>
+            <Input
+              placeholder="Enter first name"
+              onChangeText={(first_name) => this.setState({ first_name })}
+              value={this.state.first_name}
+              maxLength="50"
+            ></Input>
+            <Label>Last name:</Label>
+            <Input
+              placeholder="Enter last name"
+              onChangeText={(last_name) => this.setState({ last_name })}
+              value={this.state.last_name}
+              maxLength="50"
+            ></Input>
+            <Label>Email:</Label>
+            <Input
+              maxLength="256"
+              placeholder="Enter email adress"
+              onChangeText={(email) => this.setState({ email })}
+              value={this.state.email}
+            ></Input>
 
-          <Button title="Submit" onPress={() => this.updateDetails()} />
-        </View>
+            <PrimaryButton onPress={() => this.updateDetails()}>
+              <ButtonText>SUBMIT</ButtonText>
+            </PrimaryButton>
+          </BoxContainer>
+          {/* </View> */}
+        </ContainerCentred>
       );
     }
   }

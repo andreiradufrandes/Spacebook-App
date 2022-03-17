@@ -9,6 +9,7 @@ import {
   Modal,
   Pressable,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { checkLettersAndSpaces } from './functions';
@@ -460,63 +461,64 @@ class SearchScreen extends Component {
     return (
       // <Container>
       <ContainerCentred>
-        <Header>
-          <Title>Search for people or friends</Title>
-          <Label>Name:</Label>
-          <Input
-            placeholder="user's name"
-            onChangeText={(searchTerm) => this.setState({ searchTerm })}
-            value={this.state.searchTerm}
-            maxLength="50"
-          ></Input>
+        <ScrollView>
+          <Header>
+            <Title>Search for people or friends</Title>
+            <Label>Name:</Label>
+            <Input
+              placeholder="user's name"
+              onChangeText={(searchTerm) => this.setState({ searchTerm })}
+              value={this.state.searchTerm}
+              maxLength="50"
+            ></Input>
 
-          <ButtonContainer>
-            <PrimaryButton onPress={() => this.searchName('previousResults')}>
-              <ButtonText>{'<'}</ButtonText>
-            </PrimaryButton>
-            <PrimaryButton onPress={() => this.searchName('initialResults')}>
-              <ButtonText>SEARCH</ButtonText>
-            </PrimaryButton>
-            <PrimaryButton onPress={() => this.searchName('nextResults')}>
-              <ButtonText>{'>'}</ButtonText>
-            </PrimaryButton>
-          </ButtonContainer>
-        </Header>
+            <ButtonContainer>
+              <PrimaryButton onPress={() => this.searchName('previousResults')}>
+                <ButtonText>{'<'}</ButtonText>
+              </PrimaryButton>
+              <PrimaryButton onPress={() => this.searchName('initialResults')}>
+                <ButtonText>SEARCH</ButtonText>
+              </PrimaryButton>
+              <PrimaryButton onPress={() => this.searchName('nextResults')}>
+                <ButtonText>{'>'}</ButtonText>
+              </PrimaryButton>
+            </ButtonContainer>
+          </Header>
 
-        {/*   modal */}
-        <View>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              this.setModalVisible(!modalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                {/* Display the erro you wish to display to the user */}
-                <Text style={styles.modalText}>
-                  Error: {this.state.errorMessage}{' '}
-                </Text>
-                <Pressable
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => this.setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.textStyle}>Ok</Text>
-                </Pressable>
+          {/*   modal */}
+          <View>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  {/* <Text style={styles.modalText}>Hello World!</Text> */}
+                  {/* Display the erro you wish to display to the user */}
+                  <Text style={styles.modalText}>
+                    Error: {this.state.errorMessage}{' '}
+                  </Text>
+                  <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <Text style={styles.textStyle}>Ok</Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          </Modal>
-          {/* <Pressable
+            </Modal>
+            {/* <Pressable
             style={[styles.button, styles.buttonOpen]}
             onPress={() => this.setModalVisible(true)}
             >
             <Text style={styles.textStyle}>Show Modal</Text>
             </Pressable> */}
-        </View>
-        {/* 
+          </View>
+          {/* 
         <Button
           title="take me to Andrei's profile"
           onPress={() =>
@@ -526,64 +528,65 @@ class SearchScreen extends Component {
           }
         /> */}
 
-        {/* <Title>Search for people or friends</Title>
+          {/* <Title>Search for people or friends</Title>
 
         <Label>Enter user's name:</Label> */}
-        {/* <TextBox
+          {/* <TextBox
           placeholder="user's name"
           onChangeText={(searchTerm) => this.setState({ searchTerm })}
           value={this.state.searchTerm}
           maxLength="50"
         ></TextBox> */}
 
-        {/* <Button title="search" onPress={() => this.searchName()} /> */}
-        {/* Trial for primary button */}
-        {/* <Center>
+          {/* <Button title="search" onPress={() => this.searchName()} /> */}
+          {/* Trial for primary button */}
+          {/* <Center>
           <PrimaryButton onPress={() => this.searchName('initialResults')}>
             <ButtonText>SEARCH</ButtonText>
           </PrimaryButton>
         </Center> */}
 
-        <Body>
-          <FlatList
-            data={this.state.searchResults}
-            keyExtractor={(item) => item.user_id}
-            renderItem={({ item }) => (
-              // <View>
-              //   <Text>
-              //     {item.user_givenname} {item.user_familyname}
-              //   </Text>
-              //   <Button
-              //     title="Visit Profile"
-              //     onPress={() =>
-              //       this.props.navigation.navigate('Profile', {
-              //         user_id: item.user_id,
-              //       })
-              //     }
+          <Body>
+            <FlatList
+              data={this.state.searchResults}
+              keyExtractor={(item) => item.user_id}
+              renderItem={({ item }) => (
+                // <View>
+                //   <Text>
+                //     {item.user_givenname} {item.user_familyname}
+                //   </Text>
+                //   <Button
+                //     title="Visit Profile"
+                //     onPress={() =>
+                //       this.props.navigation.navigate('Profile', {
+                //         user_id: item.user_id,
+                //       })
+                //     }
 
-              //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
-              // />
+                //   this.props.navigation.navigate("Profile", userId); // can probably get tid of this later
+                // />
 
-              <FriendBox>
-                <BodyText>
-                  {item.user_givenname} {item.user_familyname}{' '}
-                </BodyText>
-                <PrimaryButton
-                  onPress={() => {
-                    console.log('userId=', item.user_id);
-                    this.props.navigation.navigate('Profile', {
-                      user_id: item.user_id,
-                    });
-                  }}
-                >
-                  <ButtonText>{'PROFILE'}</ButtonText>
-                </PrimaryButton>
-              </FriendBox>
-            )}
-          />
-        </Body>
+                <FriendBox>
+                  <BodyText>
+                    {item.user_givenname} {item.user_familyname}{' '}
+                  </BodyText>
+                  <PrimaryButton
+                    onPress={() => {
+                      console.log('userId=', item.user_id);
+                      this.props.navigation.navigate('Profile', {
+                        user_id: item.user_id,
+                      });
+                    }}
+                  >
+                    <ButtonText>{'PROFILE'}</ButtonText>
+                  </PrimaryButton>
+                </FriendBox>
+              )}
+            />
+          </Body>
 
-        {/* {true ? <Button title="Hi" /> : <Button title="Bye" />} */}
+          {/* {true ? <Button title="Hi" /> : <Button title="Bye" />} */}
+        </ScrollView>
       </ContainerCentred>
       // </Container>
     );

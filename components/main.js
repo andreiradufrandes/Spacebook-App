@@ -40,7 +40,10 @@ class MainScreen extends Component {
         style={styles.tabNavigator}
         screenOptions={{ headerShown: false }}
       >
-        <Tab.Screen name="Profile" component={ProfileComponentScreen} />
+        <Tab.Screen
+          name="ProfileComponent"
+          component={ProfileComponentScreen}
+        />
         <Tab.Screen name="Search" component={SearchScreen} />
         <Tab.Screen name="Notifications" component={NotificationsScreen} />
         <Tab.Screen name="Logout" component={LogoutScreen} />

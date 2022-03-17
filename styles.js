@@ -37,6 +37,8 @@ export const Title = styled.Text`
   font-weight: bold;
   margin-bottom: 15px;
   margin-top: 15px;
+  background: #c1bdfd;
+  padding: 10px;
 `;
 
 /*
@@ -123,13 +125,10 @@ export const Container = styled.View`
   flex-direction: column;
   background-color: #ffffff;
   padding: 5px;
-  // justify-content: center;
-  // flex-direction: column;
-  // align-items: center;
-  // align-content: space-between;
   min-height: 100vh;
   background-color: #483fcd;
   padding-bottom: 50px;
+  align-items: center;
 `;
 
 export const ContainerCentred = styled.View`
@@ -141,10 +140,15 @@ export const ContainerCentred = styled.View`
   align-items: center;
   min-height: 100vh;
   background-color: #483fcd;
+  padding-bottom: 50px;
 `;
+
+// DELETE
 
 export const ScrollViewContainer = styled.ScrollView`
   flex: 1;
+  max-width: 500px;
+  min-width: 95%;
 `;
 
 /*
@@ -223,12 +227,24 @@ export const BodyText = styled.Text`
   font-family: Roboto-Medium;
 `;
 
+// export const Name = styled.Text`
+//   margin-bottom: 10px;
+//   font-size: 20px;
+//   font-family: Roboto-Medium;
+//   font-weight: bold
+//   letter-spacing: 2px;
+
+// `;
 export const Name = styled.Text`
-  margin-bottom: 10px;
-  font-size: 20px;
-  font-family: Roboto-Medium;
-  font-weight: bold
-  letter-spacing: 2px;
+  font-size: 30px;
+  color: black;
+  text-align: center;
+  font-family: Roboto-Black;
+  font-weight: bold;
+  margin-bottom: 15px;
+  margin-top: 15px;
+  background: #02d0fd;
+  padding: 10px;
 `;
 
 export const PostText = styled.Text`

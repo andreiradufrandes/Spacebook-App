@@ -193,7 +193,7 @@ class NotificationsScreen extends Component {
       // Display the friend requests once they have once they have been store inside the state
     } else {
       return (
-        <Container>
+        <ContainerCentred>
           <ScrollView>
             <Title>Friend requests</Title>
             {/* Add a component to display messages for the user when accepting and decling friends requests */}
@@ -236,8 +236,9 @@ class NotificationsScreen extends Component {
                       <PrimaryButton
                         onPress={() => this.declineFriendRequest(item.user_id)}
                       >
-                        <ButtonText>{'ACCEPT'}</ButtonText>
+                        <ButtonText>{'DECLINE'}</ButtonText>
                       </PrimaryButton>
+
                       <PrimaryButton
                         onPress={() =>
                           this.props.navigation.navigate('Profile', {
@@ -245,8 +246,9 @@ class NotificationsScreen extends Component {
                           })
                         }
                       >
-                        <ButtonText>{' PROFILE'}</ButtonText>
+                        <ButtonText>{'PROFILE'}</ButtonText>
                       </PrimaryButton>
+
                       <PrimaryButton
                         onPress={() => {
                           this.acceptFriendRequest(item.user_id);
@@ -255,7 +257,7 @@ class NotificationsScreen extends Component {
                           });
                         }}
                       >
-                        <ButtonText>{'DECLINE'}</ButtonText>
+                        <ButtonText>{'ACCEPT'}</ButtonText>
                       </PrimaryButton>
                     </ButtonContainer>
                   </FriendBox>
@@ -263,7 +265,7 @@ class NotificationsScreen extends Component {
               />
             </View>
           </ScrollView>
-        </Container>
+        </ContainerCentred>
       );
     }
   }
