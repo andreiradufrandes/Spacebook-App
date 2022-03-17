@@ -10,6 +10,7 @@ import {
   BodyText,
   ModalContainer,
   ModalView,
+  LoadingContainer,
 } from '../styles.js';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -164,16 +165,9 @@ class NotificationsScreen extends Component {
     // Check if the component is still loading, and render a message for the user to let them know the page is loading
     if (this.state.isLoading) {
       return (
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>Loading..</Text>
-        </View>
+        <LoadingContainer>
+          <BodyText>Loading..</BodyText>
+        </LoadingContainer>
       );
       // Display the friend requests once they have once they have been store inside the state
     } else {

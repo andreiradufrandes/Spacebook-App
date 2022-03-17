@@ -44,9 +44,6 @@ class SignupScreen extends Component {
     this.setState({ modalVisible: visible });
   };
 
-  // TODO
-  // Add email check
-  // add check to see if it is empty space
   signup = () => {
     const firstNameCheck = checkName(this.state.first_name);
     const lastNameCheck = checkName(this.state.last_name);
