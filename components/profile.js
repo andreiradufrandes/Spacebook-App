@@ -1,29 +1,14 @@
 import React, { Component } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Alert,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  Modal,
-  Pressable,
-  SafeAreaView,
-} from 'react-native';
-import { FlatList } from 'react-native-web';
+import { View, Modal, FlatList } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Import styled components
 import {
   Container,
   Label,
   PrimaryButton,
-  Center,
   ButtonText,
   ButtonContainer,
-  Input,
-  BoxContainer,
   Title,
   ContainerCentred,
   BodyText,
@@ -32,10 +17,12 @@ import {
   Header,
   Body,
   ProfileImage,
-  Name,
   PostContainer,
   ScrollViewContainer,
   NewPostBox,
+  LoadingContainer,
+  ModalContainer,
+  ModalView,
 } from '../styles.js';
 
 // Import a function to be used for displaying the time and date of post in the correct format
@@ -678,54 +665,39 @@ class ProfileScreen extends React.Component {
     // Display a buffer text if the data required to be displayed in not loaded yet
     if (this.state.isLoading) {
       return (
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>Loading..</Text>
-        </View>
+        <LoadingContainer>
+          <BodyText>Loading..</BodyText>
+        </LoadingContainer>
       );
     }
-    // Display if the the page is ready
+    // Renderthe page if the elements finished loading
     else {
       return (
         <ContainerCentred>
-          {/* <SafeAreaView style={styles.container}> */}
           <ScrollViewContainer>
-            <View>
-              <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                  this.setModalVisible(!modalVisible);
-                }}
-              >
-                <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                    {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                    {/* Display the erro you wish to display to the user */}
-                    <Text style={styles.modalText}>
-                      {this.state.errorMessage}{' '}
-                    </Text>
-                    <Pressable
-                      style={[styles.button, styles.buttonClose]}
-                      onPress={() => this.setModalVisible(!modalVisible)}
-                    >
-                      <Text style={styles.textStyle}>Ok</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </Modal>
-            </View>
-            <Header>
-              {/* <View> */}
+            {/* Display a modal element to show alerts for the user */}
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
+            >
+              <ModalContainer>
+                <ModalView>
+                  <BodyText>{this.state.errorMessage} </BodyText>
+                  <PrimaryButton
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <ButtonText>{'OK'}</ButtonText>
+                  </PrimaryButton>
+                </ModalView>
+              </ModalContainer>
+              {/* </View> */}
+            </Modal>
 
-              {/* header */}
+            <Header>
               <View>
                 <Title>
                   {this.state.userInfo.first_name +
@@ -743,6 +715,7 @@ class ProfileScreen extends React.Component {
 
                 <BodyText>Email: {this.state.userInfo.email}</BodyText>
                 <ButtonContainer>
+                  {/* Allow the user to change the proile picture if it belongs to them */}
                   {this.state.isLoggedInUsersProfile ? (
                     <PrimaryButton
                       onPress={() =>
@@ -752,6 +725,7 @@ class ProfileScreen extends React.Component {
                       <ButtonText>PHOTO</ButtonText>
                     </PrimaryButton>
                   ) : null}
+                  {/* Display an update button only for the logged in user's profile */}
                   {this.state.isLoggedInUsersProfile ? (
                     <PrimaryButton
                       onPress={() => this.props.navigation.navigate('Update')}
@@ -759,10 +733,7 @@ class ProfileScreen extends React.Component {
                       <ButtonText>UPDATE</ButtonText>
                     </PrimaryButton>
                   ) : null}
-                  {/* Replace where ti */}
-                  {/* <Text> {this.state.userInfo.friend_count + ' friends'}</Text>  */}
-
-                  {/* Display the list of friends for the user who is logged in only*/}
+                  {/* Take the user to the list of friend if it;s their own profile or a friend's */}
                   {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
                     <PrimaryButton
                       onPress={() =>
@@ -776,7 +747,7 @@ class ProfileScreen extends React.Component {
                   ) : null}
                 </ButtonContainer>
 
-                {/* Add the option for adding someone as a friend as a button when on a stranger's profile */}
+                {/* Display the add friend button only when on aa strangers profile */}
                 {!this.state.isLoggedInUsersProfile &&
                 !this.state.isFriend &&
                 !this.state.userRequestedFriendRequest &&
@@ -787,6 +758,7 @@ class ProfileScreen extends React.Component {
                 ) : null}
               </View>
 
+              {/* Display a button to accept friends requests if the profile owner sent one */}
               {!this.state.isLoggedInUsersProfile &&
               !this.state.isFriend &&
               this.state.userRequestedFriendRequest ? (
@@ -795,15 +767,12 @@ class ProfileScreen extends React.Component {
                 </PrimaryButton>
               ) : null}
             </Header>
-            {/*------------------------------ Camera ------------------------------    */}
 
-            {/* move this inside the statement */}
             <Body>
+              <Title>Profile wall</Title>
               {/* Display someone's posts, as well as the option to add a post only for the logged in user's profile and for their friends */}
               {this.state.isLoggedInUsersProfile || this.state.isFriend ? (
                 <View>
-                  {/* Add a post only if it is my profile or a friend's profile */}
-
                   <NewPostBox>
                     <Label>New post:</Label>
                     <PostInput
@@ -814,7 +783,6 @@ class ProfileScreen extends React.Component {
                       }
                       value={this.state.newPostText}
                     />
-
                     <PrimaryButton onPress={() => this.addNewPost()}>
                       <ButtonText>{'ADD POST'}</ButtonText>
                     </PrimaryButton>
@@ -822,10 +790,6 @@ class ProfileScreen extends React.Component {
 
                   {/*   Display user's posts as a flatlist, with the option to like, remove like, delete, update posts,
                  and visit person's profile, depending on the posts are from */}
-                  {/* display only when display user message true  */}
-
-                  {/* display aler ONLY when it's true */}
-                  <Title>Profile wall</Title>
                   <FlatList
                     data={this.state.userPosts}
                     keyExtractor={(item) => item.post_id}
@@ -843,15 +807,6 @@ class ProfileScreen extends React.Component {
                         </BodyText>
                         <BodyText> {item.numLikes} likes</BodyText>
 
-                        {/* Display only if it's NOT my page */}
-                        {/* <Button
-                        title="View post"
-                        onPress={() => {
-                          this.props.navigation.navigate('Post', 
-                          
-                          item.post_id);
-                        }}
-                      ></Button> */}
                         <ButtonContainer>
                           <PrimaryButton
                             onPress={() => {
@@ -892,10 +847,6 @@ class ProfileScreen extends React.Component {
                             </PrimaryButton>
                           ) : null}
                         </ButtonContainer>
-                        {/* Add functionality for updating a post if it's on the user's profile */}
-                        {/* {this.state.isLoggedInUsersProfile ? (
-                          <Button title="Update post(NOT CODED)" />
-                        ) : null} */}
                       </PostContainer>
                     )}
                   />
@@ -910,68 +861,3 @@ class ProfileScreen extends React.Component {
 }
 
 export default ProfileScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  camera: {
-    flex: 1,
-  },
-  buttonContainer: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
-    margin: 20,
-  },
-  button: {
-    flex: 0.1,
-    alignSelf: 'flex-end',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 18,
-    color: 'white',
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-});

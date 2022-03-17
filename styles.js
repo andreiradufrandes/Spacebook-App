@@ -296,7 +296,35 @@ export const PostContainer = styled.View`
 
 /*
 
-        Camera
+        Loading container
 
 
 */
+export const LoadingContainer = styled.View`
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+`;
+
+/*
+
+        Modal container
+
+
+
+*/
+export const ModalContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  margintop: 10;
+`;
+
+export const ModalView = styled.View`
+  margin: 20px;
+  background-color: white;
+  padding: 40px;
+  align-items: center;
+  border: 2px;
+`;
