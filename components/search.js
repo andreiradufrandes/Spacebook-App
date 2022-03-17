@@ -55,6 +55,7 @@ class SearchScreen extends Component {
       initialOffset: 5,
       offectCounter: 0,
       firstCycle: true,
+      cycleToggler: true,
     };
   }
   // Add a toggle function to set the visibility for the user alerts
@@ -122,6 +123,7 @@ class SearchScreen extends Component {
   searchName = async (direction) => {
     // ---------------------------------
     this.state.isLoading = true;
+
     // console.log('at the beginning of the search', this.state);
 
     // do the checks
@@ -129,9 +131,11 @@ class SearchScreen extends Component {
     // If the search box is not empty, execute the code looking for the person
     if (!(this.state.searchTerm === '')) {
       const value = await AsyncStorage.getItem('@session_token');
+      console.log(value);
       const serachTermCheck = checkLettersAndSpaces(this.state.searchTerm);
 
-      // Checkk input
+      let signedOffset = 0;
+      // Display a message for the user if theyy forgot to enter a search term
       if (!serachTermCheck) {
         this.state.errorMessage =
           'Incorrect input, the name can only contain letters, no numbers or  special characters. Try again!';
@@ -152,7 +156,7 @@ class SearchScreen extends Component {
           this.setModalVisible(true);
         } else {
           // ---------------Check the direction----------------
-          let signedOffset = 0;
+
           // If the direction is backwards, make the offset negative
           if (direction == 'previousResults') {
             signedOffset -= this.state.initialOffset;
@@ -185,12 +189,25 @@ class SearchScreen extends Component {
       }
 
       /*
-
+     
 
           A lot of checks AFTER which we sent the request
 
 
         */
+      // if it is the first turn, set offest to 0
+      if (this.state.cycleToggler) {
+        this.state.offectCounter = 0;
+        this.state.cycleToggler = false;
+      }
+
+      console.log(
+        'searchLimit = ' +
+          this.state.searchLimit +
+          '\noffsetCounter =' +
+          this.state.offectCounter,
+        '\nsignedOffset = ' + signedOffset
+      );
 
       return fetch(
         'http://localhost:3333/api/1.0.0/search?q=' +
