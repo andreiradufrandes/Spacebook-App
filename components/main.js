@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SearchScreen from './search';
@@ -36,11 +36,11 @@ class MainScreen extends Component {
     // Check if the component is still loading, and render a message for the user to let them know the page is loading
     return (
       // Add a tab navigator to allow the user to travel to different parts of te app
-      <Tab.Navigator screenOptions={{ headerShown: false }}>
-        <Tab.Screen
-          name="ProfileComponent"
-          component={ProfileComponentScreen}
-        />
+      <Tab.Navigator
+        style={styles.tabNavigator}
+        screenOptions={{ headerShown: false }}
+      >
+        <Tab.Screen name="Profile" component={ProfileComponentScreen} />
         <Tab.Screen name="Search" component={SearchScreen} />
         <Tab.Screen name="Notifications" component={NotificationsScreen} />
         <Tab.Screen name="Logout" component={LogoutScreen} />
@@ -50,3 +50,9 @@ class MainScreen extends Component {
 }
 
 export default MainScreen;
+
+const styles = StyleSheet.create({
+  tabNavigator: {
+    backgroundColor: 'red',
+  },
+});

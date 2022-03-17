@@ -569,13 +569,14 @@ class SearchScreen extends Component {
                   {item.user_givenname} {item.user_familyname}{' '}
                 </BodyText>
                 <PrimaryButton
-                  onPress={() =>
+                  onPress={() => {
+                    console.log('userId=', item.user_id);
                     this.props.navigation.navigate('Profile', {
                       user_id: item.user_id,
-                    })
-                  }
+                    });
+                  }}
                 >
-                  <ButtonText>{'VISIT PROFILE'}</ButtonText>
+                  <ButtonText>{'PROFILE'}</ButtonText>
                 </PrimaryButton>
               </FriendBox>
             )}

@@ -1,7 +1,36 @@
 import React, { Component } from 'react';
-import { View, Text, Button, ScrollView, FlatList } from 'react-native';
-import { Title } from '../styles.js';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  ScrollView,
+  Modal,
+  Pressable,
+  StyleSheet,
+  FlatList,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
+  ContainerCentred,
+  Title,
+  Header,
+  Body,
+  ContainerScroll,
+  ScrollViewContainer,
+  FriendBox,
+  BodyText,
+} from '../styles.js';
 
 class FriendsScreen extends Component {
   constructor(props) {
@@ -72,33 +101,38 @@ class FriendsScreen extends Component {
     } else {
       return (
         // Wrap the contents in a scrollview to allow the ability to scroll when the components are bigger than the screen
-        <ScrollView>
-          <Title>Friends list</Title>
-          <View>
-            {/* Get the user's friends list and display it */}
-            <FlatList
-              data={this.state.friendsList}
-              keyExtractor={(item) => item.user_id}
-              renderItem={({ item }) => (
-                <View>
-                  {/* Display the first and second name of a given friend  */}
-                  <Text>
-                    {item.user_givenname} {item.user_familyname}
-                  </Text>
-                  {/* Add a button to allow the user to visit their friend's profile */}
-                  <Button
-                    title="Visit user's profile"
-                    onPress={() =>
-                      this.props.navigation.navigate('Profile', {
-                        user_id: item.user_id,
-                      })
-                    }
-                  />
-                </View>
-              )}
-            />
-          </View>
-        </ScrollView>
+        <Container>
+          <ScrollView>
+            <Title>Friends</Title>
+            <View>
+              {/* Get the user's friends list and display it */}
+              <FlatList
+                data={this.state.friendsList}
+                keyExtractor={(item) => item.user_id}
+                renderItem={({ item }) => (
+                  <FriendBox>
+                    {/* Display the first and second name of a given friend  */}
+                    <BodyText>
+                      {item.user_givenname} {item.user_familyname}
+                    </BodyText>
+                    {/* Add a button to allow the user to visit their friend's profile */}
+
+                    <PrimaryButton
+                      onPress={() => {
+                        console.log('userId=', item.user_id);
+                        this.props.navigation.navigate('Profile', {
+                          user_id: item.user_id,
+                        });
+                      }}
+                    >
+                      <ButtonText>{'PROFILE'}</ButtonText>
+                    </PrimaryButton>
+                  </FriendBox>
+                )}
+              />
+            </View>
+          </ScrollView>
+        </Container>
       );
     }
   }

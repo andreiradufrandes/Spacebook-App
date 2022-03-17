@@ -18,6 +18,7 @@ import {
   Input,
   BoxContainer,
   ContainerCentred,
+  Title,
 } from '../styles.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -100,42 +101,41 @@ class LogoutScreen extends Component {
     const { modalVisible } = this.state;
 
     return (
-      <Container>
+      <ContainerCentred>
         {/* <View style={styles.loginBox}> */}
-        <BoxContainer>
-          <View style={styles.centeredView}>
-            {/* Add a component to display messages for the user */}
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                this.setModalVisible(!modalVisible);
-              }}
-            >
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  <Text style={styles.modalText}>
-                    {this.state.errorMessage}{' '}
-                  </Text>
-                  <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => this.setModalVisible(!modalVisible)}
-                  >
-                    <Text style={styles.textStyle}>Ok</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </Modal>
-          </View>
 
-          {/* Add a button to log the user out  */}
-          {/* <Button title="Logout" onPress={() => this.logout()} /> */}
-          <PrimaryButton onPress={() => this.logout()}>
-            <ButtonText>LOG OUT</ButtonText>
-          </PrimaryButton>
-        </BoxContainer>
-      </Container>
+        {/* <BoxContainer> */}
+        <View>
+          {/* Add a component to display messages for the user */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              this.setModalVisible(!modalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>{this.state.errorMessage} </Text>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => this.setModalVisible(!modalVisible)}
+                >
+                  <Text style={styles.textStyle}>Ok</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
+        </View>
+        {/* Add a button to log the user out  */}
+        {/* <Button title="Logout" onPress={() => this.logout()} /> */}
+        {/* <Title>LOG OUT </Title> */}
+        <PrimaryButton onPress={() => this.logout()}>
+          <ButtonText>LOG OUT</ButtonText>
+        </PrimaryButton>
+        {/* </BoxContainer> */}
+      </ContainerCentred>
     );
   }
 }

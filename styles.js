@@ -60,12 +60,13 @@ export const PrimaryButton = styled.TouchableOpacity`
   max-width: 160px;
   // background-color: #5d3754;
   background-color: #3831a0;
+  padding: 15px 15px;
 `;
 
 // Change the color according to accesibility
 export const ButtonText = styled.Text`
   color: #ffffff;
-  padding: 15px 15px;
+
   font-size: 14px;
   font-family: Roboto-Medium;
   letter-spacing: 1.25;
@@ -128,6 +129,7 @@ export const Container = styled.View`
   // align-content: space-between;
   min-height: 100vh;
   background-color: #483fcd;
+  padding-bottom: 50px;
 `;
 
 export const ContainerCentred = styled.View`
@@ -254,7 +256,7 @@ export const ProfileImage = styled.Image`
 `;
 /*
 
-        New post
+        Post
 
 
 */
@@ -273,3 +275,10 @@ export const PostContainer = styled.View`
   background-color: #ffffff;
   margin-bottom: 5px;
 `;
+
+/*
+
+        Tab navigator
+
+
+*/

@@ -81,6 +81,8 @@ class ProfileScreen extends React.Component {
   }
 
   componentDidMount = async () => {
+    console.log('\n\n\n\nComponent did mount\n\n\n\n');
+
     // When the user loggs in
     const { status } = await Camera.requestCameraPermissionsAsync();
     this.setState({ hasPermission: status === 'granted' });
@@ -102,6 +104,7 @@ class ProfileScreen extends React.Component {
       .getParent()
       .addListener('tabPress', async (e) => {
         // Nagivate the user
+        console.log('\n\n\n\nComponent did mount >> PARENT NAVIGATOR\n\n\n\n');
         this.props.navigation.navigate('Profile', {
           user_id: this.state.loggedUserId,
         });
@@ -110,6 +113,8 @@ class ProfileScreen extends React.Component {
       });
 
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
+      console.log('\n\n\n\nComponent did mount >> EVENT LISTENER\n\n\n\n');
+      console.log('State at beginning of event listener: ', this.state);
       await this.startFunction();
     });
   };
@@ -121,6 +126,8 @@ class ProfileScreen extends React.Component {
 
   startFunction = async () => {
     this.state.isLoading = true;
+    this.state.isFriend = false;
+    this.state.isLoggedInUsersProfile = false;
     this.state.friendRequestSent = false;
     console.log(
       '\n\n\n\nState in starter function beginning\n\n\n',
