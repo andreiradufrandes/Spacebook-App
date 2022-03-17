@@ -1,35 +1,27 @@
 import React, { Component } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-} from 'react-native';
+import { Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Container,
   Label,
   PrimaryButton,
-  Center,
   ButtonText,
   ButtonContainer,
   Input,
   BoxContainer,
   Title,
   ContainerCentred,
+  ModalContainer,
+  ModalView,
+  BodyText,
 } from '../styles.js';
-import { greaterThan } from 'react-native-reanimated';
 
 class LoginScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: 'andreifrandes@mmu.ac.uk', // change
-      password: 'andreifrandes', // change
+      email: 'andreifrandes@mmu.ac.uk',
+      password: 'andreifrandes',
       modalVisible: false,
     };
   }
@@ -39,6 +31,7 @@ class LoginScreen extends Component {
     this.setState({ modalVisible: visible });
   };
 
+  // Add a function to checks the users's details
   login = async () => {
     // Send a request to the server to log the user in
     return (
@@ -49,7 +42,7 @@ class LoginScreen extends Component {
         },
         body: JSON.stringify(this.state),
       })
-        // Check if the request was successful and log the user in if it was
+        // Return a promise and different messages for the user depending on if the request was successful or not
         .then((response) => {
           if (response.status === 200) {
             return response.json();
@@ -87,49 +80,27 @@ class LoginScreen extends Component {
         {/* <View style={styles.loginBox}> */}
         <BoxContainer>
           {/* Add a component to display messages for the user when accepting and decling friends requests */}
-          <View>
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                this.setModalVisible(!modalVisible);
-              }}
-            >
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  <Text style={styles.modalText}>
-                    {this.state.errorMessage}{' '}
-                  </Text>
-                  <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => this.setModalVisible(!modalVisible)}
-                  >
-                    <Text style={styles.textStyle}>Ok</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </Modal>
-          </View>
-          {/* Display the instructions and buttons for th user to log in */}
-          {/* <Label>Email:</Label>
-          <TextInput
-            style={styles.input}
-            placeholder="email"
-            maxLength="256"
-            onChangeText={(email) => this.setState({ email })}
-            value={this.state.email}
-          />
-          <Label>Password:</Label>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              this.setModalVisible(!modalVisible);
+            }}
+          >
+            <ModalContainer>
+              <ModalView>
+                <BodyText>{this.state.errorMessage} </BodyText>
+                <PrimaryButton
+                  onPress={() => this.setModalVisible(!modalVisible)}
+                >
+                  <ButtonText>{'OK'}</ButtonText>
+                </PrimaryButton>
+              </ModalView>
+            </ModalContainer>
+            {/* </View> */}
+          </Modal>
 
-          <TextInput
-            style={styles.input}
-            placeholder="password"
-            onChangeText={(password) => this.setState({ password })}
-            value={this.state.password}
-            secureTextEntry={true}
-            maxLength="16"
-          /> */}
           <Title>Login</Title>
           <Label>Email:</Label>
           <Input
@@ -145,23 +116,7 @@ class LoginScreen extends Component {
             secureTextEntry={true}
             maxLength="16"
           ></Input>
-          {/* 
-          <View style={styles.ButtonContainer}>
-            <Button
-              style={styles.Button}
-              title="LOGIN"
-              onPress={() => this.login()}
-            />
 
-            
-            <Button
-              style={styles.Button}
-              title="SIGN UP PAGE"
-              onPress={() => this.props.navigation.navigate('Signup')}
-            />
-          </View> */}
-
-          {/* <View style={styles.ButtonContainer}> */}
           <ButtonContainer>
             <PrimaryButton onPress={() => this.login()}>
               <ButtonText>LOGIN</ButtonText>
@@ -173,107 +128,10 @@ class LoginScreen extends Component {
               <ButtonText>SIGN UP</ButtonText>
             </PrimaryButton>
           </ButtonContainer>
-
-          {/* </View> */}
         </BoxContainer>
-        {/* </View> */}
       </ContainerCentred>
-      // </View>
     );
   }
 }
 
 export default LoginScreen;
-// Dimension of he screen
-
-const styles = StyleSheet.create({
-  container: {
-    // flex: 1,
-    // backgroundColor: '#fff',
-    // alignItems: 'center',
-    // justifyContent: 'center',
-    // flexDirection: 'column',
-    backgroundColor: '#520f9A', // remove
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'column',
-    alignItems: 'center',
-    alignContent: 'space-between',
-    minHeight: '100%',
-    minHeight: '100vh',
-  },
-  loginBox: {
-    // flex: 1,
-    // height: '40%',
-
-    width: '80%',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    padding: 20,
-    maxWidth: 500,
-    backgroundColor: '#ffffff',
-  },
-
-  input: {
-    backgroundColor: '#ffffff',
-
-    height: 51,
-    // // flex: 1,
-    padding: 8,
-    // marginBottom: 20,
-    marginBottom: '20px',
-    borderWidth: 2,
-    borderColor: 'black',
-  },
-  ButtonContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  Button: {
-    marginBottom: '10px',
-  },
-
-  // All of this is modal
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-});

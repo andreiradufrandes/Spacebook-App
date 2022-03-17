@@ -1,35 +1,15 @@
 import React, { Component } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Alert,
-  ScrollView,
-  Modal,
-  Pressable,
-  StyleSheet,
-  FlatList,
-} from 'react-native';
+import { View, Text, ScrollView, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   Container,
-  Label,
   PrimaryButton,
-  Center,
   ButtonText,
-  ButtonContainer,
-  Input,
-  BoxContainer,
-  ContainerCentred,
   Title,
-  Header,
-  Body,
-  ContainerScroll,
-  ScrollViewContainer,
   FriendBox,
   BodyText,
+  LoadingContainer,
 } from '../styles.js';
 
 class FriendsScreen extends Component {
@@ -86,16 +66,9 @@ class FriendsScreen extends Component {
     // Check if the component is still loading, and render a message for the user to let them know the page is loading
     if (this.state.isLoading) {
       return (
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>Loading..</Text>
-        </View>
+        <LoadingContainer>
+          <BodyText>Loading..</BodyText>
+        </LoadingContainer>
       );
       // If the necessary request have been completed, render the list of friends for the user
     } else {
