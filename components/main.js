@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Import the screens to be added to the tab navigator
 import SearchScreen from './search';
 import NotificationsScreen from './notifications';
 import LogoutScreen from './logout';
@@ -25,6 +25,7 @@ class MainScreen extends Component {
     this.unsubscribe();
   }
 
+  // Check if the user is logged in, and if they are not navigate them back to the login page
   checkLoggedIn = async () => {
     const value = await AsyncStorage.getItem('@session_token');
     if (value == null) {
@@ -33,13 +34,9 @@ class MainScreen extends Component {
   };
 
   render() {
-    // Check if the component is still loading, and render a message for the user to let them know the page is loading
     return (
       // Add a tab navigator to allow the user to travel to different parts of te app
-      <Tab.Navigator
-        style={styles.tabNavigator}
-        screenOptions={{ headerShown: false }}
-      >
+      <Tab.Navigator screenOptions={{ headerShown: false }}>
         <Tab.Screen
           name="ProfileComponent"
           component={ProfileComponentScreen}
@@ -53,9 +50,3 @@ class MainScreen extends Component {
 }
 
 export default MainScreen;
-
-const styles = StyleSheet.create({
-  tabNavigator: {
-    backgroundColor: 'red',
-  },
-});

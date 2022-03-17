@@ -1,25 +1,14 @@
 import React, { Component } from 'react';
+import { Modal } from 'react-native';
 import {
-  Text,
-  ScrollView,
-  Button,
-  View,
-  Modal,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
-import {
-  Container,
-  Label,
   PrimaryButton,
-  Center,
   ButtonText,
-  ButtonContainer,
-  Input,
-  BoxContainer,
   ContainerCentred,
-  Title,
+  ModalContainer,
+  ModalView,
+  BodyText,
 } from '../styles.js';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class LogoutScreen extends Component {
@@ -34,7 +23,7 @@ class LogoutScreen extends Component {
   }
 
   componentDidMount() {
-    // Add an event listener to check if the user is logged in everytime they navigate to the logout page
+    // Check if the user is logged in
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.checkLoggedIn();
     });
@@ -102,86 +91,33 @@ class LogoutScreen extends Component {
 
     return (
       <ContainerCentred>
-        {/* <View style={styles.loginBox}> */}
+        {/* Display a modal element to show alerts for the user */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            this.setModalVisible(!modalVisible);
+          }}
+        >
+          <ModalContainer>
+            <ModalView>
+              <BodyText>{this.state.errorMessage} </BodyText>
+              <PrimaryButton
+                onPress={() => this.setModalVisible(!modalVisible)}
+              >
+                <ButtonText>{'OK'}</ButtonText>
+              </PrimaryButton>
+            </ModalView>
+          </ModalContainer>
+        </Modal>
 
-        {/* <BoxContainer> */}
-        <View>
-          {/* Add a component to display messages for the user */}
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              this.setModalVisible(!modalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <Text style={styles.modalText}>{this.state.errorMessage} </Text>
-                <Pressable
-                  style={[styles.button, styles.buttonClose]}
-                  onPress={() => this.setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.textStyle}>Ok</Text>
-                </Pressable>
-              </View>
-            </View>
-          </Modal>
-        </View>
-        {/* Add a button to log the user out  */}
-        {/* <Button title="Logout" onPress={() => this.logout()} /> */}
-        {/* <Title>LOG OUT </Title> */}
         <PrimaryButton onPress={() => this.logout()}>
           <ButtonText>LOG OUT</ButtonText>
         </PrimaryButton>
-        {/* </BoxContainer> */}
       </ContainerCentred>
     );
   }
 }
 
 export default LogoutScreen;
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-});

@@ -1,31 +1,21 @@
 import React, { Component } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  ScrollView,
-  Modal,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { View, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  Container,
   Label,
   PrimaryButton,
-  Center,
   ButtonText,
-  ButtonContainer,
-  Input,
   BoxContainer,
-  Title,
   ContainerCentred,
   BodyText,
   PostInput,
   PostText,
+  ModalContainer,
+  ModalView,
+  LoadingContainer,
 } from '../styles.js';
 
+// Import a function to be used for displaying the time and date of post in the correct format
 import { timeAndDateExtractor } from './functions';
 
 class PostScreen extends Component {
@@ -47,21 +37,14 @@ class PostScreen extends Component {
     };
   }
 
-  // update post function
-  // On click:
-  // 1. Update post = true
-  // 2. if update post true, display update field
-  // 3. have second button saying update finished which triggers update request
-  //   import it from main page
   componentDidMount = async () => {
-    console.log('\n\n\n\n\npost component did mount:');
-    // this.state.userProfileID = this.navigation.params.user_id;
+    // Store the id of the logged in person in the state to be used for verification
     this.state.loggedUserId = await AsyncStorage.getItem('@id');
 
+    // Get the post from the server and check who the author is
     await this.getSinglePost();
     await this.checkPostIsFromLoggedUser();
     await this.getSinglePost();
-    console.log('user profile id: ', this.state.userProfileID);
   };
 
   // Add a toggle function to set the visibility of the alerts, to be be used during netwroking requests displaying allerts for the user
@@ -360,294 +343,113 @@ class PostScreen extends Component {
   render() {
     const { modalVisible } = this.state;
 
-    // Check if the component is still loading, and render a message for the user to let them know the page is loading
+    // Display a buffer text if the data required to be displayed in not loaded yet    if (this.state.isLoading) {
     if (this.state.isLoading) {
       return (
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>Loading..</Text>
-        </View>
+        <LoadingContainer>
+          <BodyText>Loading..</BodyText>
+        </LoadingContainer>
       );
+
       // If the request was successful, render the post on the page
     } else {
       return (
-        <View>
-          {/* ------------------------------------------------------------------------------------- */}
-          <ContainerCentred>
-            {/* <View style={styles.loginBox}> */}
-            <BoxContainer>
-              <View>
-                <Modal
-                  animationType="slide"
-                  transparent={true}
-                  visible={modalVisible}
-                  onRequestClose={() => {
-                    this.setModalVisible(!modalVisible);
-                  }}
-                >
-                  <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                      <Text style={styles.modalText}>
-                        {this.state.errorMessage}{' '}
-                      </Text>
-                      <Pressable
-                        style={[styles.button, styles.buttonClose]}
-                        onPress={() => this.setModalVisible(!modalVisible)}
-                      >
-                        <Text style={styles.textStyle}>Ok</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                </Modal>
-              </View>
-
-              <BodyText>
-                From: {this.state.post.author.first_name}{' '}
-                {this.state.post.author.last_name}
-              </BodyText>
-              <PostText>"{this.state.post.text}"</PostText>
-              <BodyText>
-                {' '}
-                Posted on:{' '}
-                {timeAndDateExtractor(this.state.post.timestamp).at(0)} at{' '}
-                {timeAndDateExtractor(this.state.post.timestamp).at(1)}
-              </BodyText>
-              <BodyText> {this.state.post.numLikes} likes</BodyText>
-              {!this.state.isLoggedInUsersPost ? (
+        <ContainerCentred>
+          {/* Display a modal element to show alerts for the user */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              this.setModalVisible(!modalVisible);
+            }}
+          >
+            <ModalContainer>
+              <ModalView>
+                <BodyText>{this.state.errorMessage} </BodyText>
                 <PrimaryButton
-                  onPress={() => this.likePost(this.state.post.post_id)}
+                  onPress={() => this.setModalVisible(!modalVisible)}
                 >
-                  <ButtonText>{'LIKE'}</ButtonText>
+                  <ButtonText>{'OK'}</ButtonText>
                 </PrimaryButton>
-              ) : null}
-              {!this.state.isLoggedInUsersPost ? (
-                <PrimaryButton
-                  onPress={() => this.removeLike(this.state.post.post_id)}
-                >
-                  <ButtonText>{'REMOVE LIKE'}</ButtonText>
-                </PrimaryButton>
-              ) : null}
-
-              {this.state.isLoggedInUsersPost ? (
-                <PrimaryButton
-                  onPress={() => this.deletePost(this.state.post.post_id)}
-                >
-                  <ButtonText>{'DELETE'}</ButtonText>
-                </PrimaryButton>
-              ) : null}
-
-              {this.state.isLoggedInUsersPost ? (
-                <PrimaryButton
-                  onPress={() => {
-                    (this.state.updatePost = true), this.getSinglePost();
-                  }}
-                >
-                  <ButtonText>{'UPDATE'}</ButtonText>
-                </PrimaryButton>
-              ) : null}
-
-              {this.state.updatePost ? (
-                <View>
-                  <Label>New post:</Label>
-                  <PostInput
-                    maxLength="256"
-                    multiline={true}
-                    onChangeText={(newPostMeesage) =>
-                      this.setState({ newPostMeesage })
-                    }
-                    value={this.state.newPostMeesage}
-                  />
-
-                  {/* <Button
-                  title="Submit updated post"
-                  onPress={() => {
-                    this.updatePost();
-                  }}
-                /> */}
-
-                  <PrimaryButton
-                    onPress={() => {
-                      this.updatePost();
-                    }}
-                  >
-                    <ButtonText>{'SUBMIT'}</ButtonText>
-                  </PrimaryButton>
-                </View>
-              ) : null}
-            </BoxContainer>
+              </ModalView>
+            </ModalContainer>
             {/* </View> */}
-          </ContainerCentred>
-          {/* ------------------------------------------------------------------------------------- */}
-          <View>
-            {/* Create a modal alert to display the alert message for the user */}
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                this.setModalVisible(!modalVisible);
-              }}
-            >
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  {/* Set the message to be displayed for the user  */}
-                  <Text style={styles.modalText}>
-                    {this.state.errorMessage}{' '}
-                  </Text>
-                  <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => this.setModalVisible(!modalVisible)}
-                  >
-                    <Text style={styles.textStyle}>Ok</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </Modal>
-          </View>
+          </Modal>
 
-          {/* Display the post withe the relevant details */}
-          <View>
-            <Text>
+          <BoxContainer>
+            <BodyText>
               From: {this.state.post.author.first_name}{' '}
               {this.state.post.author.last_name}
-            </Text>
-            <Text> {this.state.post.text}</Text>
-            <Text>
+            </BodyText>
+            <PostText>"{this.state.post.text}"</PostText>
+            <BodyText>
               {' '}
               Posted on: {timeAndDateExtractor(this.state.post.timestamp).at(
                 0
               )}{' '}
               at {timeAndDateExtractor(this.state.post.timestamp).at(1)}
-            </Text>
-            <Text> {this.state.post.numLikes} likes</Text>
-
-            {/* Allow the user to like the post if it is not their own post */}
+            </BodyText>
+            <BodyText> {this.state.post.numLikes} likes</BodyText>
             {!this.state.isLoggedInUsersPost ? (
-              <Button
-                title="Like"
+              <PrimaryButton
                 onPress={() => this.likePost(this.state.post.post_id)}
-              />
+              >
+                <ButtonText>{'LIKE'}</ButtonText>
+              </PrimaryButton>
             ) : null}
-
-            {/* Allow the user to remove like from the post if it is not their own post */}
             {!this.state.isLoggedInUsersPost ? (
-              <Button
-                title="Remove Like"
+              <PrimaryButton
                 onPress={() => this.removeLike(this.state.post.post_id)}
-              />
+              >
+                <ButtonText>{'REMOVE LIKE'}</ButtonText>
+              </PrimaryButton>
             ) : null}
 
-            {/* Allow the user to delete the post, ony if it is their post */}
             {this.state.isLoggedInUsersPost ? (
-              <Button
-                title="Delete post"
+              <PrimaryButton
                 onPress={() => this.deletePost(this.state.post.post_id)}
-              />
+              >
+                <ButtonText>{'DELETE'}</ButtonText>
+              </PrimaryButton>
             ) : null}
 
-            {/* Display a button to allow the user to update the post if it is their own post  */}
             {this.state.isLoggedInUsersPost ? (
-              <Button
-                title="Update"
+              <PrimaryButton
                 onPress={() => {
                   (this.state.updatePost = true), this.getSinglePost();
                 }}
-              />
+              >
+                <ButtonText>{'UPDATE'}</ButtonText>
+              </PrimaryButton>
             ) : null}
 
-            {/* Update the user's post with the new message if the user calls for it */}
             {this.state.updatePost ? (
               <View>
                 <Label>New post:</Label>
-                <TextInput
+                <PostInput
                   maxLength="256"
-                  placeholder="New post"
+                  multiline={true}
                   onChangeText={(newPostMeesage) =>
                     this.setState({ newPostMeesage })
                   }
                   value={this.state.newPostMeesage}
                 />
-                <Button
-                  title="Submit updated post"
+
+                <PrimaryButton
                   onPress={() => {
                     this.updatePost();
                   }}
-                />
+                >
+                  <ButtonText>{'SUBMIT'}</ButtonText>
+                </PrimaryButton>
               </View>
             ) : null}
-          </View>
-        </View>
+          </BoxContainer>
+        </ContainerCentred>
       );
     }
   }
 }
 
 export default PostScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-  },
-  input: {
-    backgroundColor: '#edf7ff',
-    borderRadius: 10,
-    height: 50,
-    // flex: 1,
-    padding: 10,
-    marginBottom: 20,
-  },
-  Button: {
-    marginBottom: 50,
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-});

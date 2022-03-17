@@ -1,32 +1,15 @@
 import React, { Component } from 'react';
+import { View, Text, ScrollView, Modal } from 'react-native';
 import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Alert,
-  ScrollView,
-  Modal,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
-import {
-  Container,
-  Label,
   PrimaryButton,
-  Center,
   ButtonText,
   ButtonContainer,
-  Input,
-  BoxContainer,
   ContainerCentred,
   Title,
-  Header,
-  Body,
-  ContainerScroll,
-  ScrollViewContainer,
   FriendBox,
   BodyText,
+  ModalContainer,
+  ModalView,
 } from '../styles.js';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -71,7 +54,7 @@ class NotificationsScreen extends Component {
           'X-Authorization': value,
         },
       })
-        // Return the response from the server if the request is successful
+        // Return theresults from the server and check if the request was successful
         .then((response) => {
           if (response.status === 200) {
             return response.json();
@@ -79,14 +62,14 @@ class NotificationsScreen extends Component {
             throw 'Something went wrong';
           }
         })
-        // Store the friends requests in the state to be displayed later, and set the loading variable to false in order to render the page
+        // If successful, store the friend request list in the state to be used later
         .then((responseJson) => {
           this.setState({
             friendsRequests: responseJson,
             isLoading: false,
           });
         })
-        // Throw and error if something goes wrong
+        // Throw an erro in the console if any occured during the request
         .catch((error) => {
           console.log(error);
         })
@@ -108,7 +91,9 @@ class NotificationsScreen extends Component {
         .then((response) => {
           // Check if the request was successful and inform the user the friend request was accepted
           if (response.status === 200) {
+            // Refresh the page to reflect that the request was accepted
             this.getFriendRequests();
+            // Display a message to the user informing them the request was accepted
             this.state.errorMessage = 'Frind request accepted!';
             this.setModalVisible(true);
             // Display differnt error alerts for the user if the netwroking request was unsuccessful
@@ -196,31 +181,28 @@ class NotificationsScreen extends Component {
         <ContainerCentred>
           <ScrollView>
             <Title>Friend requests</Title>
-            {/* Add a component to display messages for the user when accepting and decling friends requests */}
-            <View style={styles.centeredView}>
-              <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                  this.setModalVisible(!modalVisible);
-                }}
-              >
-                <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                    <Text style={styles.modalText}>
-                      {this.state.errorMessage}{' '}
-                    </Text>
-                    <Pressable
-                      style={[styles.button, styles.buttonClose]}
-                      onPress={() => this.setModalVisible(!modalVisible)}
-                    >
-                      <Text style={styles.textStyle}>Ok</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </Modal>
-            </View>
+
+            {/* Display a modal element to show alerts for the user */}
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
+            >
+              <ModalContainer>
+                <ModalView>
+                  <BodyText>{this.state.errorMessage} </BodyText>
+                  <PrimaryButton
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <ButtonText>{'OK'}</ButtonText>
+                  </PrimaryButton>
+                </ModalView>
+              </ModalContainer>
+            </Modal>
+
             <View>
               {/* Display the list of friends requests */}
               <FlatList
@@ -272,47 +254,3 @@ class NotificationsScreen extends Component {
 }
 
 export default NotificationsScreen;
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-});
