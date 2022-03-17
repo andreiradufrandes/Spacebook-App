@@ -18,6 +18,7 @@ export const Center = styled.View`
 // add font weight (maybe)
 // not sure
 
+// delete
 export const TextBox = styled.TextInput`
   // padding: 12px;
   // margin: 15px;
@@ -245,9 +246,10 @@ export const PostText = styled.Text`
 
 */
 export const ProfileImage = styled.Image`
-  width: 170;
-  height: 170;
-  border-radius: 20px;
+  width: 140;
+  height: 140;
+  // border-radius: 20px;
+  border-radius: 50%;
   margin bottom : 10px;
 `;
 /*

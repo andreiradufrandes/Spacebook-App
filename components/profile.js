@@ -13,6 +13,7 @@ import {
   Pressable,
   SafeAreaView,
 } from 'react-native';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
@@ -951,43 +952,46 @@ class ProfileScreen extends React.Component {
                           item.post_id);
                         }}
                       ></Button> */}
-
-                        <PrimaryButton
-                          onPress={() => {
-                            this.props.navigation.navigate('Post', {
-                              user_id: this.state.userProfileID,
-                              post_id: item.post_id,
-                            });
-                          }}
-                        >
-                          <ButtonText>{'VIEW POST'}</ButtonText>
-                        </PrimaryButton>
-                        {/* {this.state.isFriend ? (
+                        <ButtonContainer>
+                          <PrimaryButton
+                            onPress={() => {
+                              this.props.navigation.navigate('Post', {
+                                user_id: this.state.userProfileID,
+                                post_id: item.post_id,
+                              });
+                            }}
+                          >
+                            <ButtonText>{'POST'}</ButtonText>
+                          </PrimaryButton>
+                          {/* {this.state.isFriend ? (
                           <Button title="Visit user's page(NOT CODED)" />
                         ) : null} */}
-                        <PrimaryButton
-                          onPress={() => this.likePost(item.post_id)}
-                        >
-                          <ButtonText>{'LIKE'}</ButtonText>
-                        </PrimaryButton>
-
-                        <PrimaryButton
-                          onPress={() => this.removeLike(item.post_id)}
-                        >
-                          <ButtonText>{'DISLIKE'}</ButtonText>
-                        </PrimaryButton>
-
-                        {/* Allow the user to delete a post if it's on their own profile */}
-                        {this.state.isLoggedInUsersProfile ? (
                           <PrimaryButton
-                            onPress={() =>
-                              this.deletePost(item.post_id, item.author.user_id)
-                            }
+                            onPress={() => this.likePost(item.post_id)}
                           >
-                            <ButtonText>{'DELETE'}</ButtonText>
+                            <ButtonText>{'LIKE'}</ButtonText>
                           </PrimaryButton>
-                        ) : null}
 
+                          <PrimaryButton
+                            onPress={() => this.removeLike(item.post_id)}
+                          >
+                            <ButtonText>{'DISLIKE'}</ButtonText>
+                          </PrimaryButton>
+
+                          {/* Allow the user to delete a post if it's on their own profile */}
+                          {this.state.isLoggedInUsersProfile ? (
+                            <PrimaryButton
+                              onPress={() =>
+                                this.deletePost(
+                                  item.post_id,
+                                  item.author.user_id
+                                )
+                              }
+                            >
+                              <ButtonText>{'DELETE'}</ButtonText>
+                            </PrimaryButton>
+                          ) : null}
+                        </ButtonContainer>
                         {/* Add functionality for updating a post if it's on the user's profile */}
                         {/* {this.state.isLoggedInUsersProfile ? (
                           <Button title="Update post(NOT CODED)" />
