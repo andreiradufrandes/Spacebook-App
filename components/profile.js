@@ -13,10 +13,8 @@ import {
   Pressable,
   SafeAreaView,
 } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Camera } from 'expo-camera';
 import {
   Container,
   Label,
@@ -40,82 +38,63 @@ import {
   NewPostBox,
 } from '../styles.js';
 
+// Import a function to be used for displaying the time and date of post in the correct format
 import { timeAndDateExtractor } from './functions';
-// import { RootSiblingParent } from 'react-native-root-siblings';
-// TODO
-// DELETE VIEW USER'S PAGE BUTTON
-// Timestamp
-// fix remove like so it only shows once AND it shows the error
-// move ALL the posts to the invidual post as well
-// clean all the buttons so they have the right text inside of them
-// add friend so it works and refreshes the page or something when you accept a friend request
-// delete new post text and from render too
-// add buttons for going back maybe
-// some stuff is redundant(camera on profile page for instance) remove it
 
 class ProfileScreen extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      loggedUserId: '', // WARNING - delete it think
+      // Store a number of variables to store the id's of different users, and help with the requests to the API
+      loggedUserId: '',
       userProfileID: '',
       isLoggedInUsersProfile: true,
       isFriend: false,
       isLoading: true,
+      // Store a number of details of the user in the state to be displayed later
       userInfo: [],
-      userPosts: [], // not sure, might be diferent type
-      newPostText: '', // delete
-      postaddedWindow: '',
-
+      userPosts: [],
       friendsList: [],
-      hasPermission: null,
-      type: Camera.Constants.Type.back,
+      newPostText: '',
+      // Store a few variables in the state to aid with displaying the profile pciture
       photo: null,
       hasProfilePicture: false,
       friendsRequestsList: [],
       singlePost: false,
       userRequestedFriendRequest: false,
-      modalVisible: false,
       friendRequestSent: false,
+      // Store a toggle variable in the state to be used for displaying alerts
+      modalVisible: false,
     };
   }
 
   componentDidMount = async () => {
-    console.log('\n\n\n\nComponent did mount\n\n\n\n');
-
-    // When the user loggs in
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    this.setState({ hasPermission: status === 'granted' });
+    // Store the Initial id in the state to the one of the logged in user, as this the one needed when first navigating to the profile page
     this.state.isLoggedInUsersProfile = true;
     this.state.loggedUserId = await AsyncStorage.getItem('@id');
-
     this.state.userProfileID = this.state.loggedUserId;
-    // These get called WHEN i go  on someones prifile
 
+    // Get the users information, posts and profile picture
     await this.getUserInfo();
     await this.getUserPosts();
     await this.getProfileImage();
 
-    console.log('\n\n\n\n\n\n\n\ncomponent did mount\n\n\n\n\n\n\n\nn');
-
-    // ---------------------------------------------------------------
-    // When the users travels to their profile using the tab navigator
+    // Add a event listener to detect when the user is navigating back to their profile using the tab navigator
     this.parentUnsubscribe = this.props.navigation
       .getParent()
       .addListener('tabPress', async (e) => {
-        // Nagivate the user
-        console.log('\n\n\n\nComponent did mount >> PARENT NAVIGATOR\n\n\n\n');
+        // Send the user back to their profile by passing in their id as parameter inside the navigation, which gets checked before displaying their details
         this.props.navigation.navigate('Profile', {
           user_id: this.state.loggedUserId,
         });
-
+        // call the starter function responsible for sending all the requests containing the user's detail, and display them
         await this.startFunction();
       });
 
+    // Add an event listener to detect someone navigates to the profile page
     this.unsubscribe = this.props.navigation.addListener('focus', async () => {
-      console.log('\n\n\n\nComponent did mount >> EVENT LISTENER\n\n\n\n');
-      console.log('State at beginning of event listener: ', this.state);
+      // Call the starter function to detect who the profile belongs to, and display all the relevant details
       await this.startFunction();
     });
   };
@@ -125,30 +104,28 @@ class ProfileScreen extends React.Component {
     this.unsubscribe();
   }
 
+  // Starter function to be called when navigating to the profile page
   startFunction = async () => {
+    // Reset some of the values in the state to their initial intended value, as they might change during navigation
     this.state.isLoading = true;
     this.state.isFriend = false;
     this.state.isLoggedInUsersProfile = false;
     this.state.friendRequestSent = false;
-    console.log(
-      '\n\n\n\nState in starter function beginning\n\n\n',
-      this.state
-    );
-    console.log('#function called: startFunction');
-    // Resetting parameter
     this.state.loggedUserId = await AsyncStorage.getItem('@id');
-    let AsyncStorageID = await AsyncStorage.getItem('@id'); // maye delete
-    this.state.userProfileID = AsyncStorageID; /// set it to MY id for now
+    let AsyncStorageID = await AsyncStorage.getItem('@id');
+    this.state.userProfileID = AsyncStorageID;
+
+    // Add a usercheck flag to determine wherther the profile belongs to the user who logged in or someone else
     let userCheck = typeof this.props.route.params;
 
-    // Check if the profile is mine, and set userProfilId to my id
+    // If the route parameters are undefined, the profile belongs to the user who is logged in
     if (userCheck === 'undefined') {
       this.state.isLoggedInUsersProfile = true;
       this.state.userProfileID = AsyncStorageID;
-      // If it is NOT my profile
     } else {
-      this.state.userProfileID = this.props.route.params.user_id; // this
-      // If I am navigating back to a profile, check if it is mine or not
+      // Store the user id passed by navigation in the state
+      this.state.userProfileID = this.props.route.params.user_id;
+      // Check again if the profile belongs to the logged in user, as its the case when nagiating from certain pages
       if (this.state.userProfileID == AsyncStorageID) {
         this.state.isLoggedInUsersProfile = true;
         this.state.userProfileID = AsyncStorageID;
@@ -157,51 +134,32 @@ class ProfileScreen extends React.Component {
       }
     }
 
-    // If it is not my profile, check if the user is a friend or not
+    // If the profile does not belong to the logged in user, check whether it belongs to a friend or stanger
     if (!this.state.isLoggedInUsersProfile) {
       await this.checkUserIsFriend();
     }
-
-    console.log(
-      '\n -isLoggedInUsersProfile(is this my prfile): ' +
-        this.state.isLoggedInUsersProfile +
-        "\n ,-userProfileID(user's whos prile this is): " +
-        this.state.userProfileID +
-        '\n ,-isFriend: ' +
-        this.state.isFriend
-    ); // delete
-
-    // this.state.userPosts = []; // refresh it // redo this cleare or in a function
-
-    // Get user info should depend on whose user's page we're on
+    // Get the users details from the server and display them
     await this.getUserInfo();
-    //   1. User logged in
 
-    // get the posts for is logged in used && and for friends as well
-    // if (this.state.isLoggedInUsersProfile) {
-    //   await this.getUserPosts();
-    // } else {
-    //   // 2. This is NOT my profile, isLoggedInUsersProfile == false, but a frien'ds
-    //   if (this.state.isFriend) {
-    //     await this.getUserPosts();
-    //   }
-    // }
+    // Display the user's posts only if it's their own profile or that of a friend
     if (this.state.isLoggedInUsersProfile || this.state.isFriend) {
       await this.getUserPosts();
     }
 
+    // Get the list of friend requests first, before checking if the user who's profile we are on has requested our friendship
     await this.getFriendRequests();
-    // Check if the user sent a friend request
     this.checkUserSentFriendRequest();
+    // Display the profile image
     this.getProfileImage();
   };
 
+  // Function to get the list of friends for a user from the server
   getListOfFriends = async () => {
-    // Get List Of friends for me
-    console.log('------getListOfFriend-------');
+    // Get the user's token to be used for authorising the fetch request, as well as their ID be able to like the right post
     const userId = await AsyncStorage.getItem('@id');
     const value = await AsyncStorage.getItem('@session_token');
 
+    // Send a fetch  request to the server to get the list of friends
     return fetch(
       'http://localhost:3333/api/1.0.0/user/' + userId + '/friends',
       {
@@ -212,216 +170,175 @@ class ProfileScreen extends React.Component {
     )
       .then((response) => {
         if (response.status === 200) {
-          console.log('------getListOfFriend-------successful');
+          // If the request was successful, return the object retrieved from the server to be stored in the state
           return response.json();
         } else {
           throw 'Something went wrong';
         }
       })
       .then((responseJson) => {
-        console.log('list of friends repsonseJson: ' + responseJson);
+        // Store the list of friend in the state
         this.setState({
-          // isLoading: false,
           friendsList: responseJson,
         });
-        console.log('list of friends friendsList: ' + this.state.friendsList);
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
-  // write a function that sets isFriend to no if it's not a friend
-  // ONLY call this function IF isMyProfile == false
+  // Function to check if a certain user sent a friend request, in order to display the right buttons when on their profiles
   checkUserSentFriendRequest = async () => {
-    // If the user is not already a friend and this is not my profile
+    // Check if the profile belongs to the user or the person who is logged in
     if (!this.state.isFriend && !this.state.isLoggedInUsersProfile) {
       this.state.userRequestedFriendRequest = false;
-      // check list of frinds requests
-      console.log('friends requests list:');
-      console.log(
-        'friend whose profile i am checking: ',
-        this.state.userProfileID
-      );
-      console.log(this.state.friendsRequestsList);
 
+      // Loop through the friend requests to determine if the user has sent a friend request, and reflect it in the state if they have
       this.state.friendsRequestsList.forEach((element) => {
         if (element.user_id == this.state.userProfileID) {
-          // this.state.isFriend = true;
-          console.log(
-            'element.user_id == this.state.userProfileID',
-            element.user_id,
-            ' ',
-            this.state.userProfileID
-          );
           this.state.userRequestedFriendRequest = true;
-          console.log('The user has sent a friend request!');
         }
-
-        console.log(
-          'this.state.userRequestedFriendRequest: ',
-          this.state.userRequestedFriendRequest
-        );
       });
     }
   };
 
-  //   Could be replaced with an error( like 203 not friend from some request do do something )
+  // Add a function to check if a user is part of the friend group of the logged in user
   checkUserIsFriend = async () => {
+    // Set a toggle variable for storing if a user is friend and set it to false in the start
     this.state.isFriend = false;
-    const loggeduserIDCheck = await AsyncStorage.getItem('@id');
-
-    console.log('async id in getuserinfo' + loggeduserIDCheck);
+    // Call the get list of friends function so it stores the friends in the state in order to check if a given person is part of tha group
     await this.getListOfFriends();
 
+    // Loop through the friends list and check if the user's who's profile we are on is their friend
     this.state.friendsList.forEach((element) => {
       if (element.user_id == this.props.route.params.user_id) {
+        // If the user is part of the friend group toggle the variable storing the friendship status to true
         this.state.isFriend = true;
       }
     });
-
-    console.log('isFriend INSIDE checkUserIsFriend: ' + this.state.isFriend);
   };
 
-  //   send friend request
-  sendFriendRequest() {
-    // Set the RIGHT user id
-
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' + user_id + '/friends',
-      {
-        method: 'post',
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          // TODO, refresh the user page
-          console.log('Friend added:');
-        } else {
-          throw 'Something went wrong';
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
+  // Add a function to get he users information from the server to be displayed on their profile later
   getUserInfo = async () => {
-    console.log('#function called: getUserInfo');
+    // Get the user's token and id to be used for authorising the fetch request
     const userId = this.state.userProfileID;
     const value = await AsyncStorage.getItem('@session_token');
 
-    const loggeduserIDCheck = await AsyncStorage.getItem('@id'); // delete
-    console.log('------------getuserinfo: my id: ' + loggeduserIDCheck); // delete
-    console.log("------------getuserinfo: friend i'm adding: " + userId);
-
-    return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
-      headers: {
-        'X-Authorization': value,
-      },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw 'Something went wrong';
-        }
-      })
-      .then((responseJson) => {
-        this.setState({
-          userInfo: responseJson,
-        }),
-          console.log('userInfo when getUserInfo is called:');
-        console.log(this.state.userInfo); // delete
-        console.log('Async id:' + loggeduserIDCheck);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  //   I think this already happend in the render, so no need here
-  getUserPosts = async () => {
-    // Display the posts for the user only if it is the logged in user's profile or a friend
-    console.log('#Function called: getUserPosts');
-    if (this.state.isLoggedInUsersProfile || this.state.isFriend) {
-      const userId = this.state.userProfileID;
-      const value = await AsyncStorage.getItem('@session_token');
-      console.log(userId);
-
-      return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
+    // Send a fetch request to the server to get the users details
+    return (
+      fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
         headers: {
           'X-Authorization': value,
         },
       })
+        // Check if the requst was successfu l and return the results, otherwise trow an error
         .then((response) => {
           if (response.status === 200) {
             return response.json();
           } else {
-            throw 'Something went wrong';
+            throw 'Error! Request failed';
           }
         })
+        // Store the users details in the state to be used troughout the component
         .then((responseJson) => {
           this.setState({
-            //   NOT sure if we need this here
-            // isLoading: false, // meaning it finished and now you can display it
-            userPosts: responseJson,
+            userInfo: responseJson,
           });
         })
+        // Display the errors in the console if any occure
         .catch((error) => {
           console.log(error);
-        });
+        })
+    );
+  };
+
+  // Get the posts for different users to be displayed on profiles
+  getUserPosts = async () => {
+    // Add a condition to get the posts only if the posts belong to the logged in person or their friends
+    if (this.state.isLoggedInUsersProfile || this.state.isFriend) {
+      // Get the user's token to be used for authorising the fetch request, as well as their ID be able to like the right post
+      const userId = this.state.userProfileID;
+      const value = await AsyncStorage.getItem('@session_token');
+
+      // Send a request to the server to get the user's posts
+      return (
+        fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
+          headers: {
+            'X-Authorization': value,
+          },
+        })
+          // Return the posts if the request was successul or throw and error if something went wrong
+          .then((response) => {
+            if (response.status === 200) {
+              return response.json();
+            } else {
+              throw 'Something went wrong';
+            }
+          })
+          // Store the user's posts in the state to be displayed on their profile later
+          .then((responseJson) => {
+            this.setState({
+              userPosts: responseJson,
+            });
+          })
+          // Throw an error if one occured in the console
+          .catch((error) => {
+            console.log(error);
+          })
+      );
     }
   };
 
+  // Add a function to delete a given post
   deletePost = async (post_id, user_id) => {
+    // Get the user's token to be used for authorising the fetch request, as well as their ID be able to delete the right post
     const value = await AsyncStorage.getItem('@session_token');
-    console.log(post_id, user_id);
-    //
     user_id = await AsyncStorage.getItem('@id');
 
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
-      {
-        method: 'delete',
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          this.state.errorMessage = 'Post deleted!';
-          this.setModalVisible(true);
-          this.getUserPosts();
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Make sure you are logged in and try again';
-          this.setModalVisible(true);
-        } else if (response.status === 403) {
-          this.state.errorMessage =
-            'Forbidden! You can only delete your posts!';
-          this.setModalVisible(true);
-        } else if (response.status === 404) {
-          this.state.errorMessage =
-            'The post you are trying to delete does not exist anymore!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
+    // Send a fetch request to the server to delete the post
+    return (
+      fetch(
+        'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
+        {
+          method: 'delete',
+          headers: {
+            'X-Authorization': value,
+          },
         }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      )
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          if (response.status === 200) {
+            // If the post was deleted successfully, inform the user about it and refesh the list of post to reflect this
+            this.state.errorMessage = 'Post deleted!';
+            this.setModalVisible(true);
+            this.getUserPosts();
+            // Display different alerts for the user if the netwroking request was unsuccessful, advising them on what the issue is
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in and try again';
+            this.setModalVisible(true);
+          } else if (response.status === 403) {
+            this.state.errorMessage =
+              'Forbidden! You can only delete your posts!';
+            this.setModalVisible(true);
+          } else if (response.status === 404) {
+            this.state.errorMessage =
+              'The post you are trying to delete does not exist anymore!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
-  //   TODO
-  // CHANGE SO THAT IT POSTS ON THE RIGHT PERSONS PROFILE
+  // Add a new post on a profile
   addNewPost = async () => {
     // Check that the post we wanted to add is not an empty string
     if (this.state.newPostText !== '') {
@@ -433,38 +350,44 @@ class ProfileScreen extends React.Component {
 
       // Store the id of the user who's profile we are writing on
       const userId = this.state.userProfileID;
-      return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
-        method: 'post',
-        headers: {
-          'content-type': 'application/json',
-          'X-Authorization': value,
-        },
-        body: JSON.stringify(postToSend),
-      })
-        .then((response) => {
-          if (response.status === 201) {
-            this.state.errorMessage = 'Post added successfully!';
-            this.setModalVisible(true);
-
-            this.getUserPosts();
-            this.state.newPostText = '';
-          } else if (response.status === 401) {
-            this.state.errorMessage =
-              'Unauthorised! Make sure you are logged in, and then try again!';
-            this.setModalVisible(true);
-          } else if (response.status === 404) {
-            this.state.errorMessage =
-              'Something went wrong. Make you the person whos profile you are writing on is your friend';
-            this.setModalVisible(true);
-          } else if (response.status === 500) {
-            this.state.errorMessage =
-              'Server error! Restart the server then try again';
-            this.setModalVisible(true);
-          }
+      return (
+        fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/post', {
+          method: 'post',
+          headers: {
+            'content-type': 'application/json',
+            'X-Authorization': value,
+          },
+          body: JSON.stringify(postToSend),
         })
-        .catch((error) => {
-          console.log(error);
-        });
+          // Return a promise and different messages for the user depending on if the request was successful or not
+          .then((response) => {
+            // If successful, let the user know, and refresh the list of posts to reflect that
+            if (response.status === 201) {
+              this.state.errorMessage = 'Post added successfully!';
+              this.setModalVisible(true);
+              this.getUserPosts();
+              this.state.newPostText = '';
+              // Display different alerts for the user if the netwroking request was unsuccessful
+            } else if (response.status === 401) {
+              this.state.errorMessage =
+                'Unauthorised! Make sure you are logged in, and then try again!';
+              this.setModalVisible(true);
+            } else if (response.status === 404) {
+              this.state.errorMessage =
+                'Something went wrong. Make you the person whos profile you are writing on is your friend';
+              this.setModalVisible(true);
+            } else if (response.status === 500) {
+              this.state.errorMessage =
+                'Server error! Restart the server then try again';
+              this.setModalVisible(true);
+            }
+          })
+          // Catch any errors and display them in the console
+          .catch((error) => {
+            console.log(error);
+          })
+      );
+      // Display and error if the use forgot to add text to their post before submitting
     } else {
       this.state.errorMessage =
         'Post can not be empty! Add text and try adding it again!';
@@ -472,206 +395,172 @@ class ProfileScreen extends React.Component {
     }
   };
 
+  // Function to like a given post
   likePost = async (post_id) => {
+    // Get the user's token to be used for authorising the fetch request, as well as their ID be able to like the right post
     const value = await AsyncStorage.getItem('@session_token');
-    // TODO
-    // user_id was initially in the request but it didnt' work
-
-    // const user_id = this.state.userInfo.user_id; // change the name of the var and in the fetch as well
-    const user_id = this.state.userProfileID; // change the name of the var and in the fetch as well
-
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' +
-        user_id +
-        '/post/' +
-        post_id +
-        '/like',
-      {
-        method: 'post',
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        // If the post was liked successfully, update the page to reflect that
-        if (response.status === 200) {
-          // If it's the profile page, refresh all the posts
-          if (!this.state.singlePost) {
-            this.getUserPosts();
-            // If it's the page for an individual post, refresh it
-          } else {
-            this.getSinglePost();
-          }
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Make sure you are logged in, and then try again!';
-          this.setModalVisible(true);
-        } else if (response.status === 403) {
-          this.state.errorMessage =
-            'Forbidden! You can not like your own posts or posts appearing on your profile';
-          this.setModalVisible(true);
-        } else if (response.status === 400) {
-          this.state.errorMessage = 'You have already liked this post!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-  //   1. Add condition so you can ONLY unlike the post IF you liked it already
-  removeLike = async (post_id) => {
-    const value = await AsyncStorage.getItem('@session_token');
-    // TODO
-    // user_id was initially in the request but it didnt' work
     const user_id = this.state.userProfileID;
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' +
-        user_id +
-        '/post/' +
-        post_id +
-        '/like',
-      {
-        method: 'delete',
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        console.log('response code: ', response.status);
-        // If the post was liked successfully, update the page to reflect that
-        if (response.status === 200) {
-          // If it's the profile page, refresh all the posts
-          if (!this.state.singlePost) {
-            this.getUserPosts();
-            // If it's the page for an individual post, refresh it
-          } else {
-            this.getSinglePost();
-          }
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Make sure you are logged in, and then try again!';
-          this.setModalVisible(true);
-        } else if (response.status === 403) {
-          this.state.errorMessage =
-            'Forbidden! You can not like or unlike your own posts or posts appearing on your profile';
-          this.setModalVisible(true);
-        } else if (response.status === 400) {
-          this.state.errorMessage = 'You have already unliked this post!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
+
+    // Send a fetch request that add a like to the given post
+    return (
+      fetch(
+        'http://localhost:3333/api/1.0.0/user/' +
+          user_id +
+          '/post/' +
+          post_id +
+          '/like',
+        {
+          method: 'post',
+          headers: {
+            'X-Authorization': value,
+          },
         }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      )
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          // Check if the post was liked successfully, and refresh it to update the number of likes
+          if (response.status === 200) {
+            // If it's the profile page, refresh all the posts
+            if (!this.state.singlePost) {
+              this.getUserPosts();
+              // If it's the page for an individual post, refresh it the post
+            } else {
+              this.getSinglePost();
+            }
+            // Display differnt alerts for the user if the netwroking request was unsuccessful
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in, and then try again!';
+            this.setModalVisible(true);
+          } else if (response.status === 403) {
+            this.state.errorMessage =
+              'Forbidden! You can not like your own posts or posts appearing on your profile';
+            this.setModalVisible(true);
+          } else if (response.status === 400) {
+            this.state.errorMessage = 'You have already liked this post!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        // Catch any errors that were trown and display them in the console
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
-  //   i already created this function somewhere else, just import it
+  // Function to remove likes from a given post
+  removeLike = async (post_id) => {
+    // Get the user's token to be used for authorising the fetch request, as well as their ID be able remove likes from  the right post
+    const value = await AsyncStorage.getItem('@session_token');
+    const user_id = this.state.userProfileID;
+    return (
+      fetch(
+        'http://localhost:3333/api/1.0.0/user/' +
+          user_id +
+          '/post/' +
+          post_id +
+          '/like',
+        {
+          method: 'delete',
+          headers: {
+            'X-Authorization': value,
+          },
+        }
+      )
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          // Check if the post was unliked successfully, and refresh it to update the number of likes
+
+          if (response.status === 200) {
+            // If it's the profile page, refresh all the posts
+            if (!this.state.singlePost) {
+              this.getUserPosts();
+              // If it's the page for an individual post, refresh it
+            } else {
+              this.getSinglePost();
+            }
+            // Display different alerts for the user if the netwroking request was unsuccessful
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in, and then try again!';
+            this.setModalVisible(true);
+          } else if (response.status === 403) {
+            this.state.errorMessage =
+              'Forbidden! You can not like or unlike your own posts or posts appearing on your profile';
+            this.setModalVisible(true);
+          } else if (response.status === 400) {
+            this.state.errorMessage = 'You have already unliked this post!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        // Catch any errors that were trown and display them in the console
+        .catch((error) => {
+          console.log(error);
+        })
+    );
+  };
+
+  // Add a function to accept a friend request
   addFriend = async () => {
+    // Get the user's token and id to be used for authorising the fetch request
     const value = await AsyncStorage.getItem('@session_token');
     const myID = await AsyncStorage.getItem('@id'); // delete later
     const userId = this.state.userProfileID;
-    const loggeduserIDCheck = await AsyncStorage.getItem('@id'); // delete later
+    // Sore the of the person
 
-    console.log('------------getuserinfo: my id: ' + loggeduserIDCheck);
-    console.log("------------getuserinfo: friend i'm adding: " + userId);
-
-    // the
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' + userId + '/friends',
-      {
+    return (
+      fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/friends', {
         method: 'post',
         headers: {
           // 'content-type': 'application/json',
           'X-Authorization': value,
         },
-      }
-    )
-      .then((response) => {
-        console.log('response status inside addFriend: ' + response.status);
-        if (response.status === 201) {
-          // Send add friend alert
-          this.state.errorMessage = 'Friend request sent!';
-          this.setModalVisible(true);
-          //        REFLECT THAT
-          this.state.friendRequestSent = true;
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Make sure you are logged in and try again';
-          this.setModalVisible(true);
-        } else if (response.status === 403) {
-          this.state.errorMessage =
-            'Friend request sent already! Wait for the user to answer it';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          console.log('response status inside addFriend: ' + response.status);
+          if (response.status === 201) {
+            // Check if the request was successful and inform the user the friend request was sent
+            this.state.errorMessage = 'Friend request sent!';
+            this.setModalVisible(true);
+            this.state.friendRequestSent = true;
+            // Display differnt error alerts for the user if the netwroking request was unsuccessful
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in and try again';
+            this.setModalVisible(true);
+          } else if (response.status === 403) {
+            this.state.errorMessage =
+              'Friend request sent already! Wait for the user to answer it';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        // Catch any errors that migh occur during the process and display them in the console
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
-  //   Camera functions
-  takePicture = async () => {
-    if (this.camera) {
-      const options = {
-        quality: 0.5,
-        base64: true,
-        onPictureSaved: (data) => this.sendToServer(data),
-      };
-      await this.camera.takePictureAsync(options);
-    }
-  };
-
-  //   Send image to servet
-  sendToServer = async (data) => {
-    // Get these from AsyncStorage
-    const userId = this.state.userProfileID;
-    const value = await AsyncStorage.getItem('@session_token');
-
-    let res = await fetch(data.base64);
-    let blob = await res.blob();
-
-    return fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/photo', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'image/png',
-        'X-Authorization': value,
-      },
-      body: blob,
-    })
-      .then((response) => {
-        console.log('Picture added', response);
-        console.log(
-          ' inside sendToServer: getProfileImage called to get the image and store it!'
-        );
-        this.state.hasProfilePicture = true;
-        this.getProfileImage();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  //   Replace to get the users page we are on NOT ours
-  //   Replace to get the users page we are on NOT ours
+  // Function to get the user's profile picture from the database
   getProfileImage = async () => {
+    // Get the user's token to be used for authorising the fetch request, as well as their ID used for getting their profile picture
     const userId = this.state.userProfileID;
     const value = await AsyncStorage.getItem('@session_token');
 
+    // Send a fetch request to the server to get the user's profile picture
     fetch('http://localhost:3333/api/1.0.0/user/' + userId + '/photo', {
       method: 'GET',
       headers: {
@@ -683,97 +572,103 @@ class ProfileScreen extends React.Component {
       })
       .then((resBlob) => {
         let data = URL.createObjectURL(resBlob);
-
+        // Add the photo to the component's state, if successful to be displayed on the screen  later
         this.setState({
           photo: data,
           hasProfilePicture: true,
           isLoading: false,
         });
-        // Call getUserInfo so it displays the image now
+        // Check for any error that might occur and display them in the console
       })
       .catch((err) => {
         this.setState({
           hasProfilePicture: false,
         });
-        console.log('error', err);
+        console.log('ERROR: ', err);
       });
   };
 
+  // Add a function to accept a friend request
   acceptFriendRequest = async () => {
-    // how to get the exact id i need
-
+    // Get the user's token to be used for authorising the fetch request
     const value = await AsyncStorage.getItem('@session_token');
-    return fetch(
-      'http://localhost:3333/api/1.0.0/friendrequests/' +
-        this.state.userProfileID,
-      {
-        method: 'post',
+    return (
+      fetch(
+        'http://localhost:3333/api/1.0.0/friendrequests/' +
+          this.state.userProfileID,
+        {
+          method: 'post',
+          headers: {
+            'X-Authorization': value,
+          },
+        }
+      )
+        // Return a promise and different messages for the user depending on if the request was successful or not
+        .then((response) => {
+          // Check if the request was successful and inform the user the friend request was accepted
+          if (response.status === 200) {
+            // Display a message to the user informing them the request was accepted
+            this.state.errorMessage = 'Friend request accepted!';
+            this.setModalVisible(true);
+            // Refresh the page to reflect friendship request was accepted
+            this.startFunction();
+            // Display differnt error alerts for the user if the netwroking request was unsuccessful
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in and try again';
+            this.setModalVisible(true);
+          } else if (response.status === 404) {
+            this.state.errorMessage =
+              'User not found! Log out and back in then try again';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        // Check for any error that might occur and display them in the console
+
+        .catch((error) => {
+          console.log(error);
+        })
+    );
+  };
+
+  // Fucntion to get the friend requests for the user
+  getFriendRequests = async () => {
+    // Get the user's token to be used for authorising the fetch request
+    const value = await AsyncStorage.getItem('@session_token');
+
+    // Send a fetch request to get the user's friend reqeusts from the server
+    return (
+      fetch('http://localhost:3333/api/1.0.0/friendrequests', {
         headers: {
           'X-Authorization': value,
         },
-      }
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          this.state.errorMessage = 'Friend request accepted!';
-          this.setModalVisible(true);
-          // Refresh the page to reflect friendship request was accepted
-          this.startFunction(); // delete - this just refreshes the page
-          // refresh page
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Make sure you are logged in and try again';
-          this.setModalVisible(true);
-        } else if (response.status === 404) {
-          this.state.errorMessage =
-            'User not found! Log out and back in then try again';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
-        }
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        // Return theresults from the server and check if the request was successful
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            throw 'Friend requests request failed!';
+          }
+        })
+        // If successful, store the friend request list in the state to be used later
+        .then((responseJson) => {
+          this.setState({
+            friendsRequestsList: responseJson,
+          });
+        })
+        // Throw an erro in the console if any occured during the request
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
-  // 1. Getlistoffrinedrequests
-
-  // Checking IF the user added me already
-  getFriendRequests = async () => {
-    const value = await AsyncStorage.getItem('@session_token');
-    console.log(value);
-
-    return fetch('http://localhost:3333/api/1.0.0/friendrequests', {
-      headers: {
-        'X-Authorization': value,
-      },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw 'Something went wrong';
-        }
-      })
-      .then((responseJson) => {
-        this.setState({
-          // isLoading: false,
-          friendsRequestsList: responseJson,
-        }),
-          console.log(
-            'FRIENDS REQUESTS IN getFriendsRequests: ',
-            this.state.friendsRequestsList
-          );
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  // Add a toggle function to set the visibility for the user alerts
+  // Add a toggle function to set the visibility for the user alerts, to be used when displaying messages to the user
   setModalVisible = (visible) => {
     this.setState({ modalVisible: visible });
   };
@@ -895,11 +790,9 @@ class ProfileScreen extends React.Component {
               {!this.state.isLoggedInUsersProfile &&
               !this.state.isFriend &&
               this.state.userRequestedFriendRequest ? (
-                <Button
-                  title="Accept friend request"
-                  // onPress={() => this.addFriend()} // code it
-                  onPress={() => this.acceptFriendRequest()}
-                ></Button>
+                <PrimaryButton onPress={() => this.acceptFriendRequest()}>
+                  <ButtonText>{'ACCEPT FRIEND REQUEST'}</ButtonText>
+                </PrimaryButton>
               ) : null}
             </Header>
             {/*------------------------------ Camera ------------------------------    */}

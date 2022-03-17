@@ -101,7 +101,7 @@ class PostScreen extends Component {
             } else {
               this.getSinglePost();
             }
-            // Display differnt alerts for the user if the netwroking request was unsuccessful
+            // Display different alerts for the user if the netwroking request was unsuccessful
           } else if (response.status === 401) {
             this.state.errorMessage =
               'Unauthorised! Make sure you are logged in, and then try again!';
@@ -119,7 +119,7 @@ class PostScreen extends Component {
             this.setModalVisible(true);
           }
         })
-        // Throw an error if one is to occur
+        // Catch any errors and display them in the console
         .catch((error) => {
           console.log(error);
         })
@@ -174,7 +174,7 @@ class PostScreen extends Component {
             this.setModalVisible(true);
           }
         })
-        // Throw an error if one is to occur
+        // Catch any errors that were trown and display them in the console
         .catch((error) => {
           console.log(error);
         })
@@ -252,55 +252,59 @@ class PostScreen extends Component {
     }
   };
 
+  // Add a function to delete a given post
   deletePost = async (post_id) => {
     const value = await AsyncStorage.getItem('@session_token');
 
-    const user_id = this.state.userProfileID;
-
-    return fetch(
-      'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
-      {
-        method: 'delete',
-        headers: {
-          'X-Authorization': value,
-        },
-      }
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          // Add allert to inform the user the post was deleted
-          this.props.navigation.navigate('Profile', {
-            user_id: user_id,
-          });
-          // take the user BACK to thhe profile they were on
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Make sure you are logged in and try again';
-          this.setModalVisible(true);
-        } else if (response.status === 403) {
-          this.state.errorMessage =
-            'Forbidden! You can only delete your posts!';
-          this.setModalVisible(true);
-        } else if (response.status === 404) {
-          this.state.errorMessage =
-            'The post you are trying to delete does not exist anymore!';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again';
-          this.setModalVisible(true);
+    let user_id = this.state.userProfileID;
+    // Send a fetch request to the server to delete the post
+    return (
+      fetch(
+        'http://localhost:3333/api/1.0.0/user/' + user_id + '/post/' + post_id,
+        {
+          method: 'delete',
+          headers: {
+            'X-Authorization': value,
+          },
         }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      )
+        // Check the response from the server and inform the user if this was succsessfull or not
+        .then((response) => {
+          // Check if the post was deleted successfully, and refresh the posts to reflect this
+          if (response.status === 200) {
+            // Redirect the user back to their profile once the post has been deleted
+            this.props.navigation.navigate('Profile', {
+              user_id: user_id,
+            });
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Make sure you are logged in and try again';
+            this.setModalVisible(true);
+          } else if (response.status === 403) {
+            this.state.errorMessage =
+              'Forbidden! You can only delete your posts!';
+            this.setModalVisible(true);
+          } else if (response.status === 404) {
+            this.state.errorMessage =
+              'The post you are trying to delete does not exist anymore!';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again';
+            this.setModalVisible(true);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   // Create a request to retrive a given post from the server
   getSinglePost = async () => {
     // Get the user's token to be used for authorising the fetch request, as well as their ID be able to retrieve the right post
     const value = await AsyncStorage.getItem('@session_token');
-    const userId = this.props.route.params.user_id;
+    let userId = this.props.route.params.user_id;
 
     // Store the id of the user's who's profile we are on to be used for other requests checking the profile owner
     this.state.userProfileID = userId;
