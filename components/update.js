@@ -23,7 +23,8 @@ import {
   ContainerCentred,
   Title,
 } from '../styles.js';
-import { checkName } from './functions';
+import { checkName, checkLettersAndSpaces } from './functions';
+import { lessThan } from 'react-native-reanimated';
 /*
 
 Left TODO:
@@ -49,6 +50,7 @@ class UpdateScreen extends Component {
       first_name: '',
       last_name: '',
       email: '',
+      errorMessage: '',
       modalVisible: false,
     };
   }
@@ -108,96 +110,137 @@ class UpdateScreen extends Component {
   };
 
   updateDetails = async () => {
-    let firstNameCheck;
-    let lastNameCheck;
-    // Check if the input has been changed
+    // Variables to keep track of first and last name
+
+    // True if the name was change and changed correctly and false if it was not changed correctly
+
+    // Check if the user entered a new name, and update it if they have
+    let firstNameCharactersCheck = false;
+    let firstNameChangeFlag = true;
     if (this.state.first_name == '') {
-      firstNameCheck = true;
+      // User is not changing the first name
+      firstNameChangeFlag = false;
     } else {
-      firstNameCheck = checkName(this.state.first_name);
+      // User is changing their first name
+      firstNameCharactersCheck = checkLettersAndSpaces(this.state.first_name);
     }
-
-    if (this.state.last_name == '') {
-      lastNameCheck = true;
-    } else {
-      lastNameCheck = checkName(this.state.lastNameCheck);
-    }
-
-    // Create an error for the user to inform them the first or second name is incorrect
-    if ((firstNameCheck && lastNameCheck) == false) {
+    // Check if the first name was changed and if incorrectly alert user
+    if (firstNameChangeFlag && !firstNameCharactersCheck) {
+      console.log('First name changed incorrecly! try again');
       this.state.errorMessage =
-        'First or last name incorrect! Make sure you use only letters.';
+        'First name incorrect! Names can only contain letters!';
       this.setModalVisible(true);
       return null;
-    } else {
-      // Store the user's details to be userd in the networking requests
-      const userId = await AsyncStorage.getItem('@id');
-      const value = await AsyncStorage.getItem('@session_token');
-
-      // Only update the user details if they contains letters only
-      let to_send = {};
-
-      // Check the details provided by the user against their previous details, and only update the ones that have been changed
-      if (
-        this.state.first_name != this.state.origin_first_name &&
-        this.state.first_name != ''
-      ) {
-        to_send['first_name'] = this.state.first_name;
-      }
-      if (
-        this.state.last_name != this.state.origin_last_name &&
-        this.state.last_name != ''
-      ) {
-        to_send['last_name'] = this.state.last_name;
-      }
-      if (
-        this.state.email != this.state.origin_email &&
-        this.state.email != ''
-      ) {
-        to_send['email'] = this.state.email;
-      }
-
-      // DELETE
-      console.log(JSON.stringify(to_send));
-
-      return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
-        method: 'PATCH',
-        headers: {
-          'content-type': 'application/json',
-          'X-Authorization': value,
-        },
-        body: JSON.stringify(to_send),
-      })
-        .then((response) => {
-          console.log('responseCode: ', response.status);
-          if (response.status === 200) {
-            this.state.errorMessage = 'Details updated successfully!';
-            this.setModalVisible(true);
-            this.props.navigation.navigate('Profile', {
-              user_id: userId,
-            });
-          } else if (response.status === 400) {
-            this.state.errorMessage =
-              'This might be because the email you are trying to use is already assigned to another account, or the email provided is incorrect';
-            this.setModalVisible(true);
-          } else if (response.status === 401) {
-            this.state.errorMessage =
-              'Unauthorised! Try logging in again to make sure the right details are sent to the server.';
-            this.setModalVisible(true);
-          } else if (response.status === 403) {
-            this.state.errorMessage =
-              'Forbidden! You can only update your own details.';
-            this.setModalVisible(true);
-          } else if (response.status === 500) {
-            this.state.errorMessage =
-              'Server error! Restart the server then try again.';
-            this.setModalVisible(true);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      // Alert AND return null
     }
+
+    // Check if the user entered a new name, and update it if they have
+    let lastNameCharactersCheck = false;
+    let lastNameChangeFlag = true;
+    // Check if tge last name is being changed
+    if (this.state.last_name == '') {
+      lastNameChangeFlag = false;
+    } else {
+      // User is changing their first name
+      // Check if the name contains only letters and spaces
+      lastNameCharactersCheck = checkLettersAndSpaces(this.state.last_name);
+    }
+
+    if (lastNameChangeFlag && !lastNameCharactersCheck) {
+      console.log('Last name changed incorrecly! try again');
+      this.state.errorMessage =
+        'Last name incorrect! Names can only contain letters!';
+      this.setModalVisible(true);
+      return null;
+      // Alert and return null
+    }
+    console.log('Both names are correct!');
+
+    /*
+
+      Check email 
+
+
+
+    */
+
+    /*
+
+      Cchek the to_send is not empty
+    
+
+
+    */
+
+    // Store the user's details to be userd in the networking requests
+    const userId = await AsyncStorage.getItem('@id');
+    const value = await AsyncStorage.getItem('@session_token');
+
+    // Only update the user details if they contains letters only
+    let to_send = {};
+
+    //  If the first name changed, add it to the server
+    if (firstNameChangeFlag) {
+      to_send['first_name'] = this.state.first_name;
+    }
+    //  If the last  name changed, add it to the server
+    if (lastNameChangeFlag) {
+      to_send['last_name'] = this.state.last_name;
+    }
+
+    // CHANGE
+    // See if the email has been changed, and update it if it has
+    if (this.state.email != this.state.origin_email && this.state.email != '') {
+      to_send['email'] = this.state.email;
+    }
+
+    // Check if the user is submitting any details
+    if (Object.keys(to_send).length == 0) {
+      this.state.errorMessage =
+        'No new details have been added! You need to add your new details first';
+      this.setModalVisible(true);
+      return null;
+    }
+
+    console.log(JSON.stringify(to_send));
+
+    return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+        'X-Authorization': value,
+      },
+      body: JSON.stringify(to_send),
+    })
+      .then((response) => {
+        console.log('responseCode: ', response.status);
+        if (response.status === 200) {
+          this.state.errorMessage = 'Details updated successfully!';
+          this.setModalVisible(true);
+          this.props.navigation.navigate('Profile', {
+            user_id: userId,
+          });
+        } else if (response.status === 400) {
+          this.state.errorMessage =
+            'This might be because the email you are trying to use is already assigned to another account, or the email provided is incorrect';
+          this.setModalVisible(true);
+        } else if (response.status === 401) {
+          this.state.errorMessage =
+            'Unauthorised! Try logging in again to make sure the right details are sent to the server.';
+          this.setModalVisible(true);
+        } else if (response.status === 403) {
+          this.state.errorMessage =
+            'Forbidden! You can only update your own details.';
+          this.setModalVisible(true);
+        } else if (response.status === 500) {
+          this.state.errorMessage =
+            'Server error! Restart the server then try again.';
+          this.setModalVisible(true);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   render() {

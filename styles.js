@@ -1,5 +1,5 @@
 import styled from 'styled-components/native';
-
+import { Camera } from 'expo-camera';
 // Get fonts
 // 2. Set sizes
 
@@ -158,7 +158,7 @@ export const ScrollViewContainer = styled.ScrollView`
 
 */
 export const BoxContainer = styled.View`
-  width: 80%;
+  width: 85%;
   flex-direction: column;
   justify-content: center;
   padding: 20px;
@@ -166,6 +166,7 @@ export const BoxContainer = styled.View`
   background-color: #ffffff;
   // background-color: #c1bdfd;
   // flex: 1;
+  align-items: center;
 `;
 
 /*
@@ -268,7 +269,8 @@ export const ProfileImage = styled.Image`
   height: 140;
   // border-radius: 20px;
   border-radius: 50%;
-  margin bottom : 10px;
+  margin-bottom: 10px;
+  align-self: center;
 `;
 /*
 
@@ -294,7 +296,7 @@ export const PostContainer = styled.View`
 
 /*
 
-        Tab navigator
+        Camera
 
 
 */

@@ -8,6 +8,28 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import {
+  Container,
+  Label,
+  PrimaryButton,
+  Center,
+  ButtonText,
+  ButtonContainer,
+  Input,
+  BoxContainer,
+  Title,
+  ContainerCentred,
+  BodyText,
+  PostInput,
+  PostText,
+  Header,
+  Body,
+  ProfileImage,
+  Name,
+  PostContainer,
+  ScrollViewContainer,
+  NewPostBox,
+} from '../styles.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
 
@@ -16,7 +38,7 @@ class ProfilePhotoScreen extends Component {
     super(props);
 
     this.state = {
-      isLoading: false, // change to true later
+      isLoading: true, // change to true later
       hasPermission: null,
       userProfileID: '',
       type: Camera.Constants.Type.back,
@@ -25,6 +47,7 @@ class ProfilePhotoScreen extends Component {
 
   componentDidMount = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
+    this.state.isLoading = false;
     this.setState({ hasPermission: status === 'granted' });
     this.state.userProfileID = await AsyncStorage.getItem('@id');
   };
@@ -84,33 +107,33 @@ class ProfilePhotoScreen extends Component {
       // eslint-disable-next-line no-else-return
     } else {
       return (
-        <View>
-          {/*------------------------------ Camera ------------------------------    */}
-
+        <ContainerCentred>
           {/* If the app has permission to the camera, display it. Otherwise display a text letting the user know what the issue is  */}
+
           {this.state.hasPermission ? (
-            <View style={styles.container}>
+            <BoxContainer>
+              <Title>Update profile photo</Title>
+              {/* <View> */}
+              {/* <View style={styles.loginBox}> */}
+
               <Camera
                 style={styles.camera}
                 type={this.state.type}
                 ref={(ref) => (this.camera = ref)}
+              ></Camera>
+              <PrimaryButton
+                onPress={() => {
+                  this.takePicture();
+                }}
               >
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                      this.takePicture();
-                    }}
-                  >
-                    <Text style={styles.text}> Take Photo </Text>
-                  </TouchableOpacity>
-                </View>
-              </Camera>
-            </View>
+                <ButtonText>TAKE PHOTO</ButtonText>
+              </PrimaryButton>
+              {/* </View> */}
+            </BoxContainer>
           ) : (
-            <Text>No access to camera</Text>
+            <BodyText>No access to camera</BodyText>
           )}
-        </View>
+        </ContainerCentred>
       );
     }
   }
@@ -119,25 +142,10 @@ class ProfilePhotoScreen extends Component {
 export default ProfilePhotoScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   camera: {
     flex: 1,
-  },
-  buttonContainer: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
-    margin: 20,
-  },
-  button: {
-    flex: 0.1,
-    alignSelf: 'flex-end',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 18,
-    color: 'white',
+    minHeight: 280,
+    minWidth: 280,
+    marginBottom: 10,
   },
 });
