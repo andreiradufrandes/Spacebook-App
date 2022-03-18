@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 // Import helper functions
-import { checkName } from './functions';
+import { checkName, checkEmail, checkLettersAndSpaces } from './functions';
 import {
   Container,
   Label,
@@ -47,9 +47,9 @@ class SignupScreen extends Component {
   };
 
   signup = () => {
-    const firstNameCheck = checkName(this.state.first_name);
-    const lastNameCheck = checkName(this.state.last_name);
-    // Check the password contains more than 5 characters
+    const emailCheck = checkEmail(this.state.email);
+    const firstNameCheck = checkLettersAndSpaces(this.state.first_name);
+    const lastNameCheck = checkLettersAndSpaces(this.state.last_name);
     const passwordCheck = this.state.password.length > 5;
 
     console.log('first name chacek: ', firstNameCheck);
@@ -57,18 +57,28 @@ class SignupScreen extends Component {
     // Check if the first and second name contain letters only
 
     // Create an error for the user to inform them the first or second name is incorrect
-    if ((firstNameCheck && lastNameCheck) == false) {
+    if (firstNameCheck == false) {
       this.state.errorMessage =
-        'First or last name incorrect! Make sure you use only letters.';
+        'First name incorrect. The name an contain only letters!';
       this.setModalVisible(true);
       return null;
-      // I think return null and stop here
+    } else if (lastNameCheck == false) {
+      this.state.errorMessage =
+        'Last name incorrect. The name an contain only letters!';
+      this.setModalVisible(true);
+      return null;
     } else if (passwordCheck == false) {
       this.state.errorMessage =
         'Password incorrect! Password must be greater than 5 characters.';
       this.setModalVisible(true);
       return null;
-    } else {
+    } else if (emailCheck == false) {
+      this.state.errorMessage = 'Email incorrect! try again.';
+      this.setModalVisible(true);
+      return null;
+    }
+    // If all the user's details are correct, send a request to the server to create e new user
+    else {
       // User input is correct, set the details in a variable to be sent to the server
       let user_details = {
         first_name: this.state.first_name,
