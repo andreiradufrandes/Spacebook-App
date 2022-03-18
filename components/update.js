@@ -15,7 +15,7 @@ import {
   ModalView,
   ModalContainer,
 } from '../styles.js';
-import { checkLettersAndSpaces } from './functions';
+import { checkLettersAndSpaces, checkEmail } from './functions';
 
 class UpdateScreen extends Component {
   constructor(props) {
@@ -116,9 +116,28 @@ class UpdateScreen extends Component {
 
     // Alert the user if their input was incorrect
     if (lastNameChangeFlag && !lastNameCharactersCheck) {
-      console.log('Last name changed incorrecly! try again');
       this.state.errorMessage =
         'Last name incorrect! Names can only contain letters!';
+      this.setModalVisible(true);
+      // Stop the function if the input is incorrect
+      return null;
+    }
+
+    // Check email flag variables
+    let emailCheck = false;
+    let emailChangeFlag = true;
+
+    // Check if the user is changing their email
+    if (this.state.email == '') {
+      emailChangeFlag = false;
+    } else {
+      // If the email is being changed, check that it has been done correctly
+      emailCheck = checkEmail(this.state.email);
+    }
+
+    // if the email was changed, and icorrectly so, alert the user and stop the request
+    if (emailChangeFlag && !emailCheck) {
+      this.state.errorMessage = 'Email incorrect! Try again!';
       this.setModalVisible(true);
       // Stop the function if the input is incorrect
       return null;
@@ -136,8 +155,8 @@ class UpdateScreen extends Component {
       to_send['last_name'] = this.state.last_name;
     }
 
-    // See if the email has been changed, and update it if it has
-    if (this.state.email != this.state.origin_email && this.state.email != '') {
+    // Add the first name to the object to be sent to the server, if any was entered
+    if (emailChangeFlag) {
       to_send['email'] = this.state.email;
     }
 

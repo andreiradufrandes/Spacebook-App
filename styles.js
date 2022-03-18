@@ -11,13 +11,6 @@ export const Center = styled.View`
   justify-content: center;
 `;
 
-// Add font
-// change color for accessibilty
-
-// Not sure if 16 sp works
-// add font weight (maybe)
-// not sure
-
 export const Title = styled.Text`
   font-size: 30px;
   color: black;
