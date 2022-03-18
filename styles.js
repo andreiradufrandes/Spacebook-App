@@ -1,5 +1,5 @@
 import styled from 'styled-components/native';
-import { Camera } from 'expo-camera';
+
 // Get fonts
 // 2. Set sizes
 
@@ -17,17 +17,6 @@ export const Center = styled.View`
 // Not sure if 16 sp works
 // add font weight (maybe)
 // not sure
-
-// delete
-export const TextBox = styled.TextInput`
-  // padding: 12px;
-  // margin: 15px;
-  // width: 70%;
-  // background-color: #edf7ff;
-  // borderradius: 10;
-  // height: 50;
-  // font-family: Roboto-Black;
-`;
 
 export const Title = styled.Text`
   font-size: 30px;
@@ -142,8 +131,6 @@ export const ContainerCentred = styled.View`
   background-color: #483fcd;
   padding-bottom: 50px;
 `;
-
-// DELETE
 
 export const ScrollViewContainer = styled.ScrollView`
   flex: 1;

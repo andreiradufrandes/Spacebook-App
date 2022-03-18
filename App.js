@@ -6,7 +6,7 @@ import MainScreen from './components/main';
 import LoginScreen from './components/login';
 import SignupScreen from './components/signup';
 
-// Create a constant to store the stack navigator object
+// Create a stack navigator to contain our screens
 const Stack = createNativeStackNavigator();
 
 class App extends Component {

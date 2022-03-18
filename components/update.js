@@ -1,42 +1,21 @@
 import React, { Component } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Alert,
-  Modal,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TabRouter } from '@react-navigation/native';
+
 import {
-  Container,
   Label,
   PrimaryButton,
-  Center,
   ButtonText,
-  ButtonContainer,
   Input,
   BoxContainer,
   ContainerCentred,
   Title,
+  LoadingContainer,
+  BodyText,
+  ModalView,
+  ModalContainer,
 } from '../styles.js';
-import { checkName, checkLettersAndSpaces } from './functions';
-import { lessThan } from 'react-native-reanimated';
-/*
-
-Left TODO:
-   - update so that it check the names are correct and NOT numbers, code, etc
-   - display the right message 
-   - check the details are correct
-   - if the email exists in the database it will give you an error
-   - display exactly which input is incorrect
-   - maybe change get user info
-   - change the 400 response code after checking the correct email
-   - check finished code examplle for login containing SCROLLVIEW 
-*/
+import { checkLettersAndSpaces } from './functions';
 
 class UpdateScreen extends Component {
   constructor(props) {
@@ -63,138 +42,106 @@ class UpdateScreen extends Component {
     this.getUserInfo();
   }
 
-  // // move from here to the import
-  // checkName(name) {
-  //   if (!/[^a-zA-Z]/.test(name)) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // }
-
+  // Add a function to get he users information from the server to be displayed on their profile later
   getUserInfo = async () => {
+    // Get the user's token and id to be used for authorising the fetch request
     const userId = await AsyncStorage.getItem('@id');
     const value = await AsyncStorage.getItem('@session_token');
-    console.log(userId); // delete
-    console.log(value); // delete
 
-    return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
-      headers: {
-        'X-Authorization': value,
-      },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw 'Something went wrong';
-        }
+    // Send a fetch request to the server to get the users details
+    return (
+      fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
+        headers: {
+          'X-Authorization': value,
+        },
       })
-      .then((responseJson) => {
-        // save the users info inside the state
-        this.setState({
-          isLoading: false, // meaning it finished and now you can display it
-          // Update the original user details to be used for checking against the new ones
-          origin_first_name: responseJson.first_name,
-          origin_last_name: responseJson.last_name,
-          origin_email: responseJson.email,
-        }),
-          console.log(this.state.userInfo);
-        console.log('Details after the getUserInfo');
-        console.log(this.state.origin_first_name);
-        console.log(this.state.origin_last_name);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            throw 'Something went wrong';
+          }
+        })
+        // Check if the requst was successfu l and return the results, otherwise trow an error
+        .then((responseJson) => {
+          // save the users info inside the state
+          this.setState({
+            isLoading: false, // meaning it finished and now you can display it
+            // Save the user's details inside the state
+            origin_first_name: responseJson.first_name,
+            origin_last_name: responseJson.last_name,
+            origin_email: responseJson.email,
+          });
+        })
+        // Display the errors in the console if any occure
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   updateDetails = async () => {
-    // Variables to keep track of first and last name
-
-    // True if the name was change and changed correctly and false if it was not changed correctly
-
-    // Check if the user entered a new name, and update it if they have
+    // Set 2 flag variables for checking if the user's input is corect and if they are changing their details
     let firstNameCharactersCheck = false;
     let firstNameChangeFlag = true;
+
+    // If the input is empty the user is not changing their first name
     if (this.state.first_name == '') {
-      // User is not changing the first name
       firstNameChangeFlag = false;
     } else {
-      // User is changing their first name
+      // If they are changing ther details, check their input for letters and symbols
       firstNameCharactersCheck = checkLettersAndSpaces(this.state.first_name);
     }
-    // Check if the first name was changed and if incorrectly alert user
+
+    // Alert the user if their input was incorrect
     if (firstNameChangeFlag && !firstNameCharactersCheck) {
-      console.log('First name changed incorrecly! try again');
       this.state.errorMessage =
         'First name incorrect! Names can only contain letters!';
       this.setModalVisible(true);
+      // Stop the function if there is an error
       return null;
-      // Alert AND return null
     }
 
-    // Check if the user entered a new name, and update it if they have
+    // Set 2 flag variables for checking if the user's input is corect and if they are changing their details
     let lastNameCharactersCheck = false;
     let lastNameChangeFlag = true;
-    // Check if tge last name is being changed
+
+    // If the input is empty the user is not changing their first name
     if (this.state.last_name == '') {
       lastNameChangeFlag = false;
     } else {
-      // User is changing their first name
-      // Check if the name contains only letters and spaces
+      // If they are changing ther details, check their input for letters and symbols
       lastNameCharactersCheck = checkLettersAndSpaces(this.state.last_name);
     }
 
+    // Alert the user if their input was incorrect
     if (lastNameChangeFlag && !lastNameCharactersCheck) {
       console.log('Last name changed incorrecly! try again');
       this.state.errorMessage =
         'Last name incorrect! Names can only contain letters!';
       this.setModalVisible(true);
+      // Stop the function if the input is incorrect
       return null;
-      // Alert and return null
     }
-    console.log('Both names are correct!');
 
-    /*
-
-      Check email 
-
-
-
-    */
-
-    /*
-
-      Cchek the to_send is not empty
-    
-
-
-    */
-
-    // Store the user's details to be userd in the networking requests
-    const userId = await AsyncStorage.getItem('@id');
-    const value = await AsyncStorage.getItem('@session_token');
-
-    // Only update the user details if they contains letters only
+    // Initialise an empty object to store the user's details in
     let to_send = {};
 
-    //  If the first name changed, add it to the server
+    // Add the first name to the object to be sent to the server, if any was entered
     if (firstNameChangeFlag) {
       to_send['first_name'] = this.state.first_name;
     }
-    //  If the last  name changed, add it to the server
+    // Add the first name to the object to be sent to the server, if any was entered
     if (lastNameChangeFlag) {
       to_send['last_name'] = this.state.last_name;
     }
 
-    // CHANGE
     // See if the email has been changed, and update it if it has
     if (this.state.email != this.state.origin_email && this.state.email != '') {
       to_send['email'] = this.state.email;
     }
 
-    // Check if the user is submitting any details
+    // Check if the user is submitting any details and alert them if they forgot to add the details
     if (Object.keys(to_send).length == 0) {
       this.state.errorMessage =
         'No new details have been added! You need to add your new details first';
@@ -202,45 +149,52 @@ class UpdateScreen extends Component {
       return null;
     }
 
-    console.log(JSON.stringify(to_send));
+    // Get the user's token and id to be used for authorising the fetch request
+    const userId = await AsyncStorage.getItem('@id');
+    const value = await AsyncStorage.getItem('@session_token');
 
-    return fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
-      method: 'PATCH',
-      headers: {
-        'content-type': 'application/json',
-        'X-Authorization': value,
-      },
-      body: JSON.stringify(to_send),
-    })
-      .then((response) => {
-        console.log('responseCode: ', response.status);
-        if (response.status === 200) {
-          this.state.errorMessage = 'Details updated successfully!';
-          this.setModalVisible(true);
-          this.props.navigation.navigate('Profile', {
-            user_id: userId,
-          });
-        } else if (response.status === 400) {
-          this.state.errorMessage =
-            'This might be because the email you are trying to use is already assigned to another account, or the email provided is incorrect';
-          this.setModalVisible(true);
-        } else if (response.status === 401) {
-          this.state.errorMessage =
-            'Unauthorised! Try logging in again to make sure the right details are sent to the server.';
-          this.setModalVisible(true);
-        } else if (response.status === 403) {
-          this.state.errorMessage =
-            'Forbidden! You can only update your own details.';
-          this.setModalVisible(true);
-        } else if (response.status === 500) {
-          this.state.errorMessage =
-            'Server error! Restart the server then try again.';
-          this.setModalVisible(true);
-        }
+    // Send a request to the server to send the user's new details to the server
+    return (
+      fetch('http://localhost:3333/api/1.0.0/user/' + userId, {
+        method: 'PATCH',
+        headers: {
+          'content-type': 'application/json',
+          'X-Authorization': value,
+        },
+        body: JSON.stringify(to_send),
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        .then((response) => {
+          // Check if the change was cussesful and let the user know. Afterwards direct them to the profile page
+          if (response.status === 200) {
+            this.state.errorMessage = 'Details updated successfully!';
+            this.setModalVisible(true);
+            this.props.navigation.navigate('Profile', {
+              user_id: userId,
+            });
+            // Display different alerts for the user if the netwroking request was unsuccessful, advising them on what the issue is
+          } else if (response.status === 400) {
+            this.state.errorMessage =
+              'This might be because the email you are trying to use is already assigned to another account, or the email provided is incorrect';
+            this.setModalVisible(true);
+          } else if (response.status === 401) {
+            this.state.errorMessage =
+              'Unauthorised! Try logging in again to make sure the right details are sent to the server.';
+            this.setModalVisible(true);
+          } else if (response.status === 403) {
+            this.state.errorMessage =
+              'Forbidden! You can only update your own details.';
+            this.setModalVisible(true);
+          } else if (response.status === 500) {
+            this.state.errorMessage =
+              'Server error! Restart the server then try again.';
+            this.setModalVisible(true);
+          }
+        })
+        // Display the errors in the console if any occure
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   render() {
@@ -248,54 +202,33 @@ class UpdateScreen extends Component {
 
     if (this.state.isLoading) {
       return (
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>Loading..</Text>
-        </View>
+        <LoadingContainer>
+          <BodyText>Loading..</BodyText>
+        </LoadingContainer>
       );
     } else {
       return (
         <ContainerCentred>
-          {/* <View style={styles.loginBox}> */}
           <BoxContainer>
-            <View>
-              <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                  this.setModalVisible(!modalVisible);
-                }}
-              >
-                <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                    {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                    {/* Display the erro you wish to display to the user */}
-                    <Text style={styles.modalText}>
-                      Error: {this.state.errorMessage}{' '}
-                    </Text>
-                    <Pressable
-                      style={[styles.button, styles.buttonClose]}
-                      onPress={() => this.setModalVisible(!modalVisible)}
-                    >
-                      <Text style={styles.textStyle}>Ok</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </Modal>
-              {/* <Pressable
-            style={[styles.button, styles.buttonOpen]}
-            onPress={() => this.setModalVisible(true)}
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!modalVisible);
+              }}
             >
-            <Text style={styles.textStyle}>Show Modal</Text>
-            </Pressable> */}
-            </View>
+              <ModalContainer>
+                <ModalView>
+                  <BodyText>{this.state.errorMessage} </BodyText>
+                  <PrimaryButton
+                    onPress={() => this.setModalVisible(!modalVisible)}
+                  >
+                    <ButtonText>{'OK'}</ButtonText>
+                  </PrimaryButton>
+                </ModalView>
+              </ModalContainer>
+            </Modal>
 
             <Title>Update profile</Title>
             <Label>First name:</Label>
@@ -324,54 +257,9 @@ class UpdateScreen extends Component {
               <ButtonText>SUBMIT</ButtonText>
             </PrimaryButton>
           </BoxContainer>
-          {/* </View> */}
         </ContainerCentred>
       );
     }
   }
 }
 export default UpdateScreen;
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-});

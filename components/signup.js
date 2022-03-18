@@ -21,8 +21,10 @@ import {
   Input,
   BoxContainer,
   ContainerCentred,
+  ModalContainer,
+  ModalView,
+  BodyText,
 } from '../styles.js';
-// only navigate me to LOGIN PAGE if the request successfully
 
 class SignupScreen extends Component {
   constructor(props) {
@@ -112,44 +114,27 @@ class SignupScreen extends Component {
     const { modalVisible } = this.state;
     return (
       <ContainerCentred>
-        {/* <View style={styles.loginBox}> */}
         <BoxContainer>
-          {/* Modal code */}
-          {/* TODO 
-          replace following one with just view no styleing
-        */}
-          <View style={styles.centeredView}>
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                this.setModalVisible(!modalVisible);
-              }}
-            >
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  {/* <Text style={styles.modalText}>Hello World!</Text> */}
-                  {/* Display the erro you wish to display to the user */}
-                  <Text style={styles.modalText}>
-                    Error: {this.state.errorMessage}{' '}
-                  </Text>
-                  <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => this.setModalVisible(!modalVisible)}
-                  >
-                    <Text style={styles.textStyle}>Ok</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </Modal>
-            {/* <Pressable
-            style={[styles.button, styles.buttonOpen]}
-            onPress={() => this.setModalVisible(true)}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              this.setModalVisible(!modalVisible);
+            }}
           >
-            <Text style={styles.textStyle}>Show Modal</Text>
-          </Pressable> */}
-          </View>
+            <ModalContainer>
+              <ModalView>
+                <BodyText>{this.state.errorMessage} </BodyText>
+                <PrimaryButton
+                  onPress={() => this.setModalVisible(!modalVisible)}
+                >
+                  <ButtonText>{'OK'}</ButtonText>
+                </PrimaryButton>
+              </ModalView>
+            </ModalContainer>
+            {/* </View> */}
+          </Modal>
 
           <Label>First name:</Label>
           <Input
@@ -180,17 +165,8 @@ class SignupScreen extends Component {
             secureTextEntry={true}
             maxLength="16"
           ></Input>
-          <Text>(Password must contain greater than 5 characters)</Text>
-          {/* <Button
-          title="Signup"
-          onPress={() => this.signup()}
-          // take me to login
-        />
-        <Button
-          title="Back to login page"
-          onPress={() => this.props.navigation.navigate('Login')}
-          // take me to login
-        /> */}
+          <BodyText>(Password must contain greater than 5 characters)</BodyText>
+
           <ButtonContainer>
             <PrimaryButton onPress={() => this.signup()}>
               <ButtonText>SIGN UP</ButtonText>
@@ -203,54 +179,9 @@ class SignupScreen extends Component {
             </PrimaryButton>
           </ButtonContainer>
         </BoxContainer>
-        {/* </View> */}
       </ContainerCentred>
     );
   }
 }
 
 export default SignupScreen;
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-});

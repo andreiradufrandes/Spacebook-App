@@ -75,11 +75,8 @@ class LoginScreen extends Component {
     const { modalVisible } = this.state;
 
     return (
-      // <View style={styles.container}>
       <ContainerCentred>
-        {/* <View style={styles.loginBox}> */}
         <BoxContainer>
-          {/* Add a component to display messages for the user when accepting and decling friends requests */}
           <Modal
             animationType="slide"
             transparent={true}
